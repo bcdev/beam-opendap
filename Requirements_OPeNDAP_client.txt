@@ -2,14 +2,16 @@ Requirements on OPeNDAP client for BEAM
 
 - enter lat/lon and time bounds
 - enter file name pattern
-- set URL from where to download
+- set URL from where to download (pointing to directory containing product files)
 - set target directory (default possible)
-- if time series tool is installed: provide option to create time series from downloaded products
-- possibly support user authentication on OPeNDAP server
-- show file set matching specifications (V2)
 - tool shall download every file matching the specifications in the background
 - ProgressMonitor in front
 - open every product that has been downloaded
+
+(optionally)
+- if time series tool is installed: provide option to create time series from downloaded products
+- possibly support user authentication on OPeNDAP server
+- show file set matching specifications
 - create time series, if wished
 
 Possible problem: products may be scattered over server in different directories
