@@ -1,18 +1,18 @@
 package org.esa.beam.opendap;
 
-import opendap.dap.BaseType;
-import opendap.dap.DAP2Exception;
-import opendap.dap.DConnect2;
-import opendap.dap.DDS;
+import opendap.dap.DVector;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.junit.Test;
+import thredds.catalog2.Catalog;
+import thredds.catalog2.DatasetNode;
+import thredds.catalog2.Metadata;
+import thredds.catalog2.Property;
+import thredds.catalog2.ThreddsMetadata;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static junit.framework.Assert.*;
@@ -22,22 +22,16 @@ import static junit.framework.Assert.*;
  */
 public class FilterTest {
 
-    // todo - somehow remove references to opendap test server (e.g. by introducing a specific 'DataSource'-interface)
-
     @Test
     public void testFilterByFileName() throws Exception {
-        final Filter filter = new Filter(new URL("http://test.opendap.org/dap/data/nc"), "fnoc1\\.nc|fnoc2\\.nc", null, -1, -1, -1, -1, null, null);
-        final Set<URL> urls = filter.filterByFileName();
+        final OpenDapInterface openDapInterface = new TestOpenDapInterface();
+        final Filter filter = new Filter(new URL("http://some.arbitrary.base.url/"), "valid.*file(_ext)?", openDapInterface, -1, -1, -1, -1, null, null);
+        final Set<String> urls = filter.filterByFileName();
         assertEquals(2, urls.size());
-        final URL[] urlsArray = urls.toArray(new URL[urls.size()]);
-        Arrays.sort(urlsArray, new Comparator<URL>() {
-            @Override
-            public int compare(URL o1, URL o2) {
-                return o1.toString().compareTo(o2.toString());
-            }
-        });
-        assertTrue(new URL("http://test.opendap.org/dap/data/nc/fnoc1.nc").sameFile(urlsArray[0]));
-        assertTrue(new URL("http://test.opendap.org/dap/data/nc/fnoc2.nc").sameFile(urlsArray[1]));
+        final String[] urlsArray = urls.toArray(new String[urls.size()]);
+        Arrays.sort(urlsArray);
+        assertEquals("http://some.arbitrary.base.url/valid_netcdf_file_ext", urlsArray[0]);
+        assertEquals("http://some.arbitrary.base.url/valid_other_file", urlsArray[1]);
     }
 
     @Test
@@ -46,11 +40,13 @@ public class FilterTest {
         double maxLat = 89.0;
         double minLon = -179.0;
         double maxLon = 180.0;
-        Filter filter = new Filter(new URL("http://test.opendap.org/dap/data/nc"), "sst.*\\.nc\\.gz", new MyOpenDapInterface(), minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
-        Set<URL> productUrls = filter.filter();
+        final URL baseUrl = new URL("http://test.opendap.org/opendap/hyrax/data/nc/");
+        final OpenDapInterface openDapInterface = new OpenDapInterfaceImpl(baseUrl);
+        Filter filter = new Filter(baseUrl, "sst.*\\.nc\\.gz", openDapInterface, minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
+        Set<String> productUrls = filter.filter();
         boolean containsSst = false;
-        for (URL productUrl : productUrls) {
-            if (productUrl.toString().equals("http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz")) {
+        for (String productUrl : productUrls) {
+            if (productUrl.equals("http://test.opendap.org/opendap/hyrax/data/nc/sst.mnmean.nc.gz")) {
                 containsSst = true;
             }
         }
@@ -60,11 +56,11 @@ public class FilterTest {
         maxLat = 89.0;
         minLon = -179.0;
         maxLon = 180.0;
-        filter = new Filter(new URL("http://test.opendap.org/dap/data/nc"), "sst.*\\.nc\\.gz", new MyOpenDapInterface(), minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
+        filter = new Filter(baseUrl, "sst.*\\.nc\\.gz", openDapInterface, minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
         productUrls = filter.filter();
         containsSst = false;
-        for (URL productUrl : productUrls) {
-            if (productUrl.toString().equals("http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz")) {
+        for (String productUrl : productUrls) {
+            if (productUrl.equals("http://test.opendap.org/opendap/hyrax/data/nc/sst.mnmean.nc.gz")) {
                 containsSst = true;
             }
         }
@@ -74,34 +70,102 @@ public class FilterTest {
         maxLat = 89.0;
         minLon = -20.0;  // greater than product's minimum latitude, so product is expected to be filtered out
         maxLon = 180.0;
-        filter = new Filter(new URL("http://test.opendap.org/dap/data/nc"), "sst.*\\.nc\\.gz", new MyOpenDapInterface(), minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
+        filter = new Filter(baseUrl, "sst.*\\.nc\\.gz", openDapInterface, minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
         productUrls = filter.filter();
         containsSst = false;
-        for (URL productUrl : productUrls) {
-            if (productUrl.toString().equals("http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz")) {
+        for (String productUrl : productUrls) {
+            if (productUrl.equals("http://test.opendap.org/opendap/hyrax/data/nc/sst.mnmean.nc.gz")) {
                 containsSst = true;
             }
         }
         assertFalse(containsSst);
     }
 
-    private static class MyOpenDapInterface implements OpenDapInterface {
-        public Set<BaseType> getVariables(URL url) throws IOException {
-            final DConnect2 dConnect;
-            final DDS dds;
-            try {
-                dConnect = new DConnect2(url.openStream());
-                dds = dConnect.getDDS();
-            } catch (DAP2Exception e) {
-                throw new IOException(e);
+    private static class TestOpenDapInterface implements OpenDapInterface {
+
+        @Override
+        public DVector getOneDimVariable(String varName, String url) throws IOException {
+            return null;
+        }
+
+        @Override
+        public DatasetNode[] getDatasets() throws IOException {
+            return new DatasetNode[] {
+                    new MyDatasetNode("valid_netcdf_file_ext"),
+                    new MyDatasetNode("valid_other_file"),
+                    new MyDatasetNode("invalid_netcdf_file_ext"),
+                    new MyDatasetNode("invalid_other_file_ext"),
+                    new MyDatasetNode("invalid_other_file")
+            };
+        }
+
+        private static class MyDatasetNode implements DatasetNode {
+
+            private String name;
+
+            public MyDatasetNode(String name) {
+                this.name = name;
             }
-            final Enumeration variables = dds.getVariables();
-            Set<BaseType> variableNames = new HashSet<BaseType>();
-            while (variables.hasMoreElements()) {
-                final BaseType variable = (BaseType) variables.nextElement();
-                variableNames.add(variable);
+
+            @Override
+            public String getName() {
+                return name;
             }
-            return variableNames;
+
+            @Override
+            public String getId() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public String getIdAuthority() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public List<Property> getProperties() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public Property getPropertyByName(String name) {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public ThreddsMetadata getThreddsMetadata() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public List<Metadata> getMetadata() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public Catalog getParentCatalog() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public DatasetNode getParent() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public boolean isCollection() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public List<DatasetNode> getDatasets() {
+                throw new IllegalStateException("not implemented");
+            }
+
+            @Override
+            public DatasetNode getDatasetById(String id) {
+                throw new IllegalStateException("not implemented");
+            }
         }
     }
 }

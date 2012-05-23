@@ -12,6 +12,10 @@ import opendap.dap.DGrid;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import thredds.catalog2.Catalog;
+import thredds.catalog2.DatasetNode;
+import thredds.catalog2.xml.parser.ThreddsXmlParser;
+import thredds.catalog2.xml.parser.stax.StaxThreddsXmlParser;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -29,7 +33,7 @@ import static org.junit.Assert.*;
 
 /**
  * This class contains solely tests which document the behavior and the usage of the OPeNDAP Java API.
- * Because the tests rely on a hardcoded URL and do not test any classes of the org.esa.beam.opendap package, they are
+ * Because the tests rely on hardcoded URLs and do not test any classes of the org.esa.beam.opendap package, they are
  * all ignored.
  *
  * @author Thomas Storm
@@ -43,6 +47,19 @@ public class TestOpendapAPI {
     public void setUp() throws Exception {
         String url = "http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz";
         dConnect = new DConnect2(url);
+    }
+
+    @Test
+    @Ignore
+    public void testGetCatalog() throws Exception {
+        String url = "http://test.opendap.org/dap/data/nc/catalog.xml";
+        final ThreddsXmlParser xmlParser = StaxThreddsXmlParser.newInstance();
+        final Catalog catalog = xmlParser.parse(new URL(url).toURI());
+        DatasetNode dataset = catalog.getDatasets().get(0);
+        System.out.println("dataset.id = " + dataset.getId());
+        for (DatasetNode datasetNode : dataset.getDatasets()) {
+            System.out.println("datasetNode.getId() = " + datasetNode.getId());
+        }
     }
 
     @Test

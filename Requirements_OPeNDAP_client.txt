@@ -15,7 +15,9 @@ Requirements on OPeNDAP client for BEAM
 - create time series, if wished
 
 Possible problem: products may be scattered over server in different directories
---> server responsibility to make products accessible by canonical URL
+--> solved when THREDDS server is used
+--> solved, too, when hyrax server is used, since it supports the THREDDS catalog system
+--> clarify with ACRI
 
 Problem: geographic filtering
 --> no problem for CF-conforming products: get DAS, get canonical names for latitude and longitude, filter
