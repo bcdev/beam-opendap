@@ -69,7 +69,7 @@ class OpenDapInterfaceImpl implements OpenDapInterface {
         }
         final DDS dds;
         try {
-            final DConnect2 dConnect2 = new DConnect2(new URL(url).openStream());
+            final DConnect2 dConnect2 = new DConnect2(url);
             dds = dConnect2.getDDS();
         } catch (DAP2Exception e) {
             throw new IOException(e);

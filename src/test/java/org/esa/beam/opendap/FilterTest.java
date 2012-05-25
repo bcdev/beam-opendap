@@ -25,7 +25,11 @@ public class FilterTest {
     @Test
     public void testFilterByFileName() throws Exception {
         final OpenDapInterface openDapInterface = new TestOpenDapInterface();
-        final Filter filter = new Filter(new URL("http://some.arbitrary.base.url/"), "valid.*file(_ext)?", openDapInterface, -1, -1, -1, -1, null, null);
+        final Filter filter = new FilterBuilder()
+                .baseUrl(new URL("http://some.arbitrary.base.url/"))
+                .fileNamePattern("valid.*file(_ext)?")
+                .openDapInterface(openDapInterface)
+                .build();
         final Set<String> urls = filter.filterByFileName();
         assertEquals(2, urls.size());
         final String[] urlsArray = urls.toArray(new String[urls.size()]);
@@ -40,13 +44,23 @@ public class FilterTest {
         double maxLat = 89.0;
         double minLon = -179.0;
         double maxLon = 180.0;
-        final URL baseUrl = new URL("http://test.opendap.org/opendap/hyrax/data/nc/");
+        final URL baseUrl = new URL("http://test.opendap.org/dap/data/nc/");
         final OpenDapInterface openDapInterface = new OpenDapInterfaceImpl(baseUrl);
-        Filter filter = new Filter(baseUrl, "sst.*\\.nc\\.gz", openDapInterface, minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
+        Filter filter = new FilterBuilder()
+                .baseUrl(new URL("http://test.opendap.org/dap/data/nc/"))
+                .fileNamePattern("sst.*\\.nc\\.gz")
+                .openDapInterface(openDapInterface)
+                .minLat(minLat)
+                .maxLat(maxLat)
+                .minLon(minLon)
+                .maxLon(maxLon)
+                .startDate(ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"))
+                .endDate(ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"))
+                .build();
         Set<String> productUrls = filter.filter();
         boolean containsSst = false;
         for (String productUrl : productUrls) {
-            if (productUrl.equals("http://test.opendap.org/opendap/hyrax/data/nc/sst.mnmean.nc.gz")) {
+            if (productUrl.equals("http://test.opendap.org/dap/data/nc/sst.mnmean.nc.gz")) {
                 containsSst = true;
             }
         }
@@ -56,7 +70,18 @@ public class FilterTest {
         maxLat = 89.0;
         minLon = -179.0;
         maxLon = 180.0;
-        filter = new Filter(baseUrl, "sst.*\\.nc\\.gz", openDapInterface, minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
+        filter = new FilterBuilder()
+                .baseUrl(new URL("http://test.opendap.org/dap/data/nc/"))
+                .fileNamePattern("sst.*\\.nc\\.gz")
+                .openDapInterface(openDapInterface)
+                .minLat(minLat)
+                .maxLat(maxLat)
+                .minLon(minLon)
+                .maxLon(maxLon)
+                .startDate(ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"))
+                .endDate(ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"))
+                .build();
+
         productUrls = filter.filter();
         containsSst = false;
         for (String productUrl : productUrls) {
@@ -70,7 +95,18 @@ public class FilterTest {
         maxLat = 89.0;
         minLon = -20.0;  // greater than product's minimum latitude, so product is expected to be filtered out
         maxLon = 180.0;
-        filter = new Filter(baseUrl, "sst.*\\.nc\\.gz", openDapInterface, minLat, maxLat, minLon, maxLon, ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"), ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"));
+        filter = new FilterBuilder()
+                .baseUrl(new URL("http://test.opendap.org/dap/data/nc/"))
+                .fileNamePattern("sst.*\\.nc\\.gz")
+                .openDapInterface(openDapInterface)
+                .minLat(minLat)
+                .maxLat(maxLat)
+                .minLon(minLon)
+                .maxLon(maxLon)
+                .startDate(ProductData.UTC.parse("1970-01-01", "yyyy-MM-dd"))
+                .endDate(ProductData.UTC.parse("2200-01-01", "yyyy-MM-dd"))
+                .build();
+
         productUrls = filter.filter();
         containsSst = false;
         for (String productUrl : productUrls) {

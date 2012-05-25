@@ -9,6 +9,7 @@ import opendap.dap.DArrayDimension;
 import opendap.dap.DConnect2;
 import opendap.dap.DDS;
 import opendap.dap.DGrid;
+import opendap.dap.DataDDS;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -187,6 +188,15 @@ public class TestOpendapAPI {
                 file.delete();
             }
         }
+    }
+
+    @Test
+    @Ignore
+    public void testGetDDX() throws Exception {
+        final DConnect2 dConnect2 = new DConnect2("http://test.opendap.org/opendap/data/nc/sst.mnmean.nc.gz");
+        final DataDDS data = dConnect2.getData("geogrid(sst,-90,-150,-89,-140)");
+//        final DataDDS data = dConnect2.getData("geogrid(sst,-89,-179,-88,-178");
+        System.out.println("TestOpendapAPI.testGetDDX");
     }
 
     private void testLatLonAttributes(AttributeTable attributeTable, Enumeration attributeTableNames, String expectedLongName, float expectedMin, float expectedMax, String expectedStandardName, String expectedAxis) throws Exception {

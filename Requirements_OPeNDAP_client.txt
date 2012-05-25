@@ -20,8 +20,10 @@ Possible problem: products may be scattered over server in different directories
 --> clarify with ACRI
 
 Problem: geographic filtering
---> no problem for CF-conforming products: get DAS, get canonical names for latitude and longitude, filter
---> for non-CF-conforming products: first patterns can be searched, then ask user for lat/lon variable names
+--> two possibilities:
+    1) server somehow supports fast access to geographical bounding box of data files (opendap-support consulted already)
+    2) data files contain standardized meta data
+--> reading data inside the tool is not an option at all
 
 Problem: time filtering
 --> there is no standard on names for the time variable nor on the unit
