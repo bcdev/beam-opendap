@@ -10,16 +10,34 @@ import opendap.dap.DConnect2;
 import opendap.dap.DDS;
 import opendap.dap.DGrid;
 import opendap.dap.DataDDS;
+import org.esa.beam.util.Debug;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import thredds.catalog.InvAccess;
+import thredds.catalog.InvCatalogFactory;
+import thredds.catalog.InvCatalogImpl;
+import thredds.catalog.InvCatalogRef;
+import thredds.catalog.InvDataset;
+import thredds.catalog.InvDocumentation;
+import thredds.catalog.InvMetadata;
+import thredds.catalog.InvProperty;
+import thredds.catalog.InvService;
+import thredds.catalog2.Access;
 import thredds.catalog2.Catalog;
+import thredds.catalog2.CatalogRef;
+import thredds.catalog2.Dataset;
 import thredds.catalog2.DatasetNode;
+import thredds.catalog2.Metadata;
+import thredds.catalog2.Property;
+import thredds.catalog2.Service;
+import thredds.catalog2.ThreddsMetadata;
 import thredds.catalog2.xml.parser.ThreddsXmlParser;
 import thredds.catalog2.xml.parser.stax.StaxThreddsXmlParser;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
@@ -27,6 +45,7 @@ import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -53,13 +72,194 @@ public class TestOpendapAPI {
     @Test
     @Ignore
     public void testGetCatalog() throws Exception {
-        String url = "http://test.opendap.org/dap/data/nc/catalog.xml";
+//        final String url = "http://stellwagen.er.usgs.gov/opendap/SED_TRANS/catalog.xml";
+//        final String url = "http://www.usgodae.org/dods/GDS/fnmoc_ghrsst/catalog.xml";  // Not a Catalog
+//        final String url = "http://www.usgodae.org/dods/GDS/coamps_cent_am/catalog.xml";  // Not a Catalog
+//        final String url = "http://acdisc.sci.gsfc.nasa.gov/opendap/EarthProbe_TOMS_Level3/TOMSEPL3.008/1996/catalog.xml";
+//        final String url = "http://acdisc.sci.gsfc.nasa.gov/opendap/EarthProbe_TOMS_Level3/catalog.xml";
+//        final String url = "http://acdisc.sci.gsfc.nasa.gov/opendap/catalog.xml";
+//        final String url = "http://10.3.13.120:8084/thredds/catalog/testAll/catalog.xml";
+//        final String url = "http://10.3.13.120:8084/thredds/catalog/catalog.xml";
+//        final String url = "http://10.3.13.120:8084/thredds/catalog.xml";
+//        final String url = "http://opendap.hzg.de/opendap/data/catalog.xml";
+        final String url = "http://opendap.hzg.de/opendap/data/cosyna/MERIS/2012/catalog.xml";
+//        final String url = "http://opendap.hzg.de/opendap/data/cosyna/gridded/meris/catalog.xml";
+//        final String url = "http://test.opendap.org/dap/data/nc/catalog.xml";
+
+        final InvCatalogFactory defaultFactory = InvCatalogFactory.getDefaultFactory(true);
+        final InvCatalogImpl invCatalog = defaultFactory.readXML(url);
+
         final ThreddsXmlParser xmlParser = StaxThreddsXmlParser.newInstance();
         final Catalog catalog = xmlParser.parse(new URL(url).toURI());
-        DatasetNode dataset = catalog.getDatasets().get(0);
-        System.out.println("dataset.id = " + dataset.getId());
-        for (DatasetNode datasetNode : dataset.getDatasets()) {
-            System.out.println("datasetNode.getId() = " + datasetNode.getId());
+
+        System.out.println("invCatalog.getBaseUri() = " + invCatalog.getBaseURI());
+//        System.out.println("catalog.getDocBaseUri() = " + catalog.getDocBaseUri());
+
+        System.out.println("invCatalog.getVersion() = " + invCatalog.getVersion());
+//        System.out.println("catalog.getVersion()    = " + catalog.getVersion());
+
+        final InvDataset invDataset = invCatalog.getDatasets().get(0);
+//        final DatasetNode dataset = catalog.getDatasets().get(0);
+
+        System.out.println("invDataset.getID() = " + invDataset.getID());
+//        System.out.println("dataset.getId()    = " + dataset.getId());
+
+        printInvDatasets(invDataset.getDatasets());
+        System.out.println("-----------------------------------------------------------------------");
+        System.out.println("-----------------------------------------------------------------------");
+//        printDatasets(dataset.getDatasets());
+    }
+
+    private void printInvDatasets(final List<InvDataset> invDatasets) {
+        for (InvDataset datasetNode : invDatasets) {
+            System.out.println("-----------------------------------------------------------------------");
+            System.out.println("datasetNode.getID()           = " + datasetNode.getID());
+            if (datasetNode instanceof InvCatalogRef) {
+                final InvCatalogRef catalogRef = (InvCatalogRef) datasetNode;
+//                System.out.println("    catalogRef.getReference() = " + catalogRef.getUrlPath());
+                System.out.println("    catalogRef.getReference() = " + catalogRef.getXlinkHref());
+            }
+
+            if (datasetNode instanceof InvDataset) {
+                final InvDataset ds = datasetNode;
+                System.out.println("    ds.hasAccess() = " + ds.hasAccess());
+                List<InvAccess> dsAccesses = ds.getAccess();
+                for (InvAccess dsAccess : dsAccesses) {
+                    InvService dsAccessService = dsAccess.getService();
+                    System.out.println("    dsAccessService.getName() = " + dsAccessService.getName());
+                    List<InvService> services = dsAccessService.getServices();
+                    for (InvService service : services) {
+                        System.out.println("        service.getName() = " + service.getName());
+                    }
+                }
+            }
+            System.out.println("datasetNode.getIdAuthority() = " + datasetNode.getAuthority());
+            List<InvMetadata> metadatas = datasetNode.getMetadata();
+            for (InvMetadata metadata : metadatas) {
+                System.out.println("    metadata.getContent()           = " + metadata.getContentObject());
+//                System.out.println("    metadata.getTitle()             = " + metadata.title);
+                System.out.println("    metadata.getExternalReference() = " + metadata.getXlinkURI());
+                System.out.println("    metadata.isContainedContent()   = " + metadata.getContentObject() != null);
+                if (metadata.isThreddsMetadata()) {
+                    thredds.catalog.ThreddsMetadata threddsMD = metadata.getThreddsMetadata();
+                    if (threddsMD != null) {
+                        System.out.println("    threddsMD.getAuthority() = " + threddsMD.getAuthority());
+                        System.out.println("    threddsMD.getHistory() = " + threddsMD.getHistory());
+                        System.out.println("    threddsMD.getProcessing() = " + threddsMD.getProcessing());
+                        System.out.println("    threddsMD.getRights() = " + threddsMD.getRights());
+                        System.out.println("    threddsMD.getServiceName() = " + threddsMD.getServiceName());
+                        System.out.println("    threddsMD.getSummary() = " + threddsMD.getSummary());
+                        System.out.println("    threddsMD.getDataFormatType() = " + threddsMD.getDataFormatType());
+                        System.out.println("    threddsMD.getDataSize() = " + threddsMD.getDataSize());
+                        System.out.println("    threddsMD.getDataType() = " + threddsMD.getDataType());
+                        System.out.println("    threddsMD.getGeospatialCoverage() = " + threddsMD.getGeospatialCoverage());
+                        System.out.println("    threddsMD.getTimeCoverage() = " + threddsMD.getTimeCoverage());
+
+                        final List<thredds.catalog.ThreddsMetadata.Contributor> contributors = threddsMD.getContributors();
+                        System.out.println("    threddsMD.getContributors() = " + contributors);
+                        for (thredds.catalog.ThreddsMetadata.Contributor contributor : contributors) {
+                            System.out.println("        contributor.getName() = " + contributor.getName());
+                            System.out.println("        contributor.getRole() = " + contributor.getRole());
+                        }
+
+                        final List<thredds.catalog.ThreddsMetadata.Source> creators = threddsMD.getCreators();
+                        System.out.println("    threddsMD.getCreators() = " + creators);
+                        for (thredds.catalog.ThreddsMetadata.Source creator : creators) {
+                            System.out.println("        creator.getName() = " + creator.getName());
+                            System.out.println("        creator.getEmail() = " + creator.getEmail());
+                            System.out.println("        creator.getUrl() = " + creator.getUrl());
+                            System.out.println("        creator.getVocabulary() = " + creator.getVocabulary());
+                        }
+
+                        final List<thredds.catalog.ThreddsMetadata.Source> publishers = threddsMD.getPublishers();
+                        System.out.println("    threddsMD.getPublishers() = " + publishers);
+                        for (thredds.catalog.ThreddsMetadata.Source publisher : publishers) {
+                            System.out.println("        publisher.getName() = " + publisher.getName());
+                            System.out.println("        publisher.getEmail() = " + publisher.getEmail());
+                            System.out.println("        publisher.getUrl() = " + publisher.getUrl());
+                            System.out.println("        publisher.getVocabulary() = " + publisher.getVocabulary());
+                        }
+
+                        final List<InvDocumentation> documentation = threddsMD.getDocumentation();
+                        System.out.println("    threddsMD.getDocumentation() = " + documentation);
+                        for (InvDocumentation invDocumentation : documentation) {
+                            System.out.println("        invDocumentation.getInlineContent() = " + invDocumentation.getInlineContent());
+                            System.out.println("        invDocumentation.getType() = " + invDocumentation.getType());
+                            try {
+                                System.out.println("        invDocumentation.getXlinkContent() = " + invDocumentation.getXlinkContent());
+                            } catch (IOException e) {
+                                Debug.trace(e);
+                            }
+                            System.out.println("        invDocumentation.getXlinkHref() = " + invDocumentation.getXlinkHref());
+                            System.out.println("        invDocumentation.getXlinkTitle() = " + invDocumentation.getXlinkTitle());
+                            System.out.println("        invDocumentation.getURI() = " + invDocumentation.getURI());
+                        }
+
+                        final List<InvProperty> properties = threddsMD.getProperties();
+                        System.out.println("    threddsMD.getProperties() = " + properties);
+                        for (InvProperty property : properties) {
+                            System.out.println("        property.getName() = " + property.getName());
+                            System.out.println("        property.getValue() = " + property.getValue());
+                        }
+
+                        final List<thredds.catalog.ThreddsMetadata.Variables> variables = threddsMD.getVariables();
+                        System.out.println("    threddsMD.getVariables() = " + variables);
+                        for (thredds.catalog.ThreddsMetadata.Variables variable : variables) {
+                            System.out.println("        variable.getMapHref() = " + variable.getMapHref());
+                            System.out.println("        variable.getVocabHref() = " + variable.getVocabHref());
+                            System.out.println("        variable.getVocabulary() = " + variable.getVocabulary());
+                            System.out.println("        variable.getMapUri() = " + variable.getMapUri());
+                        }
+                    }
+                }
+            }
+            List<InvProperty> properties = datasetNode.getProperties();
+            for (InvProperty property : properties) {
+                System.out.println("    property.getName()   = " + property.getName());
+                System.out.println("    property.getValue()  = " + property.getValue());
+            }
+        }
+    }
+
+    private void printDatasets(final List<DatasetNode> datasets) {
+        for (DatasetNode datasetNode : datasets) {
+            System.out.println("-----------------------------------------------------------------------");
+            System.out.println("datasetNode.getId()           = " + datasetNode.getId());
+            if (datasetNode instanceof CatalogRef) {
+                final CatalogRef catalogRef = (CatalogRef) datasetNode;
+                System.out.println("    catalogRef.getReference() = " + catalogRef.getReference());
+            }
+
+            if (datasetNode instanceof Dataset) {
+                final Dataset ds = (Dataset) datasetNode;
+                System.out.println("    ds.isAccessible() = " + ds.isAccessible());
+                List<Access> dsAccesses = ds.getAccesses();
+                for (Access dsAccess : dsAccesses) {
+                    Service dsAccessService = dsAccess.getService();
+                    System.out.println("    dsAccessService.getName() = " + dsAccessService.getName());
+                    List<Service> services = dsAccessService.getServices();
+                    for (Service service : services) {
+                        System.out.println("        service.getName() = " + service.getName());
+                    }
+                }
+            }
+//            System.out.println("datasetNode.getIdAuthority() = " + datasetNode.getIdAuthority());
+            List<Metadata> metadatas = datasetNode.getMetadata();
+            for (Metadata metadata : metadatas) {
+                System.out.println("    metadata.getContent()           = " + metadata.getContent());
+                System.out.println("    metadata.getTitle()             = " + metadata.getTitle());
+                System.out.println("    metadata.getExternalReference() = " + metadata.getExternalReference());
+                System.out.println("    metadata.isContainedContent()   = " + metadata.isContainedContent());
+            }
+            List<Property> properties = datasetNode.getProperties();
+            for (Property property : properties) {
+                System.out.println("    property.getName()   = " + property.getName());
+                System.out.println("    property.getValue()  = " + property.getValue());
+            }
+            ThreddsMetadata threddsMetadata = datasetNode.getThreddsMetadata();
+            if (threddsMetadata != null) {
+                System.out.println("    threddsMetadata.getCollectionType() = " + threddsMetadata.getCollectionType());
+            }
         }
     }
 

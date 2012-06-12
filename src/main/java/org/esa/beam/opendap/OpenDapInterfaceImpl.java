@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2011 Brockmann Consult GmbH (info@brockmann-consult.de)
- * 
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 3 of the License, or (at your option)
@@ -9,7 +9,7 @@
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
  * more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, see http://www.gnu.org/licenses/
  */
@@ -17,16 +17,23 @@
 package org.esa.beam.opendap;
 
 import opendap.dap.BaseType;
+import opendap.dap.ClientIO;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DConnect2;
 import opendap.dap.DDS;
 import opendap.dap.DVector;
+import opendap.dap.DataReadException;
+import opendap.dap.ServerVersion;
+import opendap.dap.StatusUI;
 import thredds.catalog2.Catalog;
 import thredds.catalog2.DatasetNode;
 import thredds.catalog2.xml.parser.ThreddsXmlParser;
 import thredds.catalog2.xml.parser.ThreddsXmlParserException;
 import thredds.catalog2.xml.parser.stax.StaxThreddsXmlParser;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -107,5 +114,4 @@ class OpenDapInterfaceImpl implements OpenDapInterface {
         }
         return catalog;
     }
-
 }

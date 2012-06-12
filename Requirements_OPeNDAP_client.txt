@@ -6,7 +6,7 @@ Requirements on OPeNDAP client for BEAM
 - set target directory (default possible)
 - tool shall download every file matching the specifications in the background
 - ProgressMonitor in front
-- open every product that has been downloaded
+- try to open every product that has been downloaded
 
 (optionally)
 - if time series tool is installed: provide option to create time series from downloaded products

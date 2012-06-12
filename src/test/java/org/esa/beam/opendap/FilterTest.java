@@ -47,7 +47,7 @@ public class FilterTest {
         final URL baseUrl = new URL("http://test.opendap.org/dap/data/nc/");
         final OpenDapInterface openDapInterface = new OpenDapInterfaceImpl(baseUrl);
         Filter filter = new FilterBuilder()
-                .baseUrl(new URL("http://test.opendap.org/dap/data/nc/"))
+                .baseUrl(new URL("http://test.opendap.org/dap/data/nc")) // without trailing slash "/"
                 .fileNamePattern("sst.*\\.nc\\.gz")
                 .openDapInterface(openDapInterface)
                 .minLat(minLat)
