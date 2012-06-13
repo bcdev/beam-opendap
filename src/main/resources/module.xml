@@ -1,0 +1,69 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+
+    <symbolicName>opendap-download-tool</symbolicName>
+    <version>1.0</version>
+    <name>OPeNDAP Download Tool</name>
+    <funding>EU</funding>
+
+    <description>
+        <![CDATA[
+        This module provides the ability to filter and download subsets of scientific datasets from OPeNDAP servers.
+        Fileroptions are time range, the geographical area, the names of required raster values and a filename pattern.
+        ]]>
+    </description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2012 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <categories>ui</categories>
+
+    <dependency>
+        <module>beam-visat-rcp</module>
+    </dependency>
+
+    <!--<extension point="beam-ui:toolViews">-->
+        <!--<toolView>-->
+            <!--<id>timeSeriesPlayerToolView</id>-->
+            <!--<class>org.esa.beam.timeseries.ui.player.TimeSeriesPlayerToolView</class>-->
+            <!--<title>Time Series Player</title>-->
+            <!--<tabTitle>Time Series</tabTitle>-->
+            <!--<mnemonic>T</mnemonic>-->
+            <!--<description>Time Series Player</description>-->
+            <!--<accelerator>ctrl alt T</accelerator>-->
+            <!--<smallIcon>/org/esa/beam/timeseries/ui/icons/timeseries-player16.png</smallIcon>-->
+            <!--<largeIcon>/org/esa/beam/timeseries/ui/icons/timeseries-player24.png</largeIcon>-->
+            <!--<initState>FLOATING</initState>-->
+            <!--<initSide>EAST</initSide>-->
+            <!--<initIndex>3</initIndex>-->
+            <!--<toolBarId>TimeSeriesTool</toolBarId>-->
+            <!--<helpId>timeSeriesPlayer</helpId>-->
+        <!--</toolView>-->
+    <!--</extension>-->
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>showOpendapClientAction</id>
+            <parent>file</parent>
+            <class>org.esa.beam.opendap.ShowOpendapClientAction</class>
+            <text>Show OPeNDAP client ...</text>
+            <smallIcon>icons/RsProduct16.gif</smallIcon>
+            <largeIcon>icons/RsProduct24.gif</largeIcon>
+            <shortDescr>Download products from OPeNDAP servers</shortDescr>
+            <!--<helpId>showOpendapClientAction</helpId>-->
+            <placeAfter>reopen</placeAfter>
+            <placeBefore>productGrabber</placeBefore>
+        </action>
+    </extension>
+
+    <!--<extension point="beam-ui:helpSets">-->
+        <!--<helpSet>-->
+            <!--<parent>beam-help</parent>-->
+            <!--<path>doc/help/opendap-client.hs</path>-->
+        <!--</helpSet>-->
+    <!--</extension>-->
+
+</module>
