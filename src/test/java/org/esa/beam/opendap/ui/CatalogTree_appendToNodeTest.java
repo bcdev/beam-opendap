@@ -18,10 +18,14 @@ import static org.junit.Assert.*;
 public class CatalogTree_appendToNodeTest {
 
     private ArrayList<InvDataset> datasets;
+    private InvCatalogImpl catalog;
+    private DefaultMutableTreeNode parentNode;
 
     @Before
     public void setUp() throws Exception {
         datasets = new ArrayList<InvDataset>();
+        catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
+        parentNode = new DefaultMutableTreeNode();
     }
 
     @After
@@ -31,10 +35,8 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendADapNode() throws URISyntaxException {
         // preparation
-        final InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         final InvDatasetImpl dapDataset = createDapTreeNode(catalog, "first");
         datasets.add(dapDataset);
-        final DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode();
 
         // execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -48,14 +50,11 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendThreeDapNodes() throws URISyntaxException {
         //preparation
-        final InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         datasets.add(createDapTreeNode(catalog, "Name_1"));
         final InvDatasetImpl dapTreeNode = createDapTreeNode(catalog, "Name_2");
 
         datasets.add(dapTreeNode);
         datasets.add(createDapTreeNode(catalog, "Name_3"));
-
-        final DefaultMutableTreeNode parentNode = new DefaultMutableTreeNode();
 
         //execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -69,6 +68,71 @@ public class CatalogTree_appendToNodeTest {
             assertEquals(indexMessage, true, CatalogTree.isDapNode(childAt));
             assertEquals(indexMessage, "Name_" + (i + 1), childAt.getUserObject().toString());
         }
+    }
+
+    @Test
+    public void testAppendAFileNode() throws URISyntaxException {
+        //preparation
+        final InvDatasetImpl fileDataset = new InvDatasetImpl(null, "fileName", FeatureType.NONE, "file", "http://sonstwohin.bc");
+        fileDataset.setCatalog(catalog);
+        final InvService dapService = new InvService("file", "unwichtig", "unwichtig", "unwichtig", "unwichtig");
+        fileDataset.addAccess(new InvAccessImpl(fileDataset, "http://y.z", dapService));
+        fileDataset.finish();
+        datasets.add(fileDataset);
+
+        //execution
+        CatalogTree.appendToNode(new JTree(), datasets, parentNode);
+
+        //verification
+        assertEquals(1, parentNode.getChildCount());
+        assertEquals(true, parentNode.getChildAt(0).isLeaf());
+        assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(0)));
+    }
+
+    @Test
+    public void testAppendACatalogNode() throws URISyntaxException {
+        //preparation
+        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "unwichtig");
+        catalogRef.setCatalog(catalog);
+        datasets.add(catalogRef);
+
+        //execution
+        CatalogTree.appendToNode(new JTree(), datasets, parentNode);
+
+        //verification
+        assertEquals(1, parentNode.getChildCount());
+        assertEquals(1, parentNode.getChildAt(0).getChildCount());
+        assertEquals(true, parentNode.getChildAt(0).getChildAt(0).isLeaf());
+        assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(0)));
+        assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(0).getChildAt(0)));
+        assertEquals(true, CatalogTree.isCatalogReferenceNode(parentNode.getChildAt(0).getChildAt(0)));
+    }
+
+    @Test
+    public void testAppendingVariousDatasets() {
+        //preparation
+        final InvDatasetImpl dapDataset = createDapTreeNode(catalog, "dapName");
+        datasets.add(dapDataset);
+
+        final InvDatasetImpl fileDataset = new InvDatasetImpl(null, "fileName", FeatureType.NONE, "file", "http://sonstwohin.bc");
+        fileDataset.setCatalog(catalog);
+        final InvService dapService = new InvService("file", "unwichtig", "unwichtig", "unwichtig", "unwichtig");
+        fileDataset.addAccess(new InvAccessImpl(fileDataset, "http://y.z", dapService));
+        fileDataset.finish();
+        datasets.add(fileDataset);
+
+        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "unwichtig");
+        catalogRef.setCatalog(catalog);
+        datasets.add(catalogRef);
+
+        //execution
+        CatalogTree.appendToNode(new JTree(), datasets, parentNode);
+
+        //verification
+        assertEquals(3, parentNode.getChildCount());
+        assertEquals(true, CatalogTree.isDapNode(parentNode.getChildAt(0)));
+        assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(1)));
+        assertEquals(true, CatalogTree.isCatalogReferenceNode(parentNode.getChildAt(2).getChildAt(0)));
     }
 
     private InvDatasetImpl createDapTreeNode(InvCatalogImpl catalog, String nodeName) {
