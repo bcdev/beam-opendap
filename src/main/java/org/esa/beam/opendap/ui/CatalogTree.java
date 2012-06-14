@@ -204,7 +204,7 @@ public class CatalogTree {
                 final InvCatalogRef catalogRef = (InvCatalogRef) dataset;
                 appendCatalogNodeToParent(parentNode, treeModel, catalogRef);
             } else {
-                appendLeafNodeToParent(parentNode, treeModel, dataset);
+                appendDataNodeToParent(parentNode, treeModel, dataset);
             }
         }
     }
@@ -218,7 +218,7 @@ public class CatalogTree {
         treeModel.insertNodeInto(catalogNode, parentNode, parentNode.getChildCount());
     }
 
-    static void appendLeafNodeToParent(DefaultMutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
+    static void appendDataNodeToParent(DefaultMutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
         final String uriString = dataset.getParentCatalog().getUriString();
         final String dapUri = uriString.substring(0, uriString.lastIndexOf("/") + 1) + dataset.getName();
         final OPeNDAP_Leaf leafObject = new OPeNDAP_Leaf(dataset.getName(), dapUri);
