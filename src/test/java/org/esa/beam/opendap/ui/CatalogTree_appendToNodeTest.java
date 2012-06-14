@@ -17,8 +17,11 @@ import static org.junit.Assert.*;
 
 public class CatalogTree_appendToNodeTest {
 
+    private ArrayList<InvDataset> datasets;
+
     @Before
     public void setUp() throws Exception {
+        datasets = new ArrayList<InvDataset>();
     }
 
     @After
@@ -28,7 +31,6 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendADapNode() throws URISyntaxException {
         // preparation
-        final ArrayList<InvDataset> datasets = new ArrayList<InvDataset>();
         final InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         final InvDatasetImpl dapDataset = createDapTreeNode(catalog, "first");
         datasets.add(dapDataset);
@@ -46,7 +48,6 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendThreeDapNodes() throws URISyntaxException {
         //preparation
-        final ArrayList<InvDataset> datasets = new ArrayList<InvDataset>();
         final InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         datasets.add(createDapTreeNode(catalog, "Name_1"));
         final InvDatasetImpl dapTreeNode = createDapTreeNode(catalog, "Name_2");
@@ -79,4 +80,4 @@ public class CatalogTree_appendToNodeTest {
         return dapDataset;
     }
 
-} 
+}
