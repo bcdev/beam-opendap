@@ -1,12 +1,8 @@
 package org.esa.beam.opendap.ui;
 
-import com.jidesoft.tree.StyledTreeCellRenderer;
-import org.esa.beam.dataio.netcdf.GenericNetCdfReaderPlugIn;
-import org.esa.beam.dataio.netcdf.util.Constants;
-import org.esa.beam.framework.dataio.ProductIOPlugInManager;
-import org.esa.beam.framework.dataio.ProductReader;
-import org.esa.beam.framework.dataio.ProductReaderPlugIn;
-import org.esa.beam.framework.datamodel.Product;
+import opendap.dap.http.HTTPException;
+import opendap.dap.http.HTTPMethod;
+import opendap.dap.http.HTTPSession;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.util.Debug;
 import thredds.catalog.InvAccess;
@@ -15,17 +11,17 @@ import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvCatalogRef;
 import thredds.catalog.InvDataset;
 import thredds.catalog.InvService;
-import ucar.nc2.dods.DODSNetcdfFile;
 
+import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.TreeWillExpandListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
-import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.Component;
@@ -36,20 +32,19 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Iterator;
 import java.util.List;
 
 public class CatalogTree {
 
     private final JTree jTree;
 
-    public CatalogTree() {
+    public CatalogTree(final ResponseDispatcher responseDispatcher) {
         jTree = new JTree();
         jTree.setRootVisible(false);
         ((DefaultTreeModel) jTree.getModel()).setRoot(createRootNode());
         addCellRenderer(jTree);
-        addWillExpandListener(jTree);
-        addTreeSelectionListener(jTree);
+        addWillExpandListener();
+        addTreeSelectionListener(jTree, responseDispatcher);
     }
 
     public Component getComponent() {
@@ -61,43 +56,41 @@ public class CatalogTree {
         final DefaultMutableTreeNode rootNode = createRootNode();
         model.setRoot(rootNode);
         appendToNode(jTree, rootDatasets, rootNode);
-        jTree.expandPath(new TreePath(rootNode.getPath()));
+        expandPath(rootNode);
     }
 
     static void addCellRenderer(final JTree jTree) {
+        final ImageIcon dapIcon = UIUtils.loadImageIcon("icons/Edit16.gif");
+        final ImageIcon fileIcon = UIUtils.loadImageIcon("icons/Print16.gif");
+        jTree.setCellRenderer(new DefaultTreeCellRenderer() {
 
-        final StyledTreeCellRenderer dapNodeRenderer = new StyledTreeCellRenderer();
-        dapNodeRenderer.setLeafIcon(UIUtils.loadImageIcon("icons/Edit24.gif"));
-
-        final StyledTreeCellRenderer fileNodeRenderer = new StyledTreeCellRenderer();
-        fileNodeRenderer.setLeafIcon(UIUtils.loadImageIcon("icons/Print24.gif"));
-
-        final TreeCellRenderer renderer = new TreeCellRenderer() {
             @Override
-            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus) {
+            public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
                 if (isDapNode(value)) {
-                    return dapNodeRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+                    setLeafIcon(dapIcon);
+                } else {
+                    setLeafIcon(fileIcon);
                 }
-                return fileNodeRenderer.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
+                super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+                return this;
             }
-        };
-        jTree.setCellRenderer(renderer);
+        });
     }
 
-    static void addWillExpandListener(final JTree jTree) {
+    void addWillExpandListener() {
         jTree.addTreeWillExpandListener(new TreeWillExpandListener() {
             @Override
             public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
                 final Object lastPathComponent = event.getPath().getLastPathComponent();
                 final TreeNode child = ((DefaultMutableTreeNode) lastPathComponent).getChildAt(0);
-                if (isDapNode(child)) {
+                if (isCatalogReferenceNode(child)) {
                     final DefaultMutableTreeNode dapNode = (DefaultMutableTreeNode) child;
-                    final String catalogUrlString = (String) dapNode.getUserObject();
+                    final OPeNDAP_Leaf catalogLeaf = (OPeNDAP_Leaf) dapNode.getUserObject();
                     final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
                     final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) dapNode.getParent();
                     model.removeNodeFromParent(dapNode);
                     try {
-                        final URL catalogUrl = new URL(catalogUrlString);
+                        final URL catalogUrl = new URL(catalogLeaf.getCatalogUri());
                         final URLConnection urlConnection = catalogUrl.openConnection();
                         final InputStream inputStream = urlConnection.getInputStream();
                         insertCatalogElements(inputStream, catalogUrl.toURI(), parent);
@@ -122,13 +115,18 @@ public class CatalogTree {
         });
     }
 
-    static void insertCatalogElements(InputStream catalogIS, URI catalogBaseUri, DefaultMutableTreeNode parent) {
+    void insertCatalogElements(InputStream catalogIS, URI catalogBaseUri, DefaultMutableTreeNode parent) {
         final InvCatalogFactory factory = InvCatalogFactory.getDefaultFactory(true);
         final InvCatalogImpl catalog = factory.readXML(catalogIS, catalogBaseUri);
+        final List<InvDataset> catalogDatasets = catalog.getDatasets();
+        for (InvDataset catalogDataset : catalogDatasets) {
+            appendToNode(jTree, catalogDataset.getDatasets(), parent);
+        }
+        expandPath(parent);
     }
 
+    static void addTreeSelectionListener(final JTree jTree, final ResponseDispatcher responseDispatcher) {
 
-    static void addTreeSelectionListener(final JTree jTree) {
         jTree.addTreeSelectionListener(new TreeSelectionListener() {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
@@ -139,37 +137,62 @@ public class CatalogTree {
                     return;
                 }
                 final OPeNDAP_Leaf dapObject = (OPeNDAP_Leaf) userObject;
-                if (!dapObject.isDapAccess()) {
-                    return;
-                }
-                final String uri = dapObject.getDodsUri();
+                if (dapObject.isDapAccess()) {
+//                final String uri = dapObject.getDodsUri();
 //                final String uri = dapObject.getDdxUri();
-//                final String uri = dapObject.getDdsUri();
+                    final String uri = dapObject.getDdsUri();
 //                final String uri = dapObject.getDasUri();
-                try {
-                    final DODSNetcdfFile netcdfFile = new DODSNetcdfFile(uri);
-                    System.out.println(netcdfFile.getFileTypeId());
-                    final Iterator<ProductReaderPlugIn> readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(Constants.FORMAT_NAME);
-                    while (readerPlugIns.hasNext()) {
-                        ProductReaderPlugIn readerPlugIn = readerPlugIns.next();
-                        if (readerPlugIn instanceof GenericNetCdfReaderPlugIn) {
-                            final ProductReader readerInstance = readerPlugIn.createReaderInstance();
-                            final Product product = readerInstance.readProductNodes(netcdfFile, null);
-                            System.out.println("product.getNumBands() = " + product.getNumBands());
-                            product.closeIO();
-                        }
+                    try {
+                        HTTPSession session = new HTTPSession();
+                        final HTTPMethod httpMethod = session.newMethodGet(uri);
+                        final int execute = httpMethod.execute();
+                        responseDispatcher.dispatchDDSResponse(httpMethod.getResponseAsString());
+
+                        // final DODSNetcdfFile netcdfFile = new DODSNetcdfFile(uri);
+                        // System.out.println(netcdfFile.getFileTypeId());
+                        // final Iterator<ProductReaderPlugIn> readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(Constants.FORMAT_NAME);
+                        // while (readerPlugIns.hasNext()) {
+                        //     ProductReaderPlugIn readerPlugIn = readerPlugIns.next();
+                        //     if (readerPlugIn instanceof GenericNetCdfReaderPlugIn) {
+                        //         final ProductReader readerInstance = readerPlugIn.createReaderInstance();
+                        //         final Product product = readerInstance.readProductNodes(netcdfFile, null);
+                        //         System.out.println("product.getNumBands() = " + product.getNumBands());
+                        //         product.closeIO();
+                        //     }
+                        // }
+                    } catch (IOException e1) {
+                        //todo
+                        Debug.trace(e1);
                     }
-                } catch (IOException e1) {
-                    Debug.trace(e1);
+                } else if (dapObject.isFileAccess()) {
+                    final String fileUri = dapObject.getFileUri();
+                    try {
+                        HTTPSession session = new HTTPSession();
+                        final HTTPMethod httpMethod = session.newMethodGet(fileUri);
+                        final int execute = httpMethod.execute();
+                        responseDispatcher.dispatchFileResponse(httpMethod.getResponseAsString());
+                    } catch (HTTPException e1) {
+                        //todo
+                        Debug.trace(e1);
+                    }
                 }
             }
         });
     }
 
+
     static boolean isDapNode(Object value) {
         if (value instanceof DefaultMutableTreeNode) {
             final Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-            return (userObject instanceof String) && ((String) userObject).toLowerCase().startsWith("http:");
+            return (userObject instanceof OPeNDAP_Leaf) && ((OPeNDAP_Leaf) userObject).isDapAccess();
+        }
+        return false;
+    }
+
+    static boolean isCatalogReferenceNode(Object value) {
+        if (value instanceof DefaultMutableTreeNode) {
+            final Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
+            return (userObject instanceof OPeNDAP_Leaf) && ((OPeNDAP_Leaf) userObject).isCatalogReference();
         }
         return false;
     }
@@ -181,7 +204,9 @@ public class CatalogTree {
                 final InvCatalogRef catalogRef = (InvCatalogRef) dataset;
                 final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
                 final String urlPath = catalogRef.getURI().toASCIIString();
-                catalogNode.add(new DefaultMutableTreeNode(urlPath));
+                final OPeNDAP_Leaf oPeNDAP_leaf = new OPeNDAP_Leaf(urlPath, urlPath);
+                oPeNDAP_leaf.setCatalogReference(true);
+                catalogNode.add(new DefaultMutableTreeNode(oPeNDAP_leaf));
                 treeModel.insertNodeInto(catalogNode, treeNode, treeNode.getChildCount());
             } else {
                 final String uriString = dataset.getParentCatalog().getUriString();
@@ -199,20 +224,25 @@ public class CatalogTree {
         }
     }
 
+    private void expandPath(DefaultMutableTreeNode node) {
+        jTree.expandPath(new TreePath(node.getPath()));
+    }
+
     static DefaultMutableTreeNode createRootNode() {
         return new DefaultMutableTreeNode("root", true);
     }
 
-    private static class OPeNDAP_Leaf {
+    static class OPeNDAP_Leaf {
 
         private final String name;
         private boolean dapAccess;
         private boolean fileAccess;
-        private final String dapUri;
+        private boolean catalogReference;
+        private final String uri;
 
-        public OPeNDAP_Leaf(String name, String dapUri) {
+        public OPeNDAP_Leaf(String name, String uri) {
             this.name = name;
-            this.dapUri = dapUri;
+            this.uri = uri;
         }
 
         @Override
@@ -222,13 +252,22 @@ public class CatalogTree {
 
         public void setService(String serviceName) {
             if (serviceName != null) {
-                if (serviceName.trim().equalsIgnoreCase("dap")) {
+                final String trimmedLower = serviceName.trim().toLowerCase();
+                if (trimmedLower.equals("dap") || trimmedLower.equals("odap")) {
                     dapAccess = true;
                 }
-                if (serviceName.trim().equalsIgnoreCase("file")) {
+                if (trimmedLower.equals("file") || trimmedLower.equals("http")) {
                     fileAccess = true;
                 }
             }
+        }
+
+        public boolean isCatalogReference() {
+            return catalogReference;
+        }
+
+        public void setCatalogReference(boolean catalogReference) {
+            this.catalogReference = catalogReference;
         }
 
         public boolean isDapAccess() {
@@ -240,19 +279,36 @@ public class CatalogTree {
         }
 
         public String getDasUri() {
-            return dapUri + ".das";
+            return uri + ".das";
         }
 
         public String getDdsUri() {
-            return dapUri + ".dds";
+            return uri + ".dds";
         }
 
         public String getDdxUri() {
-            return dapUri + ".ddx";
+            return uri + ".ddx";
         }
 
         public String getDodsUri() {
-            return dapUri;
+            return uri;
         }
+
+        public String getFileUri() {
+            return uri;
+        }
+
+        public String getCatalogUri() {
+            return uri;
+        }
+    }
+
+    public static interface ResponseDispatcher {
+
+        void dispatchDASResponse(String response);
+
+        void dispatchDDSResponse(String response);
+
+        void dispatchFileResponse(String response);
     }
 }

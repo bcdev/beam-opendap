@@ -79,10 +79,10 @@ public class TestOpendapAPI {
 //        final String url = "http://acdisc.sci.gsfc.nasa.gov/opendap/EarthProbe_TOMS_Level3/catalog.xml";
 //        final String url = "http://acdisc.sci.gsfc.nasa.gov/opendap/catalog.xml";
 //        final String url = "http://10.3.13.120:8084/thredds/catalog/testAll/catalog.xml";
-//        final String url = "http://10.3.13.120:8084/thredds/catalog/catalog.xml";
+        final String url = "http://10.3.13.120:8084/thredds/catalog/catalog.xml";
 //        final String url = "http://10.3.13.120:8084/thredds/catalog.xml";
 //        final String url = "http://opendap.hzg.de/opendap/data/catalog.xml";
-        final String url = "http://opendap.hzg.de/opendap/data/cosyna/MERIS/2012/catalog.xml";
+//        final String url = "http://opendap.hzg.de/opendap/data/cosyna/MERIS/2012/catalog.xml";
 //        final String url = "http://opendap.hzg.de/opendap/data/cosyna/gridded/meris/catalog.xml";
 //        final String url = "http://test.opendap.org/dap/data/nc/catalog.xml";
 
@@ -98,13 +98,18 @@ public class TestOpendapAPI {
         System.out.println("invCatalog.getVersion() = " + invCatalog.getVersion());
 //        System.out.println("catalog.getVersion()    = " + catalog.getVersion());
 
-        final InvDataset invDataset = invCatalog.getDatasets().get(0);
+        final List<InvDataset> datasets = invCatalog.getDatasets();
+
+        final InvDataset invDataset = datasets.get(0);
 //        final DatasetNode dataset = catalog.getDatasets().get(0);
 
         System.out.println("invDataset.getID() = " + invDataset.getID());
 //        System.out.println("dataset.getId()    = " + dataset.getId());
 
-        printInvDatasets(invDataset.getDatasets());
+
+        System.out.println("-----------------------------------------------------------------------");
+        System.out.println("-----------------------------------------------------------------------");
+        printInvDatasets(datasets);
         System.out.println("-----------------------------------------------------------------------");
         System.out.println("-----------------------------------------------------------------------");
 //        printDatasets(dataset.getDatasets());
@@ -218,6 +223,7 @@ public class TestOpendapAPI {
                 System.out.println("    property.getName()   = " + property.getName());
                 System.out.println("    property.getValue()  = " + property.getValue());
             }
+            printInvDatasets(datasetNode.getDatasets());
         }
     }
 
