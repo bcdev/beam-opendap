@@ -197,31 +197,39 @@ public class CatalogTree {
         return false;
     }
 
-    static void appendToNode(final JTree jTree, List<InvDataset> datasets, DefaultMutableTreeNode treeNode) {
+    static void appendToNode(final JTree jTree, List<InvDataset> datasets, DefaultMutableTreeNode parentNode) {
         final DefaultTreeModel treeModel = (DefaultTreeModel) jTree.getModel();
         for (InvDataset dataset : datasets) {
             if (dataset instanceof InvCatalogRef) {
                 final InvCatalogRef catalogRef = (InvCatalogRef) dataset;
-                final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
-                final String urlPath = catalogRef.getURI().toASCIIString();
-                final OPeNDAP_Leaf oPeNDAP_leaf = new OPeNDAP_Leaf(urlPath, urlPath);
-                oPeNDAP_leaf.setCatalogReference(true);
-                catalogNode.add(new DefaultMutableTreeNode(oPeNDAP_leaf));
-                treeModel.insertNodeInto(catalogNode, treeNode, treeNode.getChildCount());
+                appendCatalogNodeToParent(parentNode, treeModel, catalogRef);
             } else {
-                final String uriString = dataset.getParentCatalog().getUriString();
-                final String dapUri = uriString.substring(0, uriString.lastIndexOf("/") + 1) + dataset.getName();
-                final OPeNDAP_Leaf leafObject = new OPeNDAP_Leaf(dataset.getName(), dapUri);
-                final List<InvAccess> accessList = dataset.getAccess();
-                for (InvAccess access : accessList) {
-                    InvService service = access.getService();
-                    final String serviceName = service.getName();
-                    leafObject.setService(serviceName);
-                }
-                final DefaultMutableTreeNode leafNode = new DefaultMutableTreeNode(leafObject);
-                treeModel.insertNodeInto(leafNode, treeNode, treeNode.getChildCount());
+                appendLeafNodeToParent(parentNode, treeModel, dataset);
             }
         }
+    }
+
+    static void appendCatalogNodeToParent(DefaultMutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
+        final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
+        final String urlPath = catalogRef.getURI().toASCIIString();
+        final OPeNDAP_Leaf oPeNDAP_leaf = new OPeNDAP_Leaf(urlPath, urlPath);
+        oPeNDAP_leaf.setCatalogReference(true);
+        catalogNode.add(new DefaultMutableTreeNode(oPeNDAP_leaf));
+        treeModel.insertNodeInto(catalogNode, parentNode, parentNode.getChildCount());
+    }
+
+    static void appendLeafNodeToParent(DefaultMutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
+        final String uriString = dataset.getParentCatalog().getUriString();
+        final String dapUri = uriString.substring(0, uriString.lastIndexOf("/") + 1) + dataset.getName();
+        final OPeNDAP_Leaf leafObject = new OPeNDAP_Leaf(dataset.getName(), dapUri);
+        final List<InvAccess> accessList = dataset.getAccess();
+        for (InvAccess access : accessList) {
+            InvService service = access.getService();
+            final String serviceName = service.getName();
+            leafObject.setService(serviceName);
+        }
+        final DefaultMutableTreeNode leafNode = new DefaultMutableTreeNode(leafObject);
+        treeModel.insertNodeInto(leafNode, parentNode, parentNode.getChildCount());
     }
 
     private void expandPath(DefaultMutableTreeNode node) {
