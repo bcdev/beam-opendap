@@ -15,14 +15,13 @@ public class CatalogTree_setNewRootDatasetsTest {
 
     private ArrayList<InvDataset> datasets;
     private InvCatalogImpl catalog;
-    private InvDatasetImpl dapDataset;
     private CatalogTree catalogTree;
 
     @Before
     public void setUp() throws Exception {
         datasets = new ArrayList<InvDataset>();
         catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
-        dapDataset = createDataset(catalog, "first", "dap");
+        InvDatasetImpl dapDataset = createDataset(catalog, "first", "dap");
         datasets.add(dapDataset);
         catalogTree = new CatalogTree(null);
     }
@@ -109,4 +108,4 @@ public class CatalogTree_setNewRootDatasetsTest {
         return dapDataset;
     }
 
-} 
+}
