@@ -1,13 +1,11 @@
 package org.esa.beam.opendap.ui;
 
-import org.hsqldb.lib.StringInputStream;
 import org.junit.*;
 import thredds.catalog.*;
 import ucar.nc2.constants.FeatureType;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeNode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -28,15 +26,10 @@ public class CatalogTree_appendToNodeTest {
         parentNode = new DefaultMutableTreeNode();
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
     public void testAppendADapNode() throws URISyntaxException {
         // preparation
-        final InvDatasetImpl dapDataset = createDapTreeNode(catalog, "first");
-        datasets.add(dapDataset);
+        datasets.add(createDataset(catalog, "first", "dap"));
 
         // execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -50,11 +43,9 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendThreeDapNodes() throws URISyntaxException {
         //preparation
-        datasets.add(createDapTreeNode(catalog, "Name_1"));
-        final InvDatasetImpl dapTreeNode = createDapTreeNode(catalog, "Name_2");
-
-        datasets.add(dapTreeNode);
-        datasets.add(createDapTreeNode(catalog, "Name_3"));
+        datasets.add(createDataset(catalog, "Name_1", "dap"));
+        datasets.add(createDataset(catalog, "Name_2", "dap"));
+        datasets.add(createDataset(catalog, "Name_3", "dap"));
 
         //execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -73,12 +64,7 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendAFileNode() throws URISyntaxException {
         //preparation
-        final InvDatasetImpl fileDataset = new InvDatasetImpl(null, "fileName", FeatureType.NONE, "file", "http://sonstwohin.bc");
-        fileDataset.setCatalog(catalog);
-        final InvService dapService = new InvService("file", "unwichtig", "unwichtig", "unwichtig", "unwichtig");
-        fileDataset.addAccess(new InvAccessImpl(fileDataset, "http://y.z", dapService));
-        fileDataset.finish();
-        datasets.add(fileDataset);
+        datasets.add(createDataset(catalog, "fileName", "file"));
 
         //execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -92,9 +78,7 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendACatalogNode() throws URISyntaxException {
         //preparation
-        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "unwichtig");
-        catalogRef.setCatalog(catalog);
-        datasets.add(catalogRef);
+        datasets.add(createCatalogRefDataset());
 
         //execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -104,6 +88,7 @@ public class CatalogTree_appendToNodeTest {
         assertEquals(1, parentNode.getChildAt(0).getChildCount());
         assertEquals(true, parentNode.getChildAt(0).getChildAt(0).isLeaf());
         assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(0)));
+        assertEquals(false, CatalogTree.isCatalogReferenceNode(parentNode.getChildAt(0)));
         assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(0).getChildAt(0)));
         assertEquals(true, CatalogTree.isCatalogReferenceNode(parentNode.getChildAt(0).getChildAt(0)));
     }
@@ -111,19 +96,9 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendingVariousDatasets() {
         //preparation
-        final InvDatasetImpl dapDataset = createDapTreeNode(catalog, "dapName");
-        datasets.add(dapDataset);
-
-        final InvDatasetImpl fileDataset = new InvDatasetImpl(null, "fileName", FeatureType.NONE, "file", "http://sonstwohin.bc");
-        fileDataset.setCatalog(catalog);
-        final InvService dapService = new InvService("file", "unwichtig", "unwichtig", "unwichtig", "unwichtig");
-        fileDataset.addAccess(new InvAccessImpl(fileDataset, "http://y.z", dapService));
-        fileDataset.finish();
-        datasets.add(fileDataset);
-
-        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "unwichtig");
-        catalogRef.setCatalog(catalog);
-        datasets.add(catalogRef);
+        datasets.add(createDataset(catalog, "dapName", "dap"));
+        datasets.add(createDataset(catalog,"fileName", "file"));
+        datasets.add(createCatalogRefDataset());
 
         //execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -132,16 +107,23 @@ public class CatalogTree_appendToNodeTest {
         assertEquals(3, parentNode.getChildCount());
         assertEquals(true, CatalogTree.isDapNode(parentNode.getChildAt(0)));
         assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(1)));
+        assertEquals(false, CatalogTree.isCatalogReferenceNode(parentNode.getChildAt(1)));
         assertEquals(true, CatalogTree.isCatalogReferenceNode(parentNode.getChildAt(2).getChildAt(0)));
     }
 
-    private InvDatasetImpl createDapTreeNode(InvCatalogImpl catalog, String nodeName) {
+    private InvDatasetImpl createDataset(InvCatalogImpl catalog, String nodeName, final String serviceName) {
         final InvDatasetImpl dapDataset = new InvDatasetImpl(null, nodeName, FeatureType.NONE, "dap", "http://sonstwohin.bc");
         dapDataset.setCatalog(catalog);
-        final InvService dapService = new InvService("dap", "unwichtig", "unwichtig", "unwichtig", "unwichtig");
+        final InvService dapService = new InvService(serviceName, "unwichtig", "unwichtig", "unwichtig", "unwichtig");
         dapDataset.addAccess(new InvAccessImpl(dapDataset, "http://y.z", dapService));
         dapDataset.finish();
         return dapDataset;
+    }
+
+    private InvCatalogRef createCatalogRefDataset() {
+        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "unwichtig");
+        catalogRef.setCatalog(catalog);
+        return catalogRef;
     }
 
 }
