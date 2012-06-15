@@ -111,8 +111,8 @@ public class CatalogTree_appendToNodeTest {
         assertEquals(true, CatalogTree.isCatalogReferenceNode(parentNode.getChildAt(2).getChildAt(0)));
     }
 
-    private InvDatasetImpl createDataset(InvCatalogImpl catalog, String nodeName, final String serviceName) {
-        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, nodeName, FeatureType.NONE, "dap", "http://sonstwohin.bc");
+    private InvDatasetImpl createDataset(InvCatalogImpl catalog, String datasetName, final String serviceName) {
+        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://sonstwohin.bc");
         dapDataset.setCatalog(catalog);
         final InvService dapService = new InvService(serviceName, "unwichtig", "unwichtig", "unwichtig", "unwichtig");
         dapDataset.addAccess(new InvAccessImpl(dapDataset, "http://y.z", dapService));

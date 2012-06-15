@@ -19,7 +19,6 @@ import static org.junit.Assert.*;
 
 public class CatalogTree_appendNodeUnitTest {
 
-    private ArrayList<InvDataset> datasets;
     private DefaultMutableTreeNode parentNode;
 
     @Before
@@ -100,7 +99,7 @@ public class CatalogTree_appendNodeUnitTest {
     }
 
     private InvDatasetImpl createADataset(String serviceName) throws URISyntaxException {
-        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, "first", FeatureType.NONE, "dap", "http://sonstwohin.bc");
+        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, "datasetName", FeatureType.NONE, serviceName, "http://sonstwohin.bc");
 
         final InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         dapDataset.setCatalog(catalog);
