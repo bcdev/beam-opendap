@@ -40,25 +40,21 @@ public class OPeNDAP_Leaf_GetterTest {
 
     @Test
     public void testGetDdsURI() {
-        assertEquals(true, child.getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
         assertEquals("http://first.dds", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getDdsUri());
     }
 
     @Test
     public void testGetDdxURI() {
-        assertEquals(true, child.getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
         assertEquals("http://first.ddx", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getDdxUri());
     }
 
     @Test
     public void testGetDodsURI() {
-        assertEquals(true, child.getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
         assertEquals("http://first", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getDodsUri());
     }
 
     @Test
     public void testGetFileURI() {
-        assertEquals(true, child.getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
         assertEquals("http://first", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getFileUri());
     }
 
