@@ -25,19 +25,30 @@ public class CatalogTree_insertCatalogElementsTest {
     }
 
     @Test
-    public void testInsertionOfCatalogRef() throws URISyntaxException, IOException {
+    public void testThatNumberOfChildrenHasChanged() throws URISyntaxException {
+        //preparation
         final String parentCatalogUrl = "http://sonst.wo.hin/catalog.xml";
         final URI parentUri = new URI(parentCatalogUrl);
         final InputStream parentInputStream = new ByteArrayInputStream(getCatalogXMLAsString().getBytes());
         int oldChildrenNumber = root.getChildCount();
 
+        //execution
         catalogTree.insertCatalogElements(parentInputStream, parentUri, root);
 
+        //verification
         assertEquals(false, root.getChildCount() == oldChildrenNumber);
+    }
+
+    @Test
+    public void testInsertionOfCatalogRef() throws URISyntaxException, IOException {
+        final String parentCatalogUrl = "http://sonst.wo.hin/catalog.xml";
+        final URI parentUri = new URI(parentCatalogUrl);
+        final InputStream parentInputStream = new ByteArrayInputStream(getCatalogXMLAsString().getBytes());
+
+        catalogTree.insertCatalogElements(parentInputStream, parentUri, root);
+
         assertEquals(true, root.getChildCount() == 1);
-        DefaultMutableTreeNode child = (DefaultMutableTreeNode) root.getChildAt(0);
-        assertEquals(true, child.getChildCount() == 1);
-        DefaultMutableTreeNode catalogChild = (DefaultMutableTreeNode) child.getChildAt(0);
+        DefaultMutableTreeNode catalogChild = (DefaultMutableTreeNode) root.getChildAt(0).getChildAt(0);
         CatalogTree.OPeNDAP_Leaf leaf = (CatalogTree.OPeNDAP_Leaf) catalogChild.getUserObject();
         assertEquals(true, leaf.isCatalogReference());
         assertEquals(true, leaf.getCatalogUri().equals("http://sonst.wo.hin/child/catalog.xml"));
@@ -48,22 +59,15 @@ public class CatalogTree_insertCatalogElementsTest {
         final String childCatalogURL = "http://sonst.wo.hin/child/catalog.xml";
         final URI childUri = new URI(childCatalogURL);
         final InputStream childInputStream = new ByteArrayInputStream(getChildCatalogXMLAsString().getBytes());
-        int oldChildrenNumber = root.getChildCount();
 
         catalogTree.insertCatalogElements(childInputStream, childUri, root);
 
-        assertEquals(false, root.getChildCount() == oldChildrenNumber);
         assertEquals(true, root.getChildCount() == 2);
         DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) root.getChildAt(0);
-        assertEquals(true, firstChild.isLeaf());
-        assertEquals(true, CatalogTree.isDapNode(firstChild));
         CatalogTree.OPeNDAP_Leaf firstLeaf = (CatalogTree.OPeNDAP_Leaf)firstChild.getUserObject();
         assertEquals(true, firstLeaf.getFileUri().equals("http://sonst.wo.hin/child/ProductName.N1.nc"));
         DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) root.getChildAt(1);
-        assertEquals(true, secondChild.isLeaf());
-        assertEquals(true, CatalogTree.isDapNode(secondChild));
         CatalogTree.OPeNDAP_Leaf secondLeaf = (CatalogTree.OPeNDAP_Leaf)secondChild.getUserObject();
-        System.out.println(secondLeaf.getFileUri());
         assertEquals(true, secondLeaf.getFileUri().equals("http://sonst.wo.hin/child/OtherProductName.N1.nc"));
     }
 
