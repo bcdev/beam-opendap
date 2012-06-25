@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -26,10 +27,12 @@ public class CatalogTree_insertCatalogElementsTest {
 
     @Test
     public void testInsertionOfCatalogElementsToEmptyCatalogTree() throws URISyntaxException, IOException {
-        final String catalogURL = "http://opendap.hzg.de/opendap/data/catalog.xml";
+        final String catalogURL = "http://sonst.wo.hin/catalog.xml";
         URI uri = new URI(catalogURL);
-        InputStream inputStream = new URL(catalogURL).openConnection().getInputStream();
+        final InputStream inputStream = new ByteArrayInputStream(getCatalogXMLAsString().getBytes());
+
         catalogTree.insertCatalogElements(inputStream, uri, root);
+
         assertEquals(true, root.getChildCount()>0);
     }
 
@@ -98,4 +101,25 @@ public class CatalogTree_insertCatalogElementsTest {
         }
     }
 
-} 
+    private String getCatalogXMLAsString() {
+
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+               "    <thredds:catalog xmlns:fn=\"http://www.w3.org/2005/02/xpath-functions\"\n" +
+               "                 xmlns:thredds=\"http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0\"\n" +
+               "                 xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+               "                 xmlns:bes=\"http://xml.opendap.org/ns/bes/1.0#\">\n" +
+               "   <thredds:service name=\"dap\" serviceType=\"OPeNDAP\" base=\"/opendap/hyrax\"/>\n" +
+               "   <thredds:service name=\"file\" serviceType=\"HTTPServer\" base=\"/opendap/hyrax\"/>\n" +
+               "        <thredds:dataset name=\"/data\" ID=\"/opendap/hyrax/data/\">\n" +
+               "            <thredds:catalogRef name=\"cosyna\" xlink:href=\"cosyna/catalog.xml\" xlink:title=\"cosyna\"\n" +
+               "                          xlink:type=\"simple\"\n" +
+               "                          ID=\"/opendap/hyrax/data/cosyna/\"/>\n" +
+               "            <thredds:catalogRef name=\"ff\" xlink:href=\"ff/catalog.xml\" xlink:title=\"ff\" xlink:type=\"simple\"\n" +
+               "                          ID=\"/opendap/hyrax/data/ff/\"/>\n" +
+               "            <thredds:catalogRef name=\"nc\" xlink:href=\"nc/catalog.xml\" xlink:title=\"nc\" xlink:type=\"simple\"\n" +
+               "                          ID=\"/opendap/hyrax/data/nc/\"/>\n" +
+               "        </thredds:dataset>\n" +
+               "    </thredds:catalog>";
+    }
+
+}
