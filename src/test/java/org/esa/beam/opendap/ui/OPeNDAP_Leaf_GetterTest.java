@@ -33,8 +33,12 @@ public class OPeNDAP_Leaf_GetterTest {
     }
 
     @Test
-    public void testGetDasURI() {
+    public void testThatChildObjectIsAInstanceOfOPeNDAP_Leaf() {
         assertEquals(true, child.getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
+    }
+
+    @Test
+    public void testGetDasURI() {
         assertEquals("http://first.das", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getDasUri());
     }
 
@@ -68,4 +72,4 @@ public class OPeNDAP_Leaf_GetterTest {
         return dataset;
     }
 
-} 
+}

@@ -1,7 +1,11 @@
 package org.esa.beam.opendap;
 
-import com.jidesoft.swing.JideSplitPaneLayout;
+import opendap.dap.DAP2Exception;
+import opendap.dap.DDS;
+import opendap.dap.parser.ParseException;
 import org.esa.beam.opendap.ui.CatalogTree;
+import org.esa.beam.opendap.utils.VariableCollector;
+import org.esa.beam.util.Debug;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvDataset;
@@ -16,13 +20,12 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.plaf.SplitPaneUI;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 public class OpendapAccess extends JPanel {
@@ -60,6 +63,7 @@ public class OpendapAccess extends JPanel {
             }
         });
         dapResponseArea = new JTextArea(30, 40);
+        final VariableCollector variableCollector = new VariableCollector();
         catalogTree = new CatalogTree(new CatalogTree.ResponseDispatcher() {
             @Override
             public void dispatchDASResponse(String response) {
@@ -69,6 +73,16 @@ public class OpendapAccess extends JPanel {
             @Override
             public void dispatchDDSResponse(String response) {
                 dapResponseArea.setText(response);
+
+                final DDS dds = new DDS();
+                try {
+                    dds.parse(new ByteArrayInputStream(response.getBytes()));
+                    variableCollector.collectFrom(dds);
+                } catch (ParseException e) {
+                    Debug.trace(e);
+                } catch (DAP2Exception e) {
+                    Debug.trace(e);
+                }
             }
 
             @Override
