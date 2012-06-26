@@ -22,6 +22,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.Component;
@@ -94,12 +95,9 @@ public class CatalogTree {
                         final URLConnection urlConnection = catalogUrl.openConnection();
                         final InputStream inputStream = urlConnection.getInputStream();
                         insertCatalogElements(inputStream, catalogUrl.toURI(), parent);
-
                     } catch (MalformedURLException e) {
                         // todo handle with error collection and message dialog at the end.
                         Debug.trace(e);
-//                    } catch (JDOMException e) {
-//                        Debug.trace(e);
                     } catch (URISyntaxException e) {
                         Debug.trace(e);
                     } catch (IOException e) {
@@ -197,7 +195,7 @@ public class CatalogTree {
         return false;
     }
 
-    static void appendToNode(final JTree jTree, List<InvDataset> datasets, DefaultMutableTreeNode parentNode) {
+    static void appendToNode(final JTree jTree, List<InvDataset> datasets, MutableTreeNode parentNode) {
         final DefaultTreeModel treeModel = (DefaultTreeModel) jTree.getModel();
         for (InvDataset dataset : datasets) {
             if (dataset instanceof InvCatalogRef) {
@@ -209,7 +207,7 @@ public class CatalogTree {
         }
     }
 
-    static void appendCatalogNodeToParent(DefaultMutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
+    static void appendCatalogNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
         final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
         final String urlPath = catalogRef.getURI().toASCIIString();
         final OPeNDAP_Leaf oPeNDAP_leaf = new OPeNDAP_Leaf(urlPath, urlPath);
@@ -218,7 +216,7 @@ public class CatalogTree {
         treeModel.insertNodeInto(catalogNode, parentNode, parentNode.getChildCount());
     }
 
-    static void appendDataNodeToParent(DefaultMutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
+    static void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
         final String uriString = dataset.getParentCatalog().getUriString();
         final String dapUri = uriString.substring(0, uriString.lastIndexOf("/") + 1) + dataset.getName();
         final OPeNDAP_Leaf leafObject = new OPeNDAP_Leaf(dataset.getName(), dapUri);

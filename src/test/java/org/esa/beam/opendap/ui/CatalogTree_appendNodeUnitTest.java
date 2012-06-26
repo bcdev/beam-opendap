@@ -98,8 +98,9 @@ public class CatalogTree_appendNodeUnitTest {
     @Test
     public void testAppendCatalogNodeToParent() throws URISyntaxException {
         //preparation
+        final URI unwichtig = null;
         final InvCatalogRef catalogReference = new InvCatalogRef(null, "catalogRefName", "http://weissehinterndorf.de");
-        catalogReference.setCatalog(new InvCatalogImpl("catalogName", "1.0", new URI("http://catalogUri.de/catalog.xml")));
+        catalogReference.setCatalog(new InvCatalogImpl("unwichtig", "1.0", unwichtig));
 
         //execution
         CatalogTree.appendCatalogNodeToParent(parentNode, getDefaultTreeModel(), catalogReference);

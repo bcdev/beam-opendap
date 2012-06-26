@@ -1,116 +1,119 @@
 package org.esa.beam.opendap.ui;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class CatalogTree_insertCatalogElementsTest {
 
     private CatalogTree catalogTree;
-    private DefaultMutableTreeNode root;
+    private DefaultMutableTreeNode parentNode;
 
     @Before
     public void setUp() throws Exception {
-        catalogTree = new CatalogTree(null);
-        root = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
+        final CatalogTree.ResponseDispatcher responseDispatcherNotNeededForThisTestCases = null;
+        catalogTree = new CatalogTree(responseDispatcherNotNeededForThisTestCases);
+        parentNode = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
     }
 
     @Test
-    public void testThatNumberOfChildrenHasChanged() throws URISyntaxException {
+    public void thestThatParentNodeHasNoChildrenAfterInitialisation() {
+        assertEquals(0, parentNode.getChildCount());
+    }
+
+    @Test
+    public void testThatOneCatalogReferenceNodeHasBeenAdded() throws URISyntaxException {
         //preparation
-        final String parentCatalogUrl = "http://sonst.wo.hin/catalog.xml";
-        final URI parentUri = new URI(parentCatalogUrl);
-        final InputStream parentInputStream = new ByteArrayInputStream(getCatalogXMLAsString().getBytes());
-        int oldChildrenNumber = root.getChildCount();
+        final URI catalogBaseUri = new URI("http://sonst.wo.hin/catalog.xml");
+        final InputStream catalogIS = getThreddsCatalogInputStreamWithOneChildCatalogReference();
 
         //execution
-        catalogTree.insertCatalogElements(parentInputStream, parentUri, root);
+        catalogTree.insertCatalogElements(catalogIS, catalogBaseUri, parentNode);
 
         //verification
-        assertEquals(false, root.getChildCount() == oldChildrenNumber);
+        assertEquals(1, parentNode.getChildCount());
+        final DefaultMutableTreeNode catalogNameNode = (DefaultMutableTreeNode) parentNode.getChildAt(0);
+        assertEquals("CatalogName/", catalogNameNode.getUserObject());
+        final TreeNode catalogReferenceNode = catalogNameNode.getChildAt(0);
+        assertEquals(true, CatalogTree.isCatalogReferenceNode(catalogReferenceNode));
     }
 
     @Test
-    public void testInsertionOfCatalogRef() throws URISyntaxException, IOException {
-        final String parentCatalogUrl = "http://sonst.wo.hin/catalog.xml";
-        final URI parentUri = new URI(parentCatalogUrl);
-        final InputStream parentInputStream = new ByteArrayInputStream(getCatalogXMLAsString().getBytes());
+    public void testThatTwoDapDatasetsHaveBeenAdded() throws URISyntaxException, IOException {
+        //preparation
+        final URI catalogBaseUri = new URI("http://sonst.wo.hin/child/catalog.xml");
+        final InputStream catalogIS = getThreddsCatalogInputStreamWithTwoChildDapDatasets();
 
-        catalogTree.insertCatalogElements(parentInputStream, parentUri, root);
+        //execution
+        catalogTree.insertCatalogElements(catalogIS, catalogBaseUri, parentNode);
 
-        assertEquals(true, root.getChildCount() == 1);
-        DefaultMutableTreeNode catalogChild = (DefaultMutableTreeNode) root.getChildAt(0).getChildAt(0);
-        CatalogTree.OPeNDAP_Leaf leaf = (CatalogTree.OPeNDAP_Leaf) catalogChild.getUserObject();
-        assertEquals(true, leaf.isCatalogReference());
-        assertEquals(true, leaf.getCatalogUri().equals("http://sonst.wo.hin/child/catalog.xml"));
+        //verification
+        assertEquals(2, parentNode.getChildCount());
+        assertEquals(true , CatalogTree.isDapNode(parentNode.getChildAt(0)));
+        assertEquals(true , CatalogTree.isDapNode(parentNode.getChildAt(1)));
+        DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) parentNode.getChildAt(0);
+        CatalogTree.OPeNDAP_Leaf firstLeaf = (CatalogTree.OPeNDAP_Leaf) firstChild.getUserObject();
+        assertEquals("http://sonst.wo.hin/child/ProductName.N1.nc", firstLeaf.getFileUri());
+        DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) parentNode.getChildAt(1);
+        CatalogTree.OPeNDAP_Leaf secondLeaf = (CatalogTree.OPeNDAP_Leaf) secondChild.getUserObject();
+        assertEquals("http://sonst.wo.hin/child/OtherProductName.N1.nc", secondLeaf.getFileUri());
     }
 
-    @Test
-    public void testInsertionOfDatasets() throws URISyntaxException, IOException {
-        final String childCatalogURL = "http://sonst.wo.hin/child/catalog.xml";
-        final URI childUri = new URI(childCatalogURL);
-        final InputStream childInputStream = new ByteArrayInputStream(getChildCatalogXMLAsString().getBytes());
+    private InputStream getThreddsCatalogInputStreamWithOneChildCatalogReference() {
 
-        catalogTree.insertCatalogElements(childInputStream, childUri, root);
+        final String threddsCatalogWithOneChildCatalogReference =
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "    <thredds:catalog xmlns:fn=\"http://www.w3.org/2005/02/xpath-functions\"\n" +
+                    "                 xmlns:thredds=\"http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0\"\n" +
+                    "                 xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+                    "                 xmlns:bes=\"http://xml.opendap.org/ns/bes/1.0#\">\n" +
+                    "    <thredds:service name=\"dap\" serviceType=\"OPeNDAP\" base=\"/opendap/hyrax\"/>\n" +
+                    "    <thredds:service name=\"file\" serviceType=\"HTTPServer\" base=\"/opendap/hyrax\"/>\n" +
+                    "        <thredds:dataset name=\"/data\" ID=\"/opendap/hyrax/data/\">\n" +
+                    "            <thredds:catalogRef name=\"CatalogName\" xlink:href=\"CatalogName/catalog.xml\" xlink:title=\"CatalogName\"\n" +
+                    "                          xlink:type=\"simple\"\n" +
+                    "                          ID=\"/opendap/hyrax/data/child/\"/>\n" +
+                    "        </thredds:dataset>\n" +
+                    "    </thredds:catalog>";
 
-        assertEquals(true, root.getChildCount() == 2);
-        DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) root.getChildAt(0);
-        CatalogTree.OPeNDAP_Leaf firstLeaf = (CatalogTree.OPeNDAP_Leaf)firstChild.getUserObject();
-        assertEquals(true, firstLeaf.getFileUri().equals("http://sonst.wo.hin/child/ProductName.N1.nc"));
-        DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) root.getChildAt(1);
-        CatalogTree.OPeNDAP_Leaf secondLeaf = (CatalogTree.OPeNDAP_Leaf)secondChild.getUserObject();
-        assertEquals(true, secondLeaf.getFileUri().equals("http://sonst.wo.hin/child/OtherProductName.N1.nc"));
+        return new ByteArrayInputStream(threddsCatalogWithOneChildCatalogReference.getBytes());
     }
 
-    private String getCatalogXMLAsString() {
+    private InputStream getThreddsCatalogInputStreamWithTwoChildDapDatasets() {
 
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "    <thredds:catalog xmlns:fn=\"http://www.w3.org/2005/02/xpath-functions\"\n" +
-                "                 xmlns:thredds=\"http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0\"\n" +
-                "                 xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
-                "                 xmlns:bes=\"http://xml.opendap.org/ns/bes/1.0#\">\n" +
-                "   <thredds:service name=\"dap\" serviceType=\"OPeNDAP\" base=\"/opendap/hyrax\"/>\n" +
-                "   <thredds:service name=\"file\" serviceType=\"HTTPServer\" base=\"/opendap/hyrax\"/>\n" +
-                "        <thredds:dataset name=\"/data\" ID=\"/opendap/hyrax/data/\">\n" +
-                "            <thredds:catalogRef name=\"child\" xlink:href=\"child/catalog.xml\" xlink:title=\"child\"\n" +
-                "                          xlink:type=\"simple\"\n" +
-                "                          ID=\"/opendap/hyrax/data/child/\"/>\n" +
-                "        </thredds:dataset>\n" +
-                "    </thredds:catalog>";
+        final String threddsCatalogStringWithTwoChildDapDatasets =
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                    "<thredds:catalog xmlns:fn=\"http://www.w3.org/2005/02/xpath-functions\"\n" +
+                    "   xmlns:thredds=\"http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0\"\n" +
+                    "   xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+                    "   xmlns:bes=\"http://xml.opendap.org/ns/bes/1.0#\">\n" +
+                    "   <thredds:service name=\"dap\" serviceType=\"OPeNDAP\" base=\"/opendap/hyrax\"/>\n" +
+                    "   <thredds:service name=\"file\" serviceType=\"HTTPServer\" base=\"/opendap/hyrax\"/>\n" +
+                    "   <thredds:dataset name=\"/data/child/MERIS/2012\" ID=\"/opendap/hyrax/data/child/MERIS/2012/\">\n" +
+                    "       <thredds:dataset name=\"ProductName.N1.nc\" ID=\"/opendap/hyrax/data/child/MERIS/2012/ProductName.N1.nc\">\n" +
+                    "           <thredds:dataSize units=\"bytes\">22851448</thredds:dataSize>\n" +
+                    "           <thredds:date type=\"modified\">2012-01-13T15:18:20</thredds:date>\n" +
+                    "           <thredds:access serviceName=\"dap\" urlPath=\"/data/child/ProductName.N1.nc\"/>\n" +
+                    "           <thredds:access serviceName=\"file\" urlPath=\"/data/child/MERIS/2012/ProductName.N1.nc\"/>\n" +
+                    "       </thredds:dataset>\n" +
+                    "       <thredds:dataset name=\"OtherProductName.N1.nc\" ID=\"/opendap/hyrax/data/child/OtherProductName.N1.nc\">\n" +
+                    "           <thredds:dataSize units=\"bytes\">20268280</thredds:dataSize>\n" +
+                    "           <thredds:date type=\"modified\">2012-01-13T17:03:54</thredds:date>\n" +
+                    "           <thredds:access serviceName=\"dap\" urlPath=\"/data/child/OtherProductName.N1.nc\"/>\n" +
+                    "           <thredds:access serviceName=\"file\" urlPath=\"/data/child/MERIS/2012/OtherProductName.N1.nc\"/>\n" +
+                    "       </thredds:dataset>\n" +
+                    "   </thredds:dataset>\n" +
+                    "</thredds:catalog>";
+
+        return new ByteArrayInputStream(threddsCatalogStringWithTwoChildDapDatasets.getBytes());
     }
-
-    private String getChildCatalogXMLAsString() {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                "<thredds:catalog xmlns:fn=\"http://www.w3.org/2005/02/xpath-functions\"\n" +
-                "   xmlns:thredds=\"http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0\"\n" +
-                "   xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
-                "   xmlns:bes=\"http://xml.opendap.org/ns/bes/1.0#\">\n" +
-                "   <thredds:service name=\"dap\" serviceType=\"OPeNDAP\" base=\"/opendap/hyrax\"/>\n" +
-                "   <thredds:service name=\"file\" serviceType=\"HTTPServer\" base=\"/opendap/hyrax\"/>\n" +
-                "   <thredds:dataset name=\"/data/child/MERIS/2012\" ID=\"/opendap/hyrax/data/child/MERIS/2012/\">\n" +
-                "       <thredds:dataset name=\"ProductName.N1.nc\" ID=\"/opendap/hyrax/data/child/MERIS/2012/ProductName.N1.nc\">\n" +
-                "           <thredds:dataSize units=\"bytes\">22851448</thredds:dataSize>\n" +
-                "         <thredds:date type=\"modified\">2012-01-13T15:18:20</thredds:date>\n" +
-                "           <thredds:access serviceName=\"dap\" urlPath=\"/data/child/ProductName.N1.nc\"/>\n" +
-                "           <thredds:access serviceName=\"file\" urlPath=\"/data/child/MERIS/2012/ProductName.N1.nc\"/>\n" +
-                "       </thredds:dataset>\n" +
-                "       <thredds:dataset name=\"OtherProductName.N1.nc\" ID=\"/opendap/hyrax/data/child/OtherProductName.N1.nc\">\n" +
-                "           <thredds:dataSize units=\"bytes\">20268280</thredds:dataSize>\n" +
-                "           <thredds:date type=\"modified\">2012-01-13T17:03:54</thredds:date>\n" +
-                "           <thredds:access serviceName=\"dap\" urlPath=\"/data/child/OtherProductName.N1.nc\"/>\n" +
-                "           <thredds:access serviceName=\"file\" urlPath=\"/data/child/MERIS/2012/OtherProductName.N1.nc\"/>\n" +
-                "       </thredds:dataset>\n" +
-                "   </thredds:dataset>\n" +
-                "</thredds:catalog>";
-    }
-
 }
