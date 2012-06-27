@@ -61,8 +61,8 @@ public class CatalogTree {
     }
 
     static void addCellRenderer(final JTree jTree) {
-        final ImageIcon dapIcon = UIUtils.loadImageIcon("icons/Edit16.gif");
-        final ImageIcon fileIcon = UIUtils.loadImageIcon("icons/Print16.gif");
+        final ImageIcon dapIcon = UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/DRsProduct16.png");
+        final ImageIcon fileIcon = UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/FRsProduct16.png");
         jTree.setCellRenderer(new DefaultTreeCellRenderer() {
 
             @Override
