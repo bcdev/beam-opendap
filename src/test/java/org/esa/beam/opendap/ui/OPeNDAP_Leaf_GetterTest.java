@@ -64,9 +64,9 @@ public class OPeNDAP_Leaf_GetterTest {
 
     private InvDatasetImpl createDataset(InvCatalogImpl catalog, String datasetName, final String serviceName) {
         final InvDatasetImpl dataset =
-                new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://sonstwohin.bc");
+                new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://wherever.you.want.bc");
         dataset.setCatalog(catalog);
-        final InvService dapService = new InvService(serviceName, "unwichtig", "unwichtig", "unwichtig", "unwichtig");
+        final InvService dapService = new InvService(serviceName, "nonrelevant", "nonrelevant", "nonrelevant", "nonrelevant");
         dataset.addAccess(new InvAccessImpl(dataset, "http://y.z", dapService));
         dataset.finish();
         return dataset;

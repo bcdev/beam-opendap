@@ -85,7 +85,8 @@ public class CatalogTree_simpleDifferentTests {
         assertEquals("noDap", tcr1.getText());
         assertEquals(true, tcr1.getIcon() instanceof ImageIcon);
         final ImageIcon icon1 = (ImageIcon) tcr1.getIcon();
-        assertEquals(true, icon1.getDescription().endsWith("/icons/Print16.gif"));
+        // todo change the expected icon to a realistic icon
+        assertEquals("/FRsProduct16.png", icon1.getDescription().substring(icon1.getDescription().length()-17));
 
         final Color foreground1 = tcr1.getForeground();
         final Color background1 = tcr1.getBackground();
@@ -100,7 +101,8 @@ public class CatalogTree_simpleDifferentTests {
         assertEquals("This is A dap Node", tcr2.getText());
         assertEquals(true, tcr2.getIcon() instanceof ImageIcon);
         final ImageIcon icon2 = (ImageIcon) tcr2.getIcon();
-        assertEquals(true, icon2.getDescription().endsWith("/icons/Edit16.gif"));
+        // todo change the expected icon to a realistic icon
+        assertEquals("/DRsProduct16.png", icon2.getDescription().substring(icon2.getDescription().length()-17));
 
         assertEquals(foreground1, tcr2.getForeground());
         assertEquals(background1, tcr2.getBackground());

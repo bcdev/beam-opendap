@@ -98,9 +98,9 @@ public class CatalogTree_appendNodeUnitTest {
     @Test
     public void testAppendCatalogNodeToParent() throws URISyntaxException {
         //preparation
-        final URI unwichtig = null;
-        final InvCatalogRef catalogReference = new InvCatalogRef(null, "catalogRefName", "http://weissehinterndorf.de");
-        catalogReference.setCatalog(new InvCatalogImpl("unwichtig", "1.0", unwichtig));
+        final URI whatever = null;
+        final InvCatalogRef catalogReference = new InvCatalogRef(null, "catalogRefName", "http://a.b");
+        catalogReference.setCatalog(new InvCatalogImpl("whatever", "1.0", whatever));
 
         //execution
         CatalogTree.appendCatalogNodeToParent(parentNode, getDefaultTreeModel(), catalogReference);
@@ -116,7 +116,7 @@ public class CatalogTree_appendNodeUnitTest {
         final DefaultMutableTreeNode child2 = (DefaultMutableTreeNode) parentNode.getChildAt(0).getChildAt(0);
         assertEquals(true, child2.getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
         final CatalogTree.OPeNDAP_Leaf oPeNDAP_leaf = (CatalogTree.OPeNDAP_Leaf) child2.getUserObject();
-        assertEquals("http://weissehinterndorf.de", oPeNDAP_leaf.getCatalogUri());
+        assertEquals("http://a.b", oPeNDAP_leaf.getCatalogUri());
         assertEquals(true, oPeNDAP_leaf.isCatalogReference());
         assertEquals(false, oPeNDAP_leaf.isFileAccess());
         assertEquals(false, oPeNDAP_leaf.isDapAccess());
@@ -144,13 +144,13 @@ public class CatalogTree_appendNodeUnitTest {
     }
 
     private InvDatasetImpl createADataset(String[] serviceNames) throws URISyntaxException {
-        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, "datasetName", FeatureType.NONE, serviceNames[0], "http://sonstwohin.bc");
+        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, "datasetName", FeatureType.NONE, serviceNames[0], "http://wherever.you.want.bc");
 
         final InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         dapDataset.setCatalog(catalog);
 
         for (String serviceName : serviceNames) {
-            final InvService dapService = new InvService(serviceName, "unwichtig", "unwichtig", "unwichtig", "unwichtig");
+            final InvService dapService = new InvService(serviceName, "nonrelevant", "nonrelevant", "nonrelevant", "nonrelevant");
             final InvAccessImpl invAccess = new InvAccessImpl(dapDataset, "http://y.z", dapService);
             dapDataset.addAccess(invAccess);
         }

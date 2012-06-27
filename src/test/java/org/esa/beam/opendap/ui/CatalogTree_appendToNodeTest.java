@@ -112,16 +112,16 @@ public class CatalogTree_appendToNodeTest {
     }
 
     private InvDatasetImpl createDataset(InvCatalogImpl catalog, String datasetName, final String serviceName) {
-        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://sonstwohin.bc");
+        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://wherever.you.want.bc");
         dapDataset.setCatalog(catalog);
-        final InvService dapService = new InvService(serviceName, "unwichtig", "unwichtig", "unwichtig", "unwichtig");
+        final InvService dapService = new InvService(serviceName, "nonrelevant", "nonrelevant", "nonrelevant", "nonrelevant");
         dapDataset.addAccess(new InvAccessImpl(dapDataset, "http://y.z", dapService));
         dapDataset.finish();
         return dapDataset;
     }
 
     private InvCatalogRef createCatalogRefDataset() {
-        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "unwichtig");
+        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "nonrelevant");
         catalogRef.setCatalog(catalog);
         return catalogRef;
     }

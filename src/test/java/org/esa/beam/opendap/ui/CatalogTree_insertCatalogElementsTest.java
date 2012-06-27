@@ -50,7 +50,7 @@ public class CatalogTree_insertCatalogElementsTest {
     @Test
     public void testThatTwoDapDatasetsHaveBeenAdded() throws URISyntaxException, IOException {
         //preparation
-        final URI catalogBaseUri = new URI("http://sonst.wo.hin/child/catalog.xml");
+        final URI catalogBaseUri = new URI("http://every.where/child/catalog.xml");
         final InputStream catalogIS = getThreddsCatalogInputStreamWithTwoChildDapDatasets();
 
         //execution
@@ -62,10 +62,10 @@ public class CatalogTree_insertCatalogElementsTest {
         assertEquals(true , CatalogTree.isDapNode(parentNode.getChildAt(1)));
         DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) parentNode.getChildAt(0);
         CatalogTree.OPeNDAP_Leaf firstLeaf = (CatalogTree.OPeNDAP_Leaf) firstChild.getUserObject();
-        assertEquals("http://sonst.wo.hin/child/ProductName.N1.nc", firstLeaf.getFileUri());
+        assertEquals("http://every.where/child/ProductName.N1.nc", firstLeaf.getFileUri());
         DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) parentNode.getChildAt(1);
         CatalogTree.OPeNDAP_Leaf secondLeaf = (CatalogTree.OPeNDAP_Leaf) secondChild.getUserObject();
-        assertEquals("http://sonst.wo.hin/child/OtherProductName.N1.nc", secondLeaf.getFileUri());
+        assertEquals("http://every.where/child/OtherProductName.N1.nc", secondLeaf.getFileUri());
     }
 
     private InputStream getThreddsCatalogInputStreamWithOneChildCatalogReference() {
