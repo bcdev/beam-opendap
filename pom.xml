@@ -31,8 +31,8 @@
            TODO: Move the sourceEncoding property to the build tag if version 3.0 is released
            -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <beam.version>4.10.3-SNAPSHOT</beam.version>
-        <ceres.version>0.13</ceres.version>
+        <beam.version>4.10.3</beam.version>
+        <ceres.version>0.13.1</ceres.version>
     </properties>
 
     <dependencies>

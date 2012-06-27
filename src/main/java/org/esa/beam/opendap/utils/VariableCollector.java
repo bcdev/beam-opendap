@@ -3,9 +3,7 @@ package org.esa.beam.opendap.utils;
 import opendap.dap.BaseType;
 import opendap.dap.DDS;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
