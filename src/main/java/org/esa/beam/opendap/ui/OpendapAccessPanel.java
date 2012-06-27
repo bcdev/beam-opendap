@@ -1,16 +1,17 @@
-package org.esa.beam.opendap;
+package org.esa.beam.opendap.ui;
 
-import opendap.dap.DAP2Exception;
-import opendap.dap.DDS;
-import opendap.dap.parser.ParseException;
-import org.esa.beam.opendap.ui.CatalogTree;
-import org.esa.beam.opendap.utils.VariableCollector;
-import org.esa.beam.util.Debug;
-import thredds.catalog.InvCatalogFactory;
-import thredds.catalog.InvCatalogImpl;
-import thredds.catalog.InvDataset;
-
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.ByteArrayInputStream;
+import java.util.List;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -20,33 +21,48 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.HeadlessException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.ByteArrayInputStream;
-import java.util.List;
+import opendap.dap.DAP2Exception;
+import opendap.dap.DDS;
+import opendap.dap.parser.ParseException;
+import org.esa.beam.opendap.utils.VariableCollector;
+import org.esa.beam.util.Debug;
+import sun.awt.VariableGridLayout;
+import thredds.catalog.InvCatalogFactory;
+import thredds.catalog.InvCatalogImpl;
+import thredds.catalog.InvDataset;
 
-public class OpendapAccess extends JPanel {
+public class OpendapAccessPanel extends JPanel {
 
     private JTextField urlField;
     private JButton refreshButton;
     private CatalogTree catalogTree;
     private JTextArea dapResponseArea;
 
+    private JCheckBox useDatasetNameFilter;
+    private Filter datasetNameFilter;
+
+    private JCheckBox useTimeRangeFilter;
+    private Filter timeRangeFilter;
+
+    private JCheckBox useRegionFilter;
+    private Filter regionFilter;
+
+    private JCheckBox useVariableNameFilter;
+    private Filter variableNameFilter;
+
+
     public static void main(String[] args) {
-        final OpendapAccess opendapAccess = new OpendapAccess();
+        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel();
         final JFrame mainFrame = new JFrame("OPeNDAP Access");
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        mainFrame.setContentPane(opendapAccess);
+        mainFrame.setContentPane(opendapAccessPanel);
         mainFrame.pack();
         final Dimension size = mainFrame.getSize();
         mainFrame.setMinimumSize(size);
         mainFrame.setVisible(true);
     }
 
-    public OpendapAccess() throws HeadlessException {
+    public OpendapAccessPanel() throws HeadlessException {
         super();
         initComponents();
         initContentPane();
@@ -62,7 +78,7 @@ public class OpendapAccess extends JPanel {
                 refresh();
             }
         });
-        dapResponseArea = new JTextArea(30, 40);
+        dapResponseArea = new JTextArea(22, 20);
         final VariableCollector variableCollector = new VariableCollector();
         catalogTree = new CatalogTree(new CatalogTree.ResponseDispatcher() {
             @Override
@@ -90,6 +106,14 @@ public class OpendapAccess extends JPanel {
                 dapResponseArea.setText(response);
             }
         });
+        useDatasetNameFilter = new JCheckBox("use dataset name filter");
+        useTimeRangeFilter = new JCheckBox("use time range filter");
+        useRegionFilter = new JCheckBox("use region filter");
+        useVariableNameFilter = new JCheckBox("use variable name filter");
+        datasetNameFilter = new DatasetNameFilter();
+        timeRangeFilter = new TimeRangeFilter();
+        regionFilter = new RegionFilter();
+        variableNameFilter = new VariableNameFilter();
     }
 
     private void refresh() {
@@ -122,7 +146,39 @@ public class OpendapAccess extends JPanel {
         urlPanel.add(urlField);
         urlPanel.add(refreshButton, BorderLayout.EAST);
 
-        final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(catalogTree.getComponent()), new JScrollPane(dapResponseArea));
+        final JScrollPane dapResponse = new JScrollPane(dapResponseArea);
+
+        final JPanel variableInfo = new JPanel(new BorderLayout(5, 5));
+        variableInfo.setBorder(new EmptyBorder(10, 0, 0, 0));
+        variableInfo.add(new JLabel("  Variable Info:"), BorderLayout.NORTH);
+        variableInfo.add(dapResponse, BorderLayout.CENTER);
+
+        final JScrollPane openDapTree = new JScrollPane(catalogTree.getComponent());
+
+        final JSplitPane centerLeftPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, openDapTree, variableInfo);
+        centerLeftPane.setDividerLocation(500);
+        centerLeftPane.setContinuousLayout(true);
+
+        final JPanel filterPanel = new JPanel();
+        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
+        filterPanel.add(new TitledPanel(useDatasetNameFilter, datasetNameFilter.getUI()));
+        filterPanel.add(new TitledPanel(useTimeRangeFilter, timeRangeFilter.getUI()));
+        filterPanel.add(new TitledPanel(useRegionFilter, regionFilter.getUI()));
+        filterPanel.add(new TitledPanel(useVariableNameFilter, variableNameFilter.getUI()));
+
+
+        final JPanel optionalPanel = new TitledPanel(null, null);
+
+
+        final JPanel downloadButtonPanel = new JPanel(new BorderLayout());
+        downloadButtonPanel.add(new JButton("Download"), BorderLayout.EAST);
+
+        final JPanel centerRightPane = new JPanel(new BorderLayout());
+        centerRightPane.add(filterPanel, BorderLayout.NORTH);
+        centerRightPane.add(optionalPanel, BorderLayout.CENTER);
+        centerRightPane.add(downloadButtonPanel, BorderLayout.SOUTH);
+
+        final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerLeftPane, centerRightPane);
         centerPanel.setDividerLocation(300);
         centerPanel.setContinuousLayout(true);
 //        final JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
