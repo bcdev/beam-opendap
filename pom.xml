@@ -170,6 +170,15 @@
                 <role>Java Developer</role>
             </roles>
         </developer>
+        <developer>
+            <id>tonio</id>
+            <name>Tonio Fincke</name>
+            <email>tonio.fincke@brockmann-consult.de</email>
+            <organization>Brockmann Consult</organization>
+            <roles>
+                <role>Java Developer</role>
+            </roles>
+        </developer>
     </developers>
 
 </project>
