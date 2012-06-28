@@ -165,6 +165,8 @@ public class OpendapAccessPanel extends JPanel {
         filterPanel.add(new TitledPanel(useTimeRangeFilter, timeRangeFilter.getUI()));
         filterPanel.add(new TitledPanel(useRegionFilter, regionFilter.getUI()));
         filterPanel.add(new TitledPanel(useVariableNameFilter, variableNameFilter.getUI()));
+        final Dimension size = filterPanel.getSize();
+        filterPanel.setMinimumSize(new Dimension(460, size.height));
 
 
         final JPanel optionalPanel = new TitledPanel(null, null);
@@ -179,7 +181,7 @@ public class OpendapAccessPanel extends JPanel {
         centerRightPane.add(downloadButtonPanel, BorderLayout.SOUTH);
 
         final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerLeftPane, centerRightPane);
-        centerPanel.setDividerLocation(300);
+        centerPanel.setDividerLocation(275);
         centerPanel.setContinuousLayout(true);
 //        final JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
 //        centerPanel.add(new JScrollPane(catalogTree.getComponent()), BorderLayout.CENTER);
