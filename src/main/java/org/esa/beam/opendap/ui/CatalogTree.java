@@ -1,14 +1,17 @@
 package org.esa.beam.opendap.ui;
 
-import java.awt.Component;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
+import opendap.dap.http.HTTPException;
+import opendap.dap.http.HTTPMethod;
+import opendap.dap.http.HTTPSession;
+import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.util.Debug;
+import thredds.catalog.InvAccess;
+import thredds.catalog.InvCatalogFactory;
+import thredds.catalog.InvCatalogImpl;
+import thredds.catalog.InvCatalogRef;
+import thredds.catalog.InvDataset;
+import thredds.catalog.ServiceType;
+
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
@@ -22,17 +25,15 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import opendap.dap.http.HTTPException;
-import opendap.dap.http.HTTPMethod;
-import opendap.dap.http.HTTPSession;
-import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.util.Debug;
-import thredds.catalog.InvAccess;
-import thredds.catalog.InvCatalogFactory;
-import thredds.catalog.InvCatalogImpl;
-import thredds.catalog.InvCatalogRef;
-import thredds.catalog.InvDataset;
-import thredds.catalog.ServiceType;
+import java.awt.Component;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.List;
 
 public class CatalogTree {
 
@@ -205,9 +206,9 @@ public class CatalogTree {
 
     static void appendToNode(final JTree jTree, List<InvDataset> datasets, MutableTreeNode parentNode) {
         for (InvDataset dataset : datasets) {
-            final List<InvDataset> childDatasets = dataset.getDatasets();
-            if (childDatasets.size() > 0) {
-                appendToNode(jTree, childDatasets, parentNode);
+            final boolean dataSetIsNoCatalog = !(dataset instanceof InvCatalogRef);
+            if (dataSetIsNoCatalog && dataset.hasNestedDatasets()) {
+                appendToNode(jTree, dataset.getDatasets(), parentNode);
             } else {
                 appendToNode(jTree, dataset, parentNode);
             }
