@@ -1,16 +1,14 @@
 package org.esa.beam.opendap.ui;
 
-import opendap.dap.http.HTTPException;
-import opendap.dap.http.HTTPMethod;
-import opendap.dap.http.HTTPSession;
-import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.util.Debug;
-import thredds.catalog.InvAccess;
-import thredds.catalog.InvCatalogFactory;
-import thredds.catalog.InvCatalogImpl;
-import thredds.catalog.InvCatalogRef;
-import thredds.catalog.InvDataset;
-
+import java.awt.Component;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
@@ -24,15 +22,16 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import java.awt.Component;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
+import opendap.dap.http.HTTPException;
+import opendap.dap.http.HTTPMethod;
+import opendap.dap.http.HTTPSession;
+import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.util.Debug;
+import thredds.catalog.InvAccess;
+import thredds.catalog.InvCatalogFactory;
+import thredds.catalog.InvCatalogImpl;
+import thredds.catalog.InvCatalogRef;
+import thredds.catalog.InvDataset;
 import thredds.catalog.ServiceType;
 
 public class CatalogTree {
@@ -120,9 +119,7 @@ public class CatalogTree {
         final InvCatalogFactory factory = InvCatalogFactory.getDefaultFactory(true);
         final InvCatalogImpl catalog = factory.readXML(catalogIS, catalogBaseUri);
         final List<InvDataset> catalogDatasets = catalog.getDatasets();
-        for (InvDataset catalogDataset : catalogDatasets) {
-            appendToNode(jTree, catalogDataset.getDatasets(), parent);
-        }
+        appendToNode(jTree, catalogDatasets, parent);
         expandPath(parent);
     }
 
@@ -207,23 +204,23 @@ public class CatalogTree {
     }
 
     static void appendToNode(final JTree jTree, List<InvDataset> datasets, MutableTreeNode parentNode) {
-        final DefaultTreeModel treeModel = (DefaultTreeModel) jTree.getModel();
         for (InvDataset dataset : datasets) {
-            if (dataset instanceof InvCatalogRef) {
-                final InvCatalogRef catalogRef = (InvCatalogRef) dataset;
-                appendCatalogNodeToParent(parentNode, treeModel, catalogRef);
+            final List<InvDataset> childDatasets = dataset.getDatasets();
+            if (childDatasets.size() > 0) {
+                appendToNode(jTree, childDatasets, parentNode);
             } else {
-                final List<InvDataset> childs = dataset.getDatasets();
-                if (childs.size() == 0) {
-                    appendDataNodeToParent(parentNode, treeModel, dataset);
-                } else {
-                    final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(dataset.getName() + "/");
-                    final int position = parentNode.getChildCount();
-                    treeModel.insertNodeInto(catalogNode, parentNode, position);
-                    final MutableTreeNode newParent = (MutableTreeNode) parentNode.getChildAt(position);
-                    appendToNode(jTree, childs, newParent);
-                }
+                appendToNode(jTree, dataset, parentNode);
             }
+        }
+    }
+
+    private static void appendToNode(JTree jTree, InvDataset dataset, MutableTreeNode parentNode) {
+        final DefaultTreeModel treeModel = (DefaultTreeModel) jTree.getModel();
+        if (dataset instanceof InvCatalogRef) {
+            final InvCatalogRef catalogRef = (InvCatalogRef) dataset;
+            appendCatalogNodeToParent(parentNode, treeModel, catalogRef);
+        } else {
+            appendDataNodeToParent(parentNode, treeModel, dataset);
         }
     }
 
@@ -245,6 +242,7 @@ public class CatalogTree {
             leafObject.setDapAccess(true);
             leafObject.setDapUri(dapAccess.getStandardUrlName());
         }
+
         final InvAccess fileAccess = dataset.getAccess(ServiceType.FILE);
         if (fileAccess != null) {
             leafObject.setFileAccess(true);
