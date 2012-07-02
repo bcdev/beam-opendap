@@ -19,7 +19,7 @@ public class VariableCollector {
     public void collectFrom(DDS dds) {
         final Enumeration<BaseType> variables = dds.getVariables();
         while (variables.hasMoreElements()) {
-            BaseType variable = variables.nextElement();
+            final BaseType variable = variables.nextElement();
             variableNames.add(variable.getLongName());
         }
     }

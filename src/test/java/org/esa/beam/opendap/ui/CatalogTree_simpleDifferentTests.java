@@ -73,20 +73,23 @@ public class CatalogTree_simpleDifferentTests {
         CatalogTree.addCellRenderer(jTree);
         final TreeCellRenderer dapCellRenderer = jTree.getCellRenderer();
 
-        final CatalogTree.OPeNDAP_Leaf dap_oPeNDAP_leaf = new CatalogTree.OPeNDAP_Leaf("This is A dap Node", "uri");
-        dap_oPeNDAP_leaf.setService("dap");
-        final Object dapNode = new DefaultMutableTreeNode(dap_oPeNDAP_leaf);
-        final Object noDapNode = new DefaultMutableTreeNode("noDap");
+        final CatalogTree.OPeNDAP_Leaf oPeNDAP_leaf = new CatalogTree.OPeNDAP_Leaf("This is A dap Node");
+        oPeNDAP_leaf.setDapAccess(true);
+        final CatalogTree.OPeNDAP_Leaf FILE_leaf = new CatalogTree.OPeNDAP_Leaf("This is A File Node");
+        FILE_leaf.setFileAccess(true);
+        final Object dapNode = new DefaultMutableTreeNode(oPeNDAP_leaf);
+        final Object fileNode = new DefaultMutableTreeNode(FILE_leaf);
+        final Object noDapNode = new DefaultMutableTreeNode("otherNode");
 
         final Component component = dapCellRenderer.getTreeCellRendererComponent(jTree, noDapNode, false, false, true, 0, false);
 
         assertEquals(true, component instanceof DefaultTreeCellRenderer);
         final DefaultTreeCellRenderer tcr1 = (DefaultTreeCellRenderer) component;
-        assertEquals("noDap", tcr1.getText());
+        assertEquals("otherNode", tcr1.getText());
         assertEquals(true, tcr1.getIcon() instanceof ImageIcon);
         final ImageIcon icon1 = (ImageIcon) tcr1.getIcon();
         // todo change the expected icon to a realistic icon
-        assertEquals("/FRsProduct16.png", icon1.getDescription().substring(icon1.getDescription().length()-17));
+        assertEquals("/NoAccess16.png", icon1.getDescription().substring(icon1.getDescription().lastIndexOf("/")));
 
         final Color foreground1 = tcr1.getForeground();
         final Color background1 = tcr1.getBackground();
@@ -102,10 +105,27 @@ public class CatalogTree_simpleDifferentTests {
         assertEquals(true, tcr2.getIcon() instanceof ImageIcon);
         final ImageIcon icon2 = (ImageIcon) tcr2.getIcon();
         // todo change the expected icon to a realistic icon
-        assertEquals("/DRsProduct16.png", icon2.getDescription().substring(icon2.getDescription().length()-17));
+        assertEquals("/DRsProduct16.png", icon2.getDescription().substring(icon2.getDescription().lastIndexOf("/")));
 
         assertEquals(foreground1, tcr2.getForeground());
         assertEquals(background1, tcr2.getBackground());
         assertEquals(font1, tcr2.getFont());
+
+
+        final Component component3 = dapCellRenderer.getTreeCellRendererComponent(jTree, fileNode, false, false, true, 0, false);
+
+        assertSame(component, component3);
+
+        assertEquals(true, component3 instanceof DefaultTreeCellRenderer);
+        final DefaultTreeCellRenderer tcr3 = (DefaultTreeCellRenderer) component3;
+        assertEquals("This is A File Node", tcr3.getText());
+        assertEquals(true, tcr3.getIcon() instanceof ImageIcon);
+        final ImageIcon icon3 = (ImageIcon) tcr3.getIcon();
+        // todo change the expected icon to a realistic icon
+        assertEquals("/FRsProduct16.png", icon3.getDescription().substring(icon3.getDescription().lastIndexOf("/")));
+
+        assertEquals(foreground1, tcr3.getForeground());
+        assertEquals(background1, tcr3.getBackground());
+        assertEquals(font1, tcr3.getFont());
     }
 }

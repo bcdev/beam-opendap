@@ -18,58 +18,38 @@ import static org.junit.Assert.assertEquals;
 
 public class OPeNDAP_Leaf_GetterTest {
 
-    private DefaultMutableTreeNode child;
+
+    private CatalogTree.OPeNDAP_Leaf oPeNDAP_leaf;
 
     @Before
     public void setUp() throws Exception {
-        ArrayList<InvDataset> datasets = new ArrayList<InvDataset>();
-        InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
-        InvDatasetImpl dapDataset = createDataset(catalog, "first", "dap");
-        datasets.add(dapDataset);
-        CatalogTree catalogTree = new CatalogTree(null);
-        catalogTree.setNewRootDatasets(datasets);
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
-        child = (DefaultMutableTreeNode)root.getChildAt(0);
-    }
-
-    @Test
-    public void testThatChildObjectIsAInstanceOfOPeNDAP_Leaf() {
-        assertEquals(true, child.getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
+        oPeNDAP_leaf = new CatalogTree.OPeNDAP_Leaf("blah");
+        oPeNDAP_leaf.setDapUri("http://domain/dap_node");
+        oPeNDAP_leaf.setFileUri("http://domain/file_node");
     }
 
     @Test
     public void testGetDasURI() {
-        assertEquals("http://first.das", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getDasUri());
+        assertEquals("http://domain/dap_node.das", oPeNDAP_leaf.getDasUri());
     }
 
     @Test
     public void testGetDdsURI() {
-        assertEquals("http://first.dds", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getDdsUri());
+        assertEquals("http://domain/dap_node.dds", oPeNDAP_leaf.getDdsUri());
     }
 
     @Test
     public void testGetDdxURI() {
-        assertEquals("http://first.ddx", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getDdxUri());
+        assertEquals("http://domain/dap_node.ddx", oPeNDAP_leaf.getDdxUri());
     }
 
     @Test
     public void testGetDodsURI() {
-        assertEquals("http://first", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getDodsUri());
+        assertEquals("http://domain/dap_node", oPeNDAP_leaf.getDapUri());
     }
 
     @Test
     public void testGetFileURI() {
-        assertEquals("http://first", ((CatalogTree.OPeNDAP_Leaf)child.getUserObject()).getFileUri());
+        assertEquals("http://domain/file_node", oPeNDAP_leaf.getFileUri());
     }
-
-    private InvDatasetImpl createDataset(InvCatalogImpl catalog, String datasetName, final String serviceName) {
-        final InvDatasetImpl dataset =
-                new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://wherever.you.want.bc");
-        dataset.setCatalog(catalog);
-        final InvService dapService = new InvService(serviceName, "nonrelevant", "nonrelevant", "nonrelevant", "nonrelevant");
-        dataset.addAccess(new InvAccessImpl(dataset, "http://y.z", dapService));
-        dataset.finish();
-        return dataset;
-    }
-
 }

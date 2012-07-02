@@ -23,14 +23,14 @@ public class CatalogTree_isCatalogReferenceNodeTest {
 
     @Test
     public void testThatAOPeNDAP_LeafWhichIsNotACatalogRefIsResolvedToFalse() {
-        final Object userObject = new CatalogTree.OPeNDAP_Leaf("any", "String");
+        final Object userObject = new CatalogTree.OPeNDAP_Leaf("any");
         final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
         assertEquals(false, CatalogTree.isCatalogReferenceNode(notADapNode));
     }
 
     @Test
     public void testThatAOPeNDAP_LeafWhichIsACatalogRefIsResolvedToTrue() {
-        final CatalogTree.OPeNDAP_Leaf oPeNDAP_leaf = new CatalogTree.OPeNDAP_Leaf("any", "String");
+        final CatalogTree.OPeNDAP_Leaf oPeNDAP_leaf = new CatalogTree.OPeNDAP_Leaf("any");
         oPeNDAP_leaf.setCatalogReference(true);
         final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(oPeNDAP_leaf);
         assertEquals(true, CatalogTree.isCatalogReferenceNode(notADapNode));

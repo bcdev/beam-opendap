@@ -29,7 +29,7 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendADapNode() throws URISyntaxException {
         // preparation
-        datasets.add(createDataset(catalog, "first", "dap"));
+        datasets.add(createDataset(catalog, "first", "OPENDAP"));
 
         // execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -43,9 +43,9 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendThreeDapNodes() throws URISyntaxException {
         //preparation
-        datasets.add(createDataset(catalog, "Name_1", "dap"));
-        datasets.add(createDataset(catalog, "Name_2", "dap"));
-        datasets.add(createDataset(catalog, "Name_3", "dap"));
+        datasets.add(createDataset(catalog, "Name_1", "OPENDAP"));
+        datasets.add(createDataset(catalog, "Name_2", "OPENDAP"));
+        datasets.add(createDataset(catalog, "Name_3", "OPENDAP"));
 
         //execution
         CatalogTree.appendToNode(new JTree(), datasets, parentNode);
@@ -96,8 +96,8 @@ public class CatalogTree_appendToNodeTest {
     @Test
     public void testAppendingVariousDatasets() {
         //preparation
-        datasets.add(createDataset(catalog, "dapName", "dap"));
-        datasets.add(createDataset(catalog,"fileName", "file"));
+        datasets.add(createDataset(catalog, "dapName", "OPENDAP"));
+        datasets.add(createDataset(catalog,"fileName", "FILE"));
         datasets.add(createCatalogRefDataset());
 
         //execution
@@ -114,7 +114,7 @@ public class CatalogTree_appendToNodeTest {
     private InvDatasetImpl createDataset(InvCatalogImpl catalog, String datasetName, final String serviceName) {
         final InvDatasetImpl dapDataset = new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://wherever.you.want.bc");
         dapDataset.setCatalog(catalog);
-        final InvService dapService = new InvService(serviceName, "nonrelevant", "nonrelevant", "nonrelevant", "nonrelevant");
+        final InvService dapService = new InvService(serviceName, serviceName, "nonrelevant", "nonrelevant", "nonrelevant");
         dapDataset.addAccess(new InvAccessImpl(dapDataset, "http://y.z", dapService));
         dapDataset.finish();
         return dapDataset;

@@ -23,24 +23,16 @@ public class CatalogTree_isDapNodeTest {
 
     @Test
     public void testThatAOPeNDAP_LeafWhichHasNoDapServiceSetIsResolvedToFalse() {
-        final CatalogTree.OPeNDAP_Leaf userObject = new CatalogTree.OPeNDAP_Leaf("name", "uri");
-        userObject.setService("nodap");
+        final CatalogTree.OPeNDAP_Leaf userObject = new CatalogTree.OPeNDAP_Leaf("name");
+        userObject.setDapAccess(false);
         final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
         assertEquals(false, CatalogTree.isDapNode(notADapNode));
     }
 
     @Test
     public void testThatAOPeNDAP_LeafWhichHasADapServiceSetIsResolvedToTrue_ServiceName_dap() {
-        final CatalogTree.OPeNDAP_Leaf userObject = new CatalogTree.OPeNDAP_Leaf("name", "uri");
-        userObject.setService("dap");
-        final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
-        assertEquals(true, CatalogTree.isDapNode(notADapNode));
-    }
-
-    @Test
-    public void testThatAOPeNDAP_LeafWhichHasADapServiceSetIsResolvedToTrue_ServiceName_odap() {
-        final CatalogTree.OPeNDAP_Leaf userObject = new CatalogTree.OPeNDAP_Leaf("name", "uri");
-        userObject.setService("odap");
+        final CatalogTree.OPeNDAP_Leaf userObject = new CatalogTree.OPeNDAP_Leaf("name");
+        userObject.setDapAccess(true);
         final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
         assertEquals(true, CatalogTree.isDapNode(notADapNode));
     }

@@ -30,10 +30,10 @@ public class CatalogTree_appendNodeUnitTest {
     }
 
     @Test
-    public void testAppendADapNode_ServiceName_dap() throws URISyntaxException {
+    public void testAppendA_OPeNDAP_Node() throws URISyntaxException {
         // preparation
-        final String serviceName = "dap";
-        final InvDatasetImpl dapDataset = createADataset(new String[]{serviceName});
+        final String serviceType = "OPENDAP";
+        final InvDatasetImpl dapDataset = createADataset(new String[]{serviceType});
 
         // execution
         CatalogTree.appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
@@ -43,35 +43,9 @@ public class CatalogTree_appendNodeUnitTest {
     }
 
     @Test
-    public void testAppendADapNode_ServiceName_odap() throws URISyntaxException {
+    public void testAppendA_FILE_Node() throws URISyntaxException {
         // preparation
-        final String serviceName = "odap";
-        final InvDatasetImpl dapDataset = createADataset(new String[]{serviceName});
-
-        // execution
-        CatalogTree.appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
-
-        // verification
-        testThatChildIsADapNode(parentNode);
-    }
-
-    @Test
-    public void testAppendAFileNode_ServiceName_file() throws URISyntaxException {
-        // preparation
-        final String serviceName = "file";
-        final InvDatasetImpl dapDataset = createADataset(new String[]{serviceName});
-
-        // execution
-        CatalogTree.appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
-
-        // verification
-        testThatChildIsAFileNodeAndMaybeADapNodeToo(parentNode, true);
-    }
-
-    @Test
-    public void testAppendAFileNode_ServiceName_http() throws URISyntaxException {
-        // preparation
-        final String serviceName = "http";
+        final String serviceName = "FILE";
         final InvDatasetImpl dapDataset = createADataset(new String[]{serviceName});
 
         // execution
@@ -84,8 +58,8 @@ public class CatalogTree_appendNodeUnitTest {
     @Test
     public void testAppendANodeWhichHasDapAccessAndAlsoFileAccess_ServiceNames_odapAndHttp() throws URISyntaxException {
         // preparation
-        final String dapServiceName = "odap";
-        final String fileServiceName = "http";
+        final String dapServiceName = "OPENDAP";
+        final String fileServiceName = "FILE";
         final InvDatasetImpl dapDataset = createADataset(new String[]{fileServiceName, dapServiceName});
 
         // execution
@@ -143,14 +117,14 @@ public class CatalogTree_appendNodeUnitTest {
         assertEquals(false, leafObject.isCatalogReference());
     }
 
-    private InvDatasetImpl createADataset(String[] serviceNames) throws URISyntaxException {
-        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, "datasetName", FeatureType.NONE, serviceNames[0], "http://wherever.you.want.bc");
+    private InvDatasetImpl createADataset(String[] serviceTypeNames) throws URISyntaxException {
+        final InvDatasetImpl dapDataset = new InvDatasetImpl(null, "datasetName", FeatureType.NONE, serviceTypeNames[0], "http://wherever.you.want.bc");
 
         final InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         dapDataset.setCatalog(catalog);
 
-        for (String serviceName : serviceNames) {
-            final InvService dapService = new InvService(serviceName, "nonrelevant", "nonrelevant", "nonrelevant", "nonrelevant");
+        for (String serviceName : serviceTypeNames) {
+            final InvService dapService = new InvService(serviceName, serviceName, "nonrelevant", "nonrelevant", "nonrelevant");
             final InvAccessImpl invAccess = new InvAccessImpl(dapDataset, "http://y.z", dapService);
             dapDataset.addAccess(invAccess);
         }

@@ -21,7 +21,7 @@ public class CatalogTree_setNewRootDatasetsTest {
     public void setUp() throws Exception {
         datasets = new ArrayList<InvDataset>();
         catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
-        InvDatasetImpl dapDataset = createDataset(catalog, "first", "dap");
+        InvDatasetImpl dapDataset = createDataset(catalog, "first", "OPENDAP");
         datasets.add(dapDataset);
         catalogTree = new CatalogTree(null);
     }
@@ -102,7 +102,7 @@ public class CatalogTree_setNewRootDatasetsTest {
         final InvDatasetImpl dapDataset =
                 new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://wherever.you.want.bc");
         dapDataset.setCatalog(catalog);
-        final InvService dapService = new InvService(serviceName, "nonrelevant", "nonrelevant", "nonrelevant", "nonrelevant");
+        final InvService dapService = new InvService(serviceName, serviceName, "nonrelevant", "nonrelevant", "nonrelevant");
         dapDataset.addAccess(new InvAccessImpl(dapDataset, "http://y.z", dapService));
         dapDataset.finish();
         return dapDataset;

@@ -62,10 +62,10 @@ public class CatalogTree_insertCatalogElementsTest {
         assertEquals(true , CatalogTree.isDapNode(parentNode.getChildAt(1)));
         DefaultMutableTreeNode firstChild = (DefaultMutableTreeNode) parentNode.getChildAt(0);
         CatalogTree.OPeNDAP_Leaf firstLeaf = (CatalogTree.OPeNDAP_Leaf) firstChild.getUserObject();
-        assertEquals("http://every.where/child/ProductName.N1.nc", firstLeaf.getFileUri());
+        assertEquals("http://every.where/opendap/hyrax/data/child/ProductName.N1.nc.dds", firstLeaf.getDdsUri());
         DefaultMutableTreeNode secondChild = (DefaultMutableTreeNode) parentNode.getChildAt(1);
         CatalogTree.OPeNDAP_Leaf secondLeaf = (CatalogTree.OPeNDAP_Leaf) secondChild.getUserObject();
-        assertEquals("http://every.where/child/OtherProductName.N1.nc", secondLeaf.getFileUri());
+        assertEquals("http://every.where/opendap/hyrax/data/child/OtherProductName.N1.nc.dds", secondLeaf.getDdsUri());
     }
 
     private InputStream getThreddsCatalogInputStreamWithOneChildCatalogReference() {
@@ -96,7 +96,7 @@ public class CatalogTree_insertCatalogElementsTest {
                     "   xmlns:thredds=\"http://www.unidata.ucar.edu/namespaces/thredds/InvCatalog/v1.0\"\n" +
                     "   xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
                     "   xmlns:bes=\"http://xml.opendap.org/ns/bes/1.0#\">\n" +
-                    "   <thredds:service name=\"dap\" serviceType=\"OPeNDAP\" base=\"/opendap/hyrax\"/>\n" +
+                    "   <thredds:service name=\"dap\" serviceType=\"OPENDAP\" base=\"/opendap/hyrax\"/>\n" +
                     "   <thredds:service name=\"file\" serviceType=\"HTTPServer\" base=\"/opendap/hyrax\"/>\n" +
                     "   <thredds:dataset name=\"/data/child/MERIS/2012\" ID=\"/opendap/hyrax/data/child/MERIS/2012/\">\n" +
                     "       <thredds:dataset name=\"ProductName.N1.nc\" ID=\"/opendap/hyrax/data/child/MERIS/2012/ProductName.N1.nc\">\n" +

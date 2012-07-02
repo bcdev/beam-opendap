@@ -10,7 +10,6 @@ import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvCatalogRef;
 import thredds.catalog.InvDataset;
-import thredds.catalog.InvService;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
@@ -34,6 +33,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
+import thredds.catalog.ServiceType;
 
 public class CatalogTree {
 
@@ -63,14 +63,17 @@ public class CatalogTree {
     static void addCellRenderer(final JTree jTree) {
         final ImageIcon dapIcon = UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/DRsProduct16.png");
         final ImageIcon fileIcon = UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/FRsProduct16.png");
+        final ImageIcon standardIcon = UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/NoAccess16.png");
         jTree.setCellRenderer(new DefaultTreeCellRenderer() {
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
                 if (isDapNode(value)) {
                     setLeafIcon(dapIcon);
-                } else {
+                } else if (isFileNode(value)) {
                     setLeafIcon(fileIcon);
+                } else {
+                    setLeafIcon(standardIcon);
                 }
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
                 return this;
@@ -187,6 +190,14 @@ public class CatalogTree {
         return false;
     }
 
+    static boolean isFileNode(Object value) {
+        if (value instanceof DefaultMutableTreeNode) {
+            final Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
+            return (userObject instanceof OPeNDAP_Leaf) && ((OPeNDAP_Leaf) userObject).isFileAccess();
+        }
+        return false;
+    }
+
     static boolean isCatalogReferenceNode(Object value) {
         if (value instanceof DefaultMutableTreeNode) {
             final Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
@@ -202,7 +213,16 @@ public class CatalogTree {
                 final InvCatalogRef catalogRef = (InvCatalogRef) dataset;
                 appendCatalogNodeToParent(parentNode, treeModel, catalogRef);
             } else {
-                appendDataNodeToParent(parentNode, treeModel, dataset);
+                final List<InvDataset> childs = dataset.getDatasets();
+                if (childs.size() == 0) {
+                    appendDataNodeToParent(parentNode, treeModel, dataset);
+                } else {
+                    final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(dataset.getName() + "/");
+                    final int position = parentNode.getChildCount();
+                    treeModel.insertNodeInto(catalogNode, parentNode, position);
+                    final MutableTreeNode newParent = (MutableTreeNode) parentNode.getChildAt(position);
+                    appendToNode(jTree, childs, newParent);
+                }
             }
         }
     }
@@ -210,22 +230,27 @@ public class CatalogTree {
     static void appendCatalogNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
         final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
         final String urlPath = catalogRef.getURI().toASCIIString();
-        final OPeNDAP_Leaf oPeNDAP_leaf = new OPeNDAP_Leaf(urlPath, urlPath);
+        final OPeNDAP_Leaf oPeNDAP_leaf = new OPeNDAP_Leaf(urlPath);
         oPeNDAP_leaf.setCatalogReference(true);
+        oPeNDAP_leaf.setCatalogUri(urlPath);
         catalogNode.add(new DefaultMutableTreeNode(oPeNDAP_leaf));
         treeModel.insertNodeInto(catalogNode, parentNode, parentNode.getChildCount());
     }
 
     static void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
-        final String uriString = dataset.getParentCatalog().getUriString();
-        final String dapUri = uriString.substring(0, uriString.lastIndexOf("/") + 1) + dataset.getName();
-        final OPeNDAP_Leaf leafObject = new OPeNDAP_Leaf(dataset.getName(), dapUri);
-        final List<InvAccess> accessList = dataset.getAccess();
-        for (InvAccess access : accessList) {
-            InvService service = access.getService();
-            final String serviceName = service.getName();
-            leafObject.setService(serviceName);
+        final OPeNDAP_Leaf leafObject = new OPeNDAP_Leaf(dataset.getName());
+
+        final InvAccess dapAccess = dataset.getAccess(ServiceType.OPENDAP);
+        if (dapAccess != null) {
+            leafObject.setDapAccess(true);
+            leafObject.setDapUri(dapAccess.getStandardUrlName());
         }
+        final InvAccess fileAccess = dataset.getAccess(ServiceType.FILE);
+        if (fileAccess != null) {
+            leafObject.setFileAccess(true);
+            leafObject.setFileUri(fileAccess.getStandardUrlName());
+        }
+
         final DefaultMutableTreeNode leafNode = new DefaultMutableTreeNode(leafObject);
         treeModel.insertNodeInto(leafNode, parentNode, parentNode.getChildCount());
     }
@@ -244,28 +269,17 @@ public class CatalogTree {
         private boolean dapAccess;
         private boolean fileAccess;
         private boolean catalogReference;
-        private final String uri;
+        private String catalogUri;
+        private String dapUri;
+        private String fileUri;
 
-        public OPeNDAP_Leaf(String name, String uri) {
+        public OPeNDAP_Leaf(String name) {
             this.name = name;
-            this.uri = uri;
         }
 
         @Override
         public String toString() {
             return name;
-        }
-
-        public void setService(String serviceName) {
-            if (serviceName != null) {
-                final String trimmedLower = serviceName.trim().toLowerCase();
-                if (trimmedLower.equals("dap") || trimmedLower.equals("odap")) {
-                    dapAccess = true;
-                }
-                if (trimmedLower.equals("file") || trimmedLower.equals("http")) {
-                    fileAccess = true;
-                }
-            }
         }
 
         public boolean isCatalogReference() {
@@ -285,27 +299,47 @@ public class CatalogTree {
         }
 
         public String getDasUri() {
-            return uri + ".das";
+            return getDapUri() + ".das";
         }
 
         public String getDdsUri() {
-            return uri + ".dds";
+            return getDapUri() + ".dds";
         }
 
         public String getDdxUri() {
-            return uri + ".ddx";
+            return getDapUri() + ".ddx";
         }
 
-        public String getDodsUri() {
-            return uri;
+        public String getDapUri() {
+            return dapUri;
+        }
+
+        public void setDapUri(String dapUri) {
+            this.dapUri = dapUri;
         }
 
         public String getFileUri() {
-            return uri;
+            return fileUri;
+        }
+
+        public void setFileUri(String fileUri) {
+            this.fileUri = fileUri;
+        }
+
+        public void setDapAccess(boolean dapAccess) {
+            this.dapAccess = dapAccess;
+        }
+
+        public void setFileAccess(boolean fileAccess) {
+            this.fileAccess = fileAccess;
         }
 
         public String getCatalogUri() {
-            return uri;
+            return catalogUri;
+        }
+
+        public void setCatalogUri(String catalogUri) {
+            this.catalogUri = catalogUri;
         }
     }
 

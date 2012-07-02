@@ -2,8 +2,6 @@ package org.esa.beam.opendap.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +24,6 @@ import opendap.dap.DDS;
 import opendap.dap.parser.ParseException;
 import org.esa.beam.opendap.utils.VariableCollector;
 import org.esa.beam.util.Debug;
-import sun.awt.VariableGridLayout;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvDataset;
@@ -78,7 +75,7 @@ public class OpendapAccessPanel extends JPanel {
                 refresh();
             }
         });
-        dapResponseArea = new JTextArea(22, 20);
+        dapResponseArea = new JTextArea(10, 40);
         final VariableCollector variableCollector = new VariableCollector();
         catalogTree = new CatalogTree(new CatalogTree.ResponseDispatcher() {
             @Override
@@ -116,6 +113,55 @@ public class OpendapAccessPanel extends JPanel {
         variableNameFilter = new VariableNameFilter();
     }
 
+    private void initContentPane() {
+        final JPanel urlPanel = new JPanel(new BorderLayout(4, 4));
+        urlPanel.add(new JLabel("Root URL"), BorderLayout.NORTH);
+        urlPanel.add(urlField);
+        urlPanel.add(refreshButton, BorderLayout.EAST);
+
+        final JScrollPane dapResponse = new JScrollPane(dapResponseArea);
+
+        final JPanel variableInfo = new JPanel(new BorderLayout(5, 5));
+        variableInfo.setBorder(new EmptyBorder(10, 0, 0, 0));
+        variableInfo.add(new JLabel("  Variable Info:"), BorderLayout.NORTH);
+        variableInfo.add(dapResponse, BorderLayout.CENTER);
+
+        final JScrollPane openDapTree = new JScrollPane(catalogTree.getComponent());
+        openDapTree.setPreferredSize(new Dimension(400, 500));
+
+        final JSplitPane centerLeftPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, openDapTree, variableInfo);
+        centerLeftPane.setResizeWeight(1);
+        centerLeftPane.setContinuousLayout(true);
+
+        final JPanel filterPanel = new JPanel();
+        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
+        filterPanel.add(new TitledPanel(useDatasetNameFilter, datasetNameFilter.getUI()));
+        filterPanel.add(new TitledPanel(useTimeRangeFilter, timeRangeFilter.getUI()));
+        filterPanel.add(new TitledPanel(useRegionFilter, regionFilter.getUI()));
+        filterPanel.add(new TitledPanel(useVariableNameFilter, variableNameFilter.getUI()));
+        final Dimension size = filterPanel.getSize();
+        filterPanel.setMinimumSize(new Dimension(460, size.height));
+
+        final JPanel optionalPanel = new TitledPanel(null, null);
+
+        final JPanel downloadButtonPanel = new JPanel(new BorderLayout());
+        downloadButtonPanel.add(new JButton("Download"), BorderLayout.EAST);
+
+        final JPanel centerRightPane = new JPanel(new BorderLayout());
+        centerRightPane.add(filterPanel, BorderLayout.NORTH);
+        centerRightPane.add(optionalPanel, BorderLayout.CENTER);
+        centerRightPane.add(downloadButtonPanel, BorderLayout.SOUTH);
+
+        final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerLeftPane, centerRightPane);
+        centerPanel.setResizeWeight(1);
+        centerPanel.setContinuousLayout(true);
+
+        this.setLayout(new BorderLayout(15, 15));
+        this.setBorder(new EmptyBorder(8, 8, 8, 8));
+        this.add(urlPanel, BorderLayout.NORTH);
+        this.add(centerPanel, BorderLayout.CENTER);
+    }
+
     private void refresh() {
         final String text = urlField.getText();
         final String catalogUrl;
@@ -138,59 +184,6 @@ public class OpendapAccessPanel extends JPanel {
         } else {
             catalogTree.setNewRootDatasets(datasets);
         }
-    }
-
-    private void initContentPane() {
-        final JPanel urlPanel = new JPanel(new BorderLayout(4, 4));
-        urlPanel.add(new JLabel("Root URL"), BorderLayout.NORTH);
-        urlPanel.add(urlField);
-        urlPanel.add(refreshButton, BorderLayout.EAST);
-
-        final JScrollPane dapResponse = new JScrollPane(dapResponseArea);
-
-        final JPanel variableInfo = new JPanel(new BorderLayout(5, 5));
-        variableInfo.setBorder(new EmptyBorder(10, 0, 0, 0));
-        variableInfo.add(new JLabel("  Variable Info:"), BorderLayout.NORTH);
-        variableInfo.add(dapResponse, BorderLayout.CENTER);
-
-        final JScrollPane openDapTree = new JScrollPane(catalogTree.getComponent());
-
-        final JSplitPane centerLeftPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, openDapTree, variableInfo);
-        centerLeftPane.setDividerLocation(500);
-        centerLeftPane.setContinuousLayout(true);
-
-        final JPanel filterPanel = new JPanel();
-        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
-        filterPanel.add(new TitledPanel(useDatasetNameFilter, datasetNameFilter.getUI()));
-        filterPanel.add(new TitledPanel(useTimeRangeFilter, timeRangeFilter.getUI()));
-        filterPanel.add(new TitledPanel(useRegionFilter, regionFilter.getUI()));
-        filterPanel.add(new TitledPanel(useVariableNameFilter, variableNameFilter.getUI()));
-        final Dimension size = filterPanel.getSize();
-        filterPanel.setMinimumSize(new Dimension(460, size.height));
-
-
-        final JPanel optionalPanel = new TitledPanel(null, null);
-
-
-        final JPanel downloadButtonPanel = new JPanel(new BorderLayout());
-        downloadButtonPanel.add(new JButton("Download"), BorderLayout.EAST);
-
-        final JPanel centerRightPane = new JPanel(new BorderLayout());
-        centerRightPane.add(filterPanel, BorderLayout.NORTH);
-        centerRightPane.add(optionalPanel, BorderLayout.CENTER);
-        centerRightPane.add(downloadButtonPanel, BorderLayout.SOUTH);
-
-        final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerLeftPane, centerRightPane);
-        centerPanel.setDividerLocation(275);
-        centerPanel.setContinuousLayout(true);
-//        final JPanel centerPanel = new JPanel(new BorderLayout(15, 15));
-//        centerPanel.add(new JScrollPane(catalogTree.getComponent()), BorderLayout.CENTER);
-//        centerPanel.add(new JScrollPane(dapResponseArea), BorderLayout.EAST);
-
-        this.setLayout(new BorderLayout(15, 15));
-        this.setBorder(new EmptyBorder(8, 8, 8, 8));
-        this.add(urlPanel, BorderLayout.NORTH);
-        this.add(centerPanel, BorderLayout.CENTER);
     }
 
 }
