@@ -1,17 +1,14 @@
 package org.esa.beam.opendap.ui;
 
-import opendap.dap.http.HTTPException;
-import opendap.dap.http.HTTPMethod;
-import opendap.dap.http.HTTPSession;
-import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.util.Debug;
-import thredds.catalog.InvAccess;
-import thredds.catalog.InvCatalogFactory;
-import thredds.catalog.InvCatalogImpl;
-import thredds.catalog.InvCatalogRef;
-import thredds.catalog.InvDataset;
-import thredds.catalog.ServiceType;
-
+import java.awt.Component;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.event.TreeExpansionEvent;
@@ -25,15 +22,18 @@ import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
-import java.awt.Component;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.List;
+import opendap.dap.http.HTTPException;
+import opendap.dap.http.HTTPMethod;
+import opendap.dap.http.HTTPSession;
+import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.opendap.DAPVariable;
+import org.esa.beam.util.Debug;
+import thredds.catalog.InvAccess;
+import thredds.catalog.InvCatalogFactory;
+import thredds.catalog.InvCatalogImpl;
+import thredds.catalog.InvCatalogRef;
+import thredds.catalog.InvDataset;
+import thredds.catalog.ServiceType;
 
 public class CatalogTree {
 
@@ -56,7 +56,7 @@ public class CatalogTree {
         final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
         final DefaultMutableTreeNode rootNode = createRootNode();
         model.setRoot(rootNode);
-        appendToNode(jTree, rootDatasets, rootNode);
+        appendToNode(jTree, rootDatasets, rootNode, true);
         expandPath(rootNode);
     }
 
@@ -86,12 +86,12 @@ public class CatalogTree {
             @Override
             public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
                 final Object lastPathComponent = event.getPath().getLastPathComponent();
-                final TreeNode child = ((DefaultMutableTreeNode) lastPathComponent).getChildAt(0);
+                final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) lastPathComponent;
+                final TreeNode child = parent.getChildAt(0);
                 if (isCatalogReferenceNode(child)) {
                     final DefaultMutableTreeNode dapNode = (DefaultMutableTreeNode) child;
                     final OPeNDAP_Leaf catalogLeaf = (OPeNDAP_Leaf) dapNode.getUserObject();
                     final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
-                    final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) dapNode.getParent();
                     model.removeNodeFromParent(dapNode);
                     try {
                         final URL catalogUrl = new URL(catalogLeaf.getCatalogUri());
@@ -120,7 +120,7 @@ public class CatalogTree {
         final InvCatalogFactory factory = InvCatalogFactory.getDefaultFactory(true);
         final InvCatalogImpl catalog = factory.readXML(catalogIS, catalogBaseUri);
         final List<InvDataset> catalogDatasets = catalog.getDatasets();
-        appendToNode(jTree, catalogDatasets, parent);
+        appendToNode(jTree, catalogDatasets, parent, true);
         expandPath(parent);
     }
 
@@ -204,22 +204,30 @@ public class CatalogTree {
         return false;
     }
 
-    static void appendToNode(final JTree jTree, List<InvDataset> datasets, MutableTreeNode parentNode) {
+    static void appendToNode(final JTree jTree, List<InvDataset> datasets, MutableTreeNode parentNode, final boolean goDeeper) {
+        // todo ... write Tests
         for (InvDataset dataset : datasets) {
-            final boolean dataSetIsNoCatalog = !(dataset instanceof InvCatalogRef);
-            if (dataSetIsNoCatalog && dataset.hasNestedDatasets()) {
-                appendToNode(jTree, dataset.getDatasets(), parentNode);
-            } else {
+            final MutableTreeNode deeperParent;
+            if (!goDeeper || !isHyraxId(dataset.getID())) {
                 appendToNode(jTree, dataset, parentNode);
+                deeperParent = (MutableTreeNode) parentNode.getChildAt(parentNode.getChildCount() - 1);
+            } else {
+                deeperParent = parentNode;
+            }
+            if (goDeeper && !(dataset instanceof InvCatalogRef)) {
+                appendToNode(jTree, dataset.getDatasets(), deeperParent, false);
             }
         }
+    }
+
+    private static boolean isHyraxId(String id) {
+        return id != null && id.startsWith("/") && id.endsWith("/");
     }
 
     private static void appendToNode(JTree jTree, InvDataset dataset, MutableTreeNode parentNode) {
         final DefaultTreeModel treeModel = (DefaultTreeModel) jTree.getModel();
         if (dataset instanceof InvCatalogRef) {
-            final InvCatalogRef catalogRef = (InvCatalogRef) dataset;
-            appendCatalogNodeToParent(parentNode, treeModel, catalogRef);
+            appendCatalogNodeToParent(parentNode, treeModel, (InvCatalogRef) dataset);
         } else {
             appendDataNodeToParent(parentNode, treeModel, dataset);
         }
@@ -227,10 +235,10 @@ public class CatalogTree {
 
     static void appendCatalogNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
         final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
-        final String urlPath = catalogRef.getURI().toASCIIString();
-        final OPeNDAP_Leaf oPeNDAP_leaf = new OPeNDAP_Leaf(urlPath);
+        final String catalogPath = catalogRef.getURI().toASCIIString();
+        final OPeNDAP_Leaf oPeNDAP_leaf = new OPeNDAP_Leaf(catalogPath);
         oPeNDAP_leaf.setCatalogReference(true);
-        oPeNDAP_leaf.setCatalogUri(urlPath);
+        oPeNDAP_leaf.setCatalogUri(catalogPath);
         catalogNode.add(new DefaultMutableTreeNode(oPeNDAP_leaf));
         treeModel.insertNodeInto(catalogNode, parentNode, parentNode.getChildCount());
     }
@@ -242,13 +250,20 @@ public class CatalogTree {
         if (dapAccess != null) {
             leafObject.setDapAccess(true);
             leafObject.setDapUri(dapAccess.getStandardUrlName());
+
+            final InvAccess fileAccess = dataset.getAccess(ServiceType.FILE);
+            if (fileAccess != null) {
+                leafObject.setFileAccess(true);
+                leafObject.setFileUri(fileAccess.getStandardUrlName());
+            } else {
+                final InvAccess serverAccess = dataset.getAccess(ServiceType.HTTPServer);
+                if (serverAccess != null) {
+                    leafObject.setFileAccess(true);
+                    leafObject.setFileUri(serverAccess.getStandardUrlName());
+                }
+            }
         }
 
-        final InvAccess fileAccess = dataset.getAccess(ServiceType.FILE);
-        if (fileAccess != null) {
-            leafObject.setFileAccess(true);
-            leafObject.setFileUri(fileAccess.getStandardUrlName());
-        }
 
         final DefaultMutableTreeNode leafNode = new DefaultMutableTreeNode(leafObject);
         treeModel.insertNodeInto(leafNode, parentNode, parentNode.getChildCount());
@@ -271,6 +286,7 @@ public class CatalogTree {
         private String catalogUri;
         private String dapUri;
         private String fileUri;
+        private DAPVariable[] variables;
 
         public OPeNDAP_Leaf(String name) {
             this.name = name;

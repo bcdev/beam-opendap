@@ -32,7 +32,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createDataset(catalog, "first", "OPENDAP"));
 
         // execution
-        CatalogTree.appendToNode(new JTree(), datasets, parentNode);
+        CatalogTree.appendToNode(new JTree(), datasets, parentNode, true);
 
         // verification
         assertEquals(1, parentNode.getChildCount());
@@ -48,7 +48,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createDataset(catalog, "Name_3", "OPENDAP"));
 
         //execution
-        CatalogTree.appendToNode(new JTree(), datasets, parentNode);
+        CatalogTree.appendToNode(new JTree(), datasets, parentNode, true);
 
         //verification
         assertEquals(3, parentNode.getChildCount());
@@ -67,7 +67,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createDataset(catalog, "fileName", "file"));
 
         //execution
-        CatalogTree.appendToNode(new JTree(), datasets, parentNode);
+        CatalogTree.appendToNode(new JTree(), datasets, parentNode, true);
 
         //verification
         assertEquals(1, parentNode.getChildCount());
@@ -81,7 +81,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createCatalogRefDataset());
 
         //execution
-        CatalogTree.appendToNode(new JTree(), datasets, parentNode);
+        CatalogTree.appendToNode(new JTree(), datasets, parentNode, true);
 
         //verification
         assertEquals(1, parentNode.getChildCount());
@@ -101,7 +101,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createCatalogRefDataset());
 
         //execution
-        CatalogTree.appendToNode(new JTree(), datasets, parentNode);
+        CatalogTree.appendToNode(new JTree(), datasets, parentNode, true);
 
         //verification
         assertEquals(3, parentNode.getChildCount());

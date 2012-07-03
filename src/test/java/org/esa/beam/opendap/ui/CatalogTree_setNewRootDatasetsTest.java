@@ -40,7 +40,7 @@ public class CatalogTree_setNewRootDatasetsTest {
     }
 
     @Test
-    public void testAddingTwoDifferentDatasets() {
+    public void testAddingADatasetWithDAPAccessAndOneWithFileAccessOnly_FileAccesOnlyResolvesToNodeWithNoAccess() {
         //preparation
         final InvDatasetImpl fileDataset = createDataset(catalog, "second", "file");
         datasets.add(fileDataset);
@@ -52,10 +52,9 @@ public class CatalogTree_setNewRootDatasetsTest {
         final DefaultMutableTreeNode root = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
         assertEquals(2, root.getChildCount());
         assertEquals(true, CatalogTree.isDapNode(root.getChildAt(0)));
+        assertEquals(false, CatalogTree.isFileNode(root.getChildAt(0)));
         assertEquals(false, CatalogTree.isDapNode(root.getChildAt(1)));
-        assertEquals(true, ((DefaultMutableTreeNode)root.getChildAt(1)).getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
-        final CatalogTree.OPeNDAP_Leaf leaf = (CatalogTree.OPeNDAP_Leaf) ((DefaultMutableTreeNode) root.getChildAt(1)).getUserObject();
-        assertEquals(true, leaf.isFileAccess());
+        assertEquals(false, CatalogTree.isFileNode(root.getChildAt(1)));
     }
 
     @Test
@@ -78,24 +77,19 @@ public class CatalogTree_setNewRootDatasetsTest {
     @Test
     public void testThatPreviousDatasetsHaveBeenRemoved() {
         //preparation
+        catalogTree.setNewRootDatasets(datasets);
+        final DefaultMutableTreeNode previousRootNode = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
+
         final InvDatasetImpl fileDataset = createDataset(catalog, "second", "file");
         final ArrayList<InvDataset> otherDatasets = new ArrayList<InvDataset>();
         otherDatasets.add(fileDataset);
 
         //execution
-        catalogTree.setNewRootDatasets(datasets);
+        catalogTree.setNewRootDatasets(otherDatasets);
 
         //verification
-        final DefaultMutableTreeNode root = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
-        final DefaultMutableTreeNode child = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getChild(root, 0);
-
-        catalogTree.setNewRootDatasets(otherDatasets);
-        final DefaultMutableTreeNode otherRoot = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
-        for(int i=0; i<otherRoot.getChildCount(); i++){
-            DefaultMutableTreeNode otherChild = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getChild(otherRoot, i);
-            assertEquals(true, ((CatalogTree.OPeNDAP_Leaf)otherChild.getUserObject()).isFileAccess());
-            assertEquals(false, child.equals(otherChild));
-        }
+        final DefaultMutableTreeNode newRootNode = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
+        assertNotSame(previousRootNode, newRootNode);
     }
 
     private InvDatasetImpl createDataset(InvCatalogImpl catalog, String datasetName, final String serviceName) {

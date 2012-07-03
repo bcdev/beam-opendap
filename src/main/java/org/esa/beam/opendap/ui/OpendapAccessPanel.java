@@ -177,13 +177,8 @@ public class OpendapAccessPanel extends JPanel {
         if (datasets.size() == 0) {
             JOptionPane.showMessageDialog(this, "'" + text + "' is not a valid OPeNDAP URL.");
             return;
-        } else if (datasets.size() == 1) {
-            final InvDataset dataset = datasets.get(0);
-            final List<InvDataset> rootDatasets = dataset.getDatasets();
-            catalogTree.setNewRootDatasets(rootDatasets);
-        } else {
-            catalogTree.setNewRootDatasets(datasets);
         }
-    }
 
+        catalogTree.setNewRootDatasets(datasets);
+    }
 }
