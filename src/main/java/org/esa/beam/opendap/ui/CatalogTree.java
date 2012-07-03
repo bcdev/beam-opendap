@@ -8,6 +8,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
@@ -277,7 +278,7 @@ public class CatalogTree {
         return new DefaultMutableTreeNode("root", true);
     }
 
-    static class OPeNDAP_Leaf {
+    public static class OPeNDAP_Leaf {
 
         private final String name;
         private boolean dapAccess;
@@ -286,10 +287,11 @@ public class CatalogTree {
         private String catalogUri;
         private String dapUri;
         private String fileUri;
-        private DAPVariable[] variables;
+        private ArrayList<DAPVariable> variables;
 
         public OPeNDAP_Leaf(String name) {
             this.name = name;
+            this.variables = new ArrayList<DAPVariable>();
         }
 
         @Override
@@ -356,6 +358,15 @@ public class CatalogTree {
         public void setCatalogUri(String catalogUri) {
             this.catalogUri = catalogUri;
         }
+
+        public DAPVariable[] getDAPVariables(){
+            return variables.toArray(new DAPVariable[variables.size()]);
+        }
+
+        public void addDAPVariable(DAPVariable variable){
+            variables.add(variable);
+        }
+
     }
 
     public static interface ResponseDispatcher {

@@ -1,18 +1,8 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.opendap.DAPVariable;
 import org.junit.Before;
 import org.junit.Test;
-import thredds.catalog.InvAccessImpl;
-import thredds.catalog.InvCatalogImpl;
-import thredds.catalog.InvDataset;
-import thredds.catalog.InvDatasetImpl;
-import thredds.catalog.InvService;
-import ucar.nc2.constants.FeatureType;
-
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import java.net.URI;
-import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 
@@ -52,4 +42,13 @@ public class OPeNDAP_Leaf_GetterTest {
     public void testGetFileURI() {
         assertEquals("http://domain/file_node", oPeNDAP_leaf.getFileUri());
     }
+
+    @Test
+    public void testGetVariables() {
+        DAPVariable variable = new DAPVariable();
+        oPeNDAP_leaf.addDAPVariable(variable);
+        assertEquals(1, oPeNDAP_leaf.getDAPVariables().length);
+        assertEquals(variable, oPeNDAP_leaf.getDAPVariables()[0]);
+    }
+
 }
