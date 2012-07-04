@@ -18,6 +18,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DDS;
@@ -49,6 +51,11 @@ public class OpendapAccessPanel extends JPanel {
 
 
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
         final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel();
         final JFrame mainFrame = new JFrame("OPeNDAP Access");
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -103,10 +110,10 @@ public class OpendapAccessPanel extends JPanel {
                 dapResponseArea.setText(response);
             }
         });
-        useDatasetNameFilter = new JCheckBox("use dataset name filter");
-        useTimeRangeFilter = new JCheckBox("use time range filter");
-        useRegionFilter = new JCheckBox("use region filter");
-        useVariableNameFilter = new JCheckBox("use variable name filter");
+        useDatasetNameFilter = new JCheckBox("Use dataset name filter");
+        useTimeRangeFilter = new JCheckBox("Use time range filter");
+        useRegionFilter = new JCheckBox("Use region filter");
+        useVariableNameFilter = new JCheckBox("Use variable name filter");
         datasetNameFilter = new DatasetNameFilter();
         timeRangeFilter = new TimeRangeFilter();
         regionFilter = new RegionFilter();

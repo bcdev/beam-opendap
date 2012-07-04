@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import opendap.dap.DArrayDimension;
 import org.esa.beam.opendap.DAPVariable;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class OPeNDAP_Leaf_GetterTest {
 
     @Test
     public void testGetVariables() {
-        DAPVariable variable = new DAPVariable();
+        DAPVariable variable = new DAPVariable("vname", "vtype", "vdatatype", new DArrayDimension[0]);
         oPeNDAP_leaf.addDAPVariable(variable);
         assertEquals(1, oPeNDAP_leaf.getDAPVariables().length);
         assertEquals(variable, oPeNDAP_leaf.getDAPVariables()[0]);

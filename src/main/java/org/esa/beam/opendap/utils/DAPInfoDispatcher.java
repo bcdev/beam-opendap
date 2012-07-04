@@ -6,7 +6,7 @@ import opendap.dap.http.HTTPMethod;
 import opendap.dap.http.HTTPSession;
 import org.esa.beam.opendap.ui.CatalogTree;
 
-public class LeafInfoDispatcher {
+public class DAPInfoDispatcher {
 
     public static void dispatchLeafInfo(CatalogTree.OPeNDAP_Leaf leaf){
         final String ddsUri = leaf.getDdsUri();

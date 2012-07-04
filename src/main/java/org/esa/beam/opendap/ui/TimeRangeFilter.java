@@ -43,14 +43,14 @@ public class TimeRangeFilter implements Filter {
         gbc.insets.right = 4;
         gbc.anchor = GridBagConstraints.WEST;
 
-        filterUI.add(new JLabel("Start Date:"), gbc);
+        filterUI.add(new JLabel("Start date:"), gbc);
 
         gbc.gridx++;
         filterUI.add(startTimePicker, gbc);
 
         gbc.gridx = 1;
         gbc.gridy++;
-        filterUI.add(new JLabel("Stop Date:"), gbc);
+        filterUI.add(new JLabel("Stop date:"), gbc);
 
         gbc.gridx++;
         filterUI.add(stopTimePicker, gbc);

@@ -5,12 +5,12 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class LeafInfoDispatcherTest {
+public class DAPInfoDispatcherTest {
 
     @Test
     public void testThatNoDAPVariablesAreAddedWhenLeafHasNoVariables() {
         CatalogTree.OPeNDAP_Leaf leaf = new CatalogTree.OPeNDAP_Leaf("empty");
-        LeafInfoDispatcher.dispatchLeafInfo(leaf);
+        DAPInfoDispatcher.dispatchLeafInfo(leaf);
         assertEquals(0, leaf.getDAPVariables().length);
     }
 

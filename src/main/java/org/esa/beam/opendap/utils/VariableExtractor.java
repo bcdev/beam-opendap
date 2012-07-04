@@ -21,8 +21,9 @@ public class VariableExtractor {
         ArrayList<DAPVariable> dapVariables = new ArrayList<DAPVariable>();
         while(ddsVariables.hasMoreElements()){
             final BaseType ddsVariable = (BaseType)ddsVariables.nextElement();
-            DAPVariable dapVariable = new DAPVariable();
-            dapVariable.setName(ddsVariable.getName());
+            DAPVariable dapVariable = new DAPVariable(ddsVariable.getName(), ddsVariable.getTypeName(),
+                    ddsVariable.getLongName(), new DArrayDimension[0]);
+//            dapVariable.setName(ddsVariable.getName());
             dapVariables.add(dapVariable);
 
             System.out.println();
