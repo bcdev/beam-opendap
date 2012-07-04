@@ -172,8 +172,14 @@ public class OpendapAccessPanel extends JPanel {
                     final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
                     if(CatalogTree.isDapNode(treeNode)){
                         final CatalogTree.OPeNDAP_Leaf leaf = (CatalogTree.OPeNDAP_Leaf) treeNode.getUserObject();
-                        final String dapUri = leaf.getDapUri();
-                        dapURIs.add(dapUri);
+                        final String downloadUri;
+                        if (leaf.isFileAccess()) {
+                            downloadUri = leaf.getFileUri();
+                        } else {
+                            downloadUri = leaf.getDapUri();
+                        }
+
+                        dapURIs.add(downloadUri);
                     }
                 }
                 if (dapURIs.size() == 0) {

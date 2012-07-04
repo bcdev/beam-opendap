@@ -20,10 +20,10 @@ import java.util.List;
  */
 public class DAPDownloader {
 
-    private final List<String> dapURIs;
+    private final List<String> downloadUris;
 
-    public DAPDownloader(List<String> dapURIs) {
-        this.dapURIs = dapURIs;
+    public DAPDownloader(List<String> downloadUris) {
+        this.downloadUris = downloadUris;
     }
 
     public void saveAndOpenProducts() {
@@ -38,7 +38,7 @@ public class DAPDownloader {
 
     private File[] downloadTo(File targetDir) {
         final List<File> files = new ArrayList<File>();
-        for (String dapURI : dapURIs) {
+        for (String dapURI : downloadUris) {
             final String errorMessagePrefix = "Unable to download '" + dapURI + "' due to Exception\n" +
                                               "Message: ";
             try {
