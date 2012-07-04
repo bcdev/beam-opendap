@@ -85,12 +85,16 @@ public class DAPVariable {
         final PrintWriter pw = new PrintWriter(sw);
         pw.println("Name: " + getName());
         pw.println("Type: " + getType());
-        pw.println("Dimensions: " + dimensions.length);
+        pw.println("Dimensions: " + getNumDimensions());
         pw.println("Datatype: " + getDataType());
         for (DArrayDimension dimension : dimensions) {
             pw.println("dim(" + dimension.getName() + ") size: " + dimension.getSize());
         }
         pw.close();
         return sw.toString();
+    }
+
+    public int getNumDimensions() {
+        return dimensions.length;
     }
 }
