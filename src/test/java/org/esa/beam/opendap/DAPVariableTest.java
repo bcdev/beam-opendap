@@ -29,23 +29,19 @@ public class DAPVariableTest {
         dapVariable = new DAPVariable(vName, vType, vDataType, vDimensions);
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
     public void testGetInfoString() {
         //preparation
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
-        final DArrayDimension[] dimensions = dapVariable.getDimensions();
+//        final DArrayDimension[] dimensions = dapVariable.getDimensions();
         pw.println("Name: " + dapVariable.getName());
-        pw.println("Type: " + dapVariable.getType());
-        pw.println("Dimensions: " + dimensions.length);
-        pw.println("Datatype: " + dapVariable.getDataType());
-        for (DArrayDimension dimension : dimensions) {
-            pw.println("dim(" + dimension.getName() + ") size: " + dimension.getSize());
-        }
+//        pw.println("Type: " + dapVariable.getType());
+//        pw.println("Dimensions: " + dimensions.length);
+//        pw.println("Datatype: " + dapVariable.getDataType());
+//        for (DArrayDimension dimension : dimensions) {
+//            pw.println("dim(" + dimension.getName() + ") size: " + dimension.getSize());
+//        }
         pw.close();
 
         //execution
@@ -83,80 +79,80 @@ public class DAPVariableTest {
         }
     }
 
-    @Test
-    public void testIllegalArgumentExceptionIsThrownIfTypeIsNotValid() {
-        final String invalidType1 = null;
-        final String invalidType2 = "";
-        final String invalidType3 = "    ";
-
-        try {
-            new DAPVariable(vName, invalidType1, vDataType, vDimensions);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("[type] is null", e.getMessage());
-        }
-
-        try {
-            new DAPVariable(vName, invalidType2, vDataType, vDimensions);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("[type] is an empty string", e.getMessage());
-        }
-
-        try {
-            new DAPVariable(vName, invalidType3, vDataType, vDimensions);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("'    ' is not a valid type", e.getMessage());
-        }
-    }
-
-    @Test
-    public void testIllegalArgumentExceptionIsThrownIfDataTypeIsNotValid() {
-        final String invalidDataType1 = null;
-        final String invalidDataType2 = "";
-        final String invalidDataType3 = "    ";
-
-        try {
-            new DAPVariable(vName, vType, invalidDataType1, vDimensions);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("[dataType] is null", e.getMessage());
-        }
-
-        try {
-            new DAPVariable(vName, vType, invalidDataType2, vDimensions);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("[dataType] is an empty string", e.getMessage());
-        }
-
-        try {
-            new DAPVariable(vName, vType, invalidDataType3, vDimensions);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("'    ' is not a valid dataType", e.getMessage());
-        }
-    }
-
-    @Test
-    public void testIllegalArgumentExceptionIsThrownIfDimensionsIsNotValid() {
-        final DArrayDimension[] invalidDimensions1 = null;
-        final DArrayDimension[] invalidDimensions2 = new DArrayDimension[0];
-
-        try {
-            new DAPVariable(vName, vType, vDataType, invalidDimensions1);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("[dimensions] is null", e.getMessage());
-        }
-
-        try {
-            new DAPVariable(vName, vType, vDataType, invalidDimensions2);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("[dimensions] is an empty array", e.getMessage());
-        }
-
-    }
+//    @Test
+//    public void testIllegalArgumentExceptionIsThrownIfTypeIsNotValid() {
+//        final String invalidType1 = null;
+//        final String invalidType2 = "";
+//        final String invalidType3 = "    ";
+//
+//        try {
+//            new DAPVariable(vName, invalidType1, vDataType, vDimensions);
+//            fail("never come here");
+//        } catch (IllegalArgumentException e) {
+//            assertEquals("[type] is null", e.getMessage());
+//        }
+//
+//        try {
+//            new DAPVariable(vName, invalidType2, vDataType, vDimensions);
+//            fail("never come here");
+//        } catch (IllegalArgumentException e) {
+//            assertEquals("[type] is an empty string", e.getMessage());
+//        }
+//
+//        try {
+//            new DAPVariable(vName, invalidType3, vDataType, vDimensions);
+//            fail("never come here");
+//        } catch (IllegalArgumentException e) {
+//            assertEquals("'    ' is not a valid type", e.getMessage());
+//        }
+//    }
+//
+//    @Test
+//    public void testIllegalArgumentExceptionIsThrownIfDataTypeIsNotValid() {
+//        final String invalidDataType1 = null;
+//        final String invalidDataType2 = "";
+//        final String invalidDataType3 = "    ";
+//
+//        try {
+//            new DAPVariable(vName, vType, invalidDataType1, vDimensions);
+//            fail("never come here");
+//        } catch (IllegalArgumentException e) {
+//            assertEquals("[dataType] is null", e.getMessage());
+//        }
+//
+//        try {
+//            new DAPVariable(vName, vType, invalidDataType2, vDimensions);
+//            fail("never come here");
+//        } catch (IllegalArgumentException e) {
+//            assertEquals("[dataType] is an empty string", e.getMessage());
+//        }
+//
+//        try {
+//            new DAPVariable(vName, vType, invalidDataType3, vDimensions);
+//            fail("never come here");
+//        } catch (IllegalArgumentException e) {
+//            assertEquals("'    ' is not a valid dataType", e.getMessage());
+//        }
+//    }
+//
+//    @Test
+//    public void testIllegalArgumentExceptionIsThrownIfDimensionsIsNotValid() {
+//        final DArrayDimension[] invalidDimensions1 = null;
+//        final DArrayDimension[] invalidDimensions2 = new DArrayDimension[0];
+//
+//        try {
+//            new DAPVariable(vName, vType, vDataType, invalidDimensions1);
+//            fail("never come here");
+//        } catch (IllegalArgumentException e) {
+//            assertEquals("[dimensions] is null", e.getMessage());
+//        }
+//
+//        try {
+//            new DAPVariable(vName, vType, vDataType, invalidDimensions2);
+//            fail("never come here");
+//        } catch (IllegalArgumentException e) {
+//            assertEquals("[dimensions] is an empty array", e.getMessage());
+//        }
+//
+//    }
 }

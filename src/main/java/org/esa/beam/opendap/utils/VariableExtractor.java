@@ -25,22 +25,23 @@ public class VariableExtractor {
     }
 
     private static DAPVariable convertToDAPVariable(BaseType ddsVariable) {
-        final DArray array;
-        if (ddsVariable instanceof DGrid) {
-            final DGrid grid = (DGrid) ddsVariable;
-            array = grid.getArray();
-        } else if (ddsVariable instanceof DArray) {
-            array = (DArray) ddsVariable;
-        } else {
-            array = null;
-        }
+//        final DArray array;
+//        if (ddsVariable instanceof DGrid) {
+//            final DGrid grid = (DGrid) ddsVariable;
+//            array = grid.getArray();
+//        } else if (ddsVariable instanceof DArray) {
+//            array = (DArray) ddsVariable;
+//        } else {
+//            array = null;
+//        }
 
         final String name = ddsVariable.getName();
-        final String typeName = ddsVariable.getTypeName();
-        final String dataTypeName = getDataTypeName(array);
-        final DArrayDimension[] dimensions = getDimenstions(array);
+//        final String typeName = ddsVariable.getTypeName();
+//        final String dataTypeName = getDataTypeName(array);
+//        final DArrayDimension[] dimensions = getDimenstions(array);
 
-        return new DAPVariable(name, typeName, dataTypeName, dimensions);
+//        return new DAPVariable(name, typeName, dataTypeName, dimensions);
+        return new DAPVariable(name, null, null, null);
     }
 
     private static String getDataTypeName(DArray array) {

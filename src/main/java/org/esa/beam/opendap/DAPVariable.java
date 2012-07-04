@@ -16,11 +16,11 @@ public class DAPVariable {
     public DAPVariable(String name, String type, String dataType, DArrayDimension[] dimensions) {
         Guardian.assertNotNullOrEmpty("name", name);
         Guardian.assertTrue("'" + name + "' is not a valid name", name.trim().length() > 0);
-        Guardian.assertNotNullOrEmpty("type", type);
-        Guardian.assertTrue("'" + type + "' is not a valid type", type.trim().length() > 0);
-        Guardian.assertNotNullOrEmpty("dataType", dataType);
-        Guardian.assertTrue("'" + dataType + "' is not a valid dataType", dataType.trim().length() > 0);
-        Guardian.assertNotNullOrEmpty("dimensions", dimensions);
+//        Guardian.assertNotNullOrEmpty("type", type);
+//        Guardian.assertTrue("'" + type + "' is not a valid type", type.trim().length() > 0);
+//        Guardian.assertNotNullOrEmpty("dataType", dataType);
+//        Guardian.assertTrue("'" + dataType + "' is not a valid dataType", dataType.trim().length() > 0);
+//        Guardian.assertNotNullOrEmpty("dimensions", dimensions);
 
         this.name = name;
         this.type = type;
@@ -32,17 +32,17 @@ public class DAPVariable {
         return name;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public String getDataType() {
-        return dataType;
-    }
-
-    public DArrayDimension[] getDimensions() {
-        return dimensions;
-    }
+//    public String getType() {
+//        return type;
+//    }
+//
+//    public String getDataType() {
+//        return dataType;
+//    }
+//
+//    public DArrayDimension[] getDimensions() {
+//        return dimensions;
+//    }
 
     @Override
     public boolean equals(Object o) {
@@ -84,17 +84,17 @@ public class DAPVariable {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
         pw.println("Name: " + getName());
-        pw.println("Type: " + getType());
-        pw.println("Dimensions: " + getNumDimensions());
-        pw.println("Datatype: " + getDataType());
-        for (DArrayDimension dimension : dimensions) {
-            pw.println("dim(" + dimension.getName() + ") size: " + dimension.getSize());
-        }
+//        pw.println("Type: " + getType());
+//        pw.println("Dimensions: " + getNumDimensions());
+//        pw.println("Datatype: " + getDataType());
+//        for (DArrayDimension dimension : dimensions) {
+//            pw.println("dim(" + dimension.getName() + ") size: " + dimension.getSize());
+//        }
         pw.close();
         return sw.toString();
     }
 
-    public int getNumDimensions() {
-        return dimensions.length;
-    }
+//    public int getNumDimensions() {
+//        return dimensions.length;
+//    }
 }
