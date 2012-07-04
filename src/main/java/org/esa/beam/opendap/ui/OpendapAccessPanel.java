@@ -6,6 +6,7 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -18,12 +19,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+
+import com.bc.io.FileDownloader;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DDS;
 import opendap.dap.parser.ParseException;
+import org.esa.beam.opendap.utils.DAPDownloader;
 import org.esa.beam.opendap.utils.VariableCollector;
 import org.esa.beam.util.Debug;
 import thredds.catalog.InvCatalogFactory;
@@ -152,7 +159,32 @@ public class OpendapAccessPanel extends JPanel {
         final JPanel optionalPanel = new TitledPanel(null, null);
 
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout());
-        downloadButtonPanel.add(new JButton("Download"), BorderLayout.EAST);
+        final JButton downloadButton = new JButton("Download");
+        downloadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final TreePath[] selectionPaths = ((JTree) catalogTree.getComponent()).getSelectionModel().getSelectionPaths();
+                if (selectionPaths == null || selectionPaths.length <= 0) {
+                    return;
+                }
+                List<String> dapURIs = new ArrayList<String>();
+                for (TreePath selectionPath : selectionPaths) {
+                    final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
+                    if(CatalogTree.isDapNode(treeNode)){
+                        final CatalogTree.OPeNDAP_Leaf leaf = (CatalogTree.OPeNDAP_Leaf) treeNode.getUserObject();
+                        final String dapUri = leaf.getDapUri();
+                        dapURIs.add(dapUri);
+                    }
+                }
+                if (dapURIs.size() == 0) {
+                    return;
+                }
+
+                final DAPDownloader downloader = new DAPDownloader(dapURIs);
+                downloader.saveAndOpenProducts();
+            }
+        });
+        downloadButtonPanel.add(downloadButton, BorderLayout.EAST);
 
         final JPanel centerRightPane = new JPanel(new BorderLayout());
         centerRightPane.add(filterPanel, BorderLayout.NORTH);
