@@ -21,18 +21,17 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
-import com.bc.io.FileDownloader;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DDS;
 import opendap.dap.parser.ParseException;
 import org.esa.beam.opendap.utils.DAPDownloader;
 import org.esa.beam.opendap.utils.VariableCollector;
 import org.esa.beam.util.Debug;
+import org.esa.beam.visat.VisatApp;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvDataset;
@@ -61,7 +60,7 @@ public class OpendapAccessPanel extends JPanel {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            e.printStackTrace();
         }
         final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel();
         final JFrame mainFrame = new JFrame("OPeNDAP Access");
@@ -168,26 +167,24 @@ public class OpendapAccessPanel extends JPanel {
                     return;
                 }
                 List<String> dapURIs = new ArrayList<String>();
+                List<String> fileURIs = new ArrayList<String>();
                 for (TreePath selectionPath : selectionPaths) {
                     final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
                     if(CatalogTree.isDapNode(treeNode)){
                         final CatalogTree.OPeNDAP_Leaf leaf = (CatalogTree.OPeNDAP_Leaf) treeNode.getUserObject();
-                        final String downloadUri;
-                        if (leaf.isFileAccess()) {
-                            downloadUri = leaf.getFileUri();
+                        if (leaf.isDapAccess()) {
+                            dapURIs.add(leaf.getDapUri());
                         } else {
-                            downloadUri = leaf.getDapUri();
+                            fileURIs.add(leaf.getFileUri());
                         }
-
-                        dapURIs.add(downloadUri);
                     }
                 }
                 if (dapURIs.size() == 0) {
                     return;
                 }
-
-                final DAPDownloader downloader = new DAPDownloader(dapURIs);
-                downloader.saveAndOpenProducts();
+                final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs);
+                downloader.saveProducts();
+                downloader.openProducts(VisatApp.getApp());
             }
         });
         downloadButtonPanel.add(downloadButton, BorderLayout.EAST);
