@@ -27,7 +27,7 @@ public class CatalogTree_setNewRootDatasetsTest {
     }
 
     @Test
-    public void testAddingADapDataset() {
+    public void testAddingDapDataset() {
         //execution
         catalogTree.setNewRootDatasets(datasets);
 
@@ -40,7 +40,7 @@ public class CatalogTree_setNewRootDatasetsTest {
     }
 
     @Test
-    public void testAddingADatasetWithDAPAccessAndOneWithFileAccessOnly_FileAccesOnlyResolvesToNodeWithNoAccess() {
+    public void testAddingDatasetWithDAPAccessAndOneWithFileAccessOnly_FileAccessOnlyResolvesToNodeWithNoAccess() {
         //preparation
         final InvDatasetImpl fileDataset = createDataset(catalog, "second", "file");
         datasets.add(fileDataset);
@@ -96,7 +96,7 @@ public class CatalogTree_setNewRootDatasetsTest {
         final InvDatasetImpl dapDataset =
                 new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://wherever.you.want.bc");
         dapDataset.setCatalog(catalog);
-        final InvService dapService = new InvService(serviceName, serviceName, "nonrelevant", "nonrelevant", "nonrelevant");
+        final InvService dapService = new InvService(serviceName, serviceName, "irrelevant", "irrelevant", "irrelevant");
         dapDataset.addAccess(new InvAccessImpl(dapDataset, "http://y.z", dapService));
         dapDataset.finish();
         return dapDataset;

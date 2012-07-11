@@ -27,7 +27,7 @@ public class CatalogTree_appendToNodeTest {
     }
 
     @Test
-    public void testAppendADapNode() throws URISyntaxException {
+    public void testAppendDapNode() throws URISyntaxException {
         // preparation
         datasets.add(createDataset(catalog, "first", "OPENDAP"));
 
@@ -62,7 +62,7 @@ public class CatalogTree_appendToNodeTest {
     }
 
     @Test
-    public void testAppendAFileNode() throws URISyntaxException {
+    public void testAppendFileNode() throws URISyntaxException {
         //preparation
         datasets.add(createDataset(catalog, "fileName", "file"));
 
@@ -76,7 +76,7 @@ public class CatalogTree_appendToNodeTest {
     }
 
     @Test
-    public void testAppendACatalogNode() throws URISyntaxException {
+    public void testAppendCatalogNode() throws URISyntaxException {
         //preparation
         datasets.add(createCatalogRefDataset());
 
@@ -114,14 +114,14 @@ public class CatalogTree_appendToNodeTest {
     private InvDatasetImpl createDataset(InvCatalogImpl catalog, String datasetName, final String serviceName) {
         final InvDatasetImpl dapDataset = new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://wherever.you.want.bc");
         dapDataset.setCatalog(catalog);
-        final InvService dapService = new InvService(serviceName, serviceName, "nonrelevant", "nonrelevant", "nonrelevant");
+        final InvService dapService = new InvService(serviceName, serviceName, "irrelevant", "irrelevant", "irrelevant");
         dapDataset.addAccess(new InvAccessImpl(dapDataset, "http://y.z", dapService));
         dapDataset.finish();
         return dapDataset;
     }
 
     private InvCatalogRef createCatalogRefDataset() {
-        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "nonrelevant");
+        final InvCatalogRef catalogRef = new InvCatalogRef(null, "catalogName", "irrelevant");
         catalogRef.setCatalog(catalog);
         return catalogRef;
     }

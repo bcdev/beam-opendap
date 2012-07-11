@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -10,28 +11,28 @@ public class CatalogTree_isDapNodeTest {
 
     @Test
     public void testThatNullIsResolvedToFalse() {
-        final Object notADapNode = null;
-        assertEquals(false, CatalogTree.isDapNode(notADapNode));
+        final Object noDapNode = null;
+        assertEquals(false, CatalogTree.isDapNode(noDapNode));
     }
 
     @Test
-    public void testThatAUserObjectWhichIsNotAOPeNDAP_LeafIsResolvedToFalse() {
-        final Integer userObject = new Integer(4);
-        final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
-        assertEquals(false, CatalogTree.isDapNode(notADapNode));
+    public void testThatUserObjectWhichIsNoOpendapLeafIsResolvedToFalse() {
+        final Integer userObject = 4;
+        final DefaultMutableTreeNode noDapNode = new DefaultMutableTreeNode(userObject);
+        assertEquals(false, CatalogTree.isDapNode(noDapNode));
     }
 
     @Test
-    public void testThatAOPeNDAP_LeafWhichHasNoDapServiceSetIsResolvedToFalse() {
-        final CatalogTree.OPeNDAP_Leaf userObject = new CatalogTree.OPeNDAP_Leaf("name");
+    public void testThatOpendapLeafWhichHasNoDapServiceSetIsResolvedToFalse() {
+        final OpendapLeaf userObject = new OpendapLeaf("name");
         userObject.setDapAccess(false);
-        final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
-        assertEquals(false, CatalogTree.isDapNode(notADapNode));
+        final DefaultMutableTreeNode noDapNode = new DefaultMutableTreeNode(userObject);
+        assertEquals(false, CatalogTree.isDapNode(noDapNode));
     }
 
     @Test
-    public void testThatAOPeNDAP_LeafWhichHasADapServiceSetIsResolvedToTrue_ServiceName_dap() {
-        final CatalogTree.OPeNDAP_Leaf userObject = new CatalogTree.OPeNDAP_Leaf("name");
+    public void testThatOpendapLeafWhichHasDapServiceSetIsResolvedToTrue() {
+        final OpendapLeaf userObject = new OpendapLeaf("name");
         userObject.setDapAccess(true);
         final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
         assertEquals(true, CatalogTree.isDapNode(notADapNode));

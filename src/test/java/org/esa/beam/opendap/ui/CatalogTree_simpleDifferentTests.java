@@ -1,10 +1,9 @@
 package org.esa.beam.opendap.ui;
 
-import com.jidesoft.tree.StyledTreeCellRenderer;
+import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.*;
 
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
@@ -43,12 +42,10 @@ public class CatalogTree_simpleDifferentTests {
     public void testThatAWellDefinedRootNodeIsCreated() {
         final DefaultMutableTreeNode rootNode = CatalogTree.createRootNode();
         assertNotNull(rootNode);
-        assertEquals(true, rootNode instanceof DefaultMutableTreeNode);
 
-        final DefaultMutableTreeNode node = (DefaultMutableTreeNode) rootNode;
-        final Object userObject = node.getUserObject();
+        final Object userObject = rootNode.getUserObject();
         assertNotNull(userObject);
-        assertEquals(true, userObject instanceof String);
+        assertTrue(userObject instanceof String);
         assertEquals("root", userObject.toString());
     }
 
@@ -73,12 +70,12 @@ public class CatalogTree_simpleDifferentTests {
         CatalogTree.addCellRenderer(jTree);
         final TreeCellRenderer dapCellRenderer = jTree.getCellRenderer();
 
-        final CatalogTree.OPeNDAP_Leaf oPeNDAP_leaf = new CatalogTree.OPeNDAP_Leaf("This is A dap Node");
-        oPeNDAP_leaf.setDapAccess(true);
-        final CatalogTree.OPeNDAP_Leaf FILE_leaf = new CatalogTree.OPeNDAP_Leaf("This is A File Node");
-        FILE_leaf.setFileAccess(true);
-        final Object dapNode = new DefaultMutableTreeNode(oPeNDAP_leaf);
-        final Object fileNode = new DefaultMutableTreeNode(FILE_leaf);
+        final OpendapLeaf opendapLeaf = new OpendapLeaf("This is A dap Node");
+        opendapLeaf.setDapAccess(true);
+        final OpendapLeaf fileLeaf = new OpendapLeaf("This is A File Node");
+        fileLeaf.setFileAccess(true);
+        final Object dapNode = new DefaultMutableTreeNode(opendapLeaf);
+        final Object fileNode = new DefaultMutableTreeNode(fileLeaf);
         final Object noDapNode = new DefaultMutableTreeNode("otherNode");
 
         final Component component = dapCellRenderer.getTreeCellRendererComponent(jTree, noDapNode, false, false, true, 0, false);

@@ -28,6 +28,7 @@ import javax.swing.tree.TreePath;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DDS;
 import opendap.dap.parser.ParseException;
+import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.DAPDownloader;
 import org.esa.beam.opendap.utils.VariableCollector;
 import org.esa.beam.util.Debug;
@@ -171,7 +172,7 @@ public class OpendapAccessPanel extends JPanel {
                 for (TreePath selectionPath : selectionPaths) {
                     final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
                     if(CatalogTree.isDapNode(treeNode)){
-                        final CatalogTree.OPeNDAP_Leaf leaf = (CatalogTree.OPeNDAP_Leaf) treeNode.getUserObject();
+                        final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
                         if (leaf.isDapAccess()) {
                             dapURIs.add(leaf.getDapUri());
                         } else {

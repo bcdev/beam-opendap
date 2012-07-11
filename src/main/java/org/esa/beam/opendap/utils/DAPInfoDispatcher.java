@@ -4,11 +4,11 @@ import opendap.dap.DDS;
 import opendap.dap.http.HTTPException;
 import opendap.dap.http.HTTPMethod;
 import opendap.dap.http.HTTPSession;
-import org.esa.beam.opendap.ui.CatalogTree;
+import org.esa.beam.opendap.OpendapLeaf;
 
 public class DAPInfoDispatcher {
 
-    public static void dispatchLeafInfo(CatalogTree.OPeNDAP_Leaf leaf){
+    public static void dispatchLeafInfo(OpendapLeaf leaf){
         final String ddsUri = leaf.getDdsUri();
         DDS dds = null;
         try {

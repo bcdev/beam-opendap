@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.*;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -15,24 +16,24 @@ public class CatalogTree_isCatalogReferenceNodeTest {
     }
 
     @Test
-    public void testThatAUserObjectWhichIsNotAStringIsResolvedToFalse() {
-        final Integer userObject = new Integer(4);
+    public void testThatUserObjectWhichIsNoStringIsResolvedToFalse() {
+        final Integer userObject = 4;
         final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
         assertEquals(false, CatalogTree.isCatalogReferenceNode(notADapNode));
     }
 
     @Test
-    public void testThatAOPeNDAP_LeafWhichIsNotACatalogRefIsResolvedToFalse() {
-        final Object userObject = new CatalogTree.OPeNDAP_Leaf("any");
-        final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(userObject);
-        assertEquals(false, CatalogTree.isCatalogReferenceNode(notADapNode));
+    public void testThatOpendapLeafWhichIsNoCatalogRefIsResolvedToFalse() {
+        final Object userObject = new OpendapLeaf("any");
+        final DefaultMutableTreeNode noDapNode = new DefaultMutableTreeNode(userObject);
+        assertEquals(false, CatalogTree.isCatalogReferenceNode(noDapNode));
     }
 
     @Test
-    public void testThatAOPeNDAP_LeafWhichIsACatalogRefIsResolvedToTrue() {
-        final CatalogTree.OPeNDAP_Leaf oPeNDAP_leaf = new CatalogTree.OPeNDAP_Leaf("any");
-        oPeNDAP_leaf.setCatalogReference(true);
-        final DefaultMutableTreeNode notADapNode = new DefaultMutableTreeNode(oPeNDAP_leaf);
-        assertEquals(true, CatalogTree.isCatalogReferenceNode(notADapNode));
+    public void testThatOpendapLeafWhichIsCatalogRefIsResolvedToTrue() {
+        final OpendapLeaf opendapLeaf = new OpendapLeaf("any");
+        opendapLeaf.setCatalogReference(true);
+        final DefaultMutableTreeNode notDapNode = new DefaultMutableTreeNode(opendapLeaf);
+        assertEquals(true, CatalogTree.isCatalogReferenceNode(notDapNode));
     }
 }

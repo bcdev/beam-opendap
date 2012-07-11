@@ -1,19 +1,23 @@
 package org.esa.beam.opendap.ui;
 
-import static org.junit.Assert.*;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import org.junit.*;
+import org.esa.beam.opendap.OpendapLeaf;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import thredds.catalog.InvAccessImpl;
 import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvCatalogRef;
 import thredds.catalog.InvDatasetImpl;
 import thredds.catalog.InvService;
 import ucar.nc2.constants.FeatureType;
+
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+import static org.junit.Assert.*;
 
 public class CatalogTree_appendNodeUnitTest {
 
@@ -29,43 +33,43 @@ public class CatalogTree_appendNodeUnitTest {
     }
 
     @Test
-    public void testAppendA_OPeNDAP_Node() throws URISyntaxException {
+    public void testAppendAn_OPeNDAP_Node() throws URISyntaxException {
         // preparation
         final String serviceType = "OPENDAP";
-        final InvDatasetImpl dapDataset = createADataset(new String[]{serviceType});
+        final InvDatasetImpl dapDataset = createDataset(new String[]{serviceType});
 
         // execution
         CatalogTree.appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
-        testThatChildIsOnlyADapNodeWithoutFileAcces(parentNode);
+        testThatChildIsOnlyDapNodeWithoutFileAccess(parentNode);
     }
 
     @Test
     public void testThatAppendDatasetWithFileAccessOnlyIsResolvedToNodeWithoutAccess() throws URISyntaxException {
         // preparation
         final String serviceName = "FILE";
-        final InvDatasetImpl dapDataset = createADataset(new String[]{serviceName});
+        final InvDatasetImpl dapDataset = createDataset(new String[]{serviceName});
 
         // execution
         CatalogTree.appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
-        testThatChildIsNetherADapNodeNorAFileNode(parentNode);
+        testThatChildIsNeitherDapNodeNorFileNode(parentNode);
     }
 
     @Test
-    public void testAppendADatasetWhichHasDapAccessAndAlsoFileAccess() throws URISyntaxException {
+    public void testAppendDatasetWhichHasDapAccessAndAlsoFileAccess() throws URISyntaxException {
         // preparation
         final String dapServiceName = "OPENDAP";
         final String fileServiceName = "FILE";
-        final InvDatasetImpl dapDataset = createADataset(new String[]{fileServiceName, dapServiceName});
+        final InvDatasetImpl dapDataset = createDataset(new String[]{fileServiceName, dapServiceName});
 
         // execution
         CatalogTree.appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
-        testThatChildIsADapNodeWhichHasFileAccesToo(parentNode);
+        testThatChildIsDapNodeWhichHasFileAccessToo(parentNode);
     }
 
     @Test
@@ -87,45 +91,45 @@ public class CatalogTree_appendNodeUnitTest {
         assertEquals("catalogRefName/", child1.getUserObject());
 
         final DefaultMutableTreeNode child2 = (DefaultMutableTreeNode) parentNode.getChildAt(0).getChildAt(0);
-        assertEquals(true, child2.getUserObject() instanceof CatalogTree.OPeNDAP_Leaf);
-        final CatalogTree.OPeNDAP_Leaf oPeNDAP_leaf = (CatalogTree.OPeNDAP_Leaf) child2.getUserObject();
-        assertEquals("http://a.b", oPeNDAP_leaf.getCatalogUri());
-        assertEquals(true, oPeNDAP_leaf.isCatalogReference());
-        assertEquals(false, oPeNDAP_leaf.isFileAccess());
-        assertEquals(false, oPeNDAP_leaf.isDapAccess());
+        assertEquals(true, child2.getUserObject() instanceof OpendapLeaf);
+        final OpendapLeaf opendapLeaf = (OpendapLeaf) child2.getUserObject();
+        assertEquals("http://a.b", opendapLeaf.getCatalogUri());
+        assertEquals(true, opendapLeaf.isCatalogReference());
+        assertEquals(false, opendapLeaf.isFileAccess());
+        assertEquals(false, opendapLeaf.isDapAccess());
     }
 
-    private void testThatChildIsNetherADapNodeNorAFileNode(DefaultMutableTreeNode parentNode) {
+    private void testThatChildIsNeitherDapNodeNorFileNode(DefaultMutableTreeNode parentNode) {
         assertEquals(1, parentNode.getChildCount());
         assertEquals(true, parentNode.getChildAt(0).isLeaf());
         assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(0)));
         assertEquals(false, CatalogTree.isFileNode(parentNode.getChildAt(0)));
     }
 
-    private void testThatChildIsOnlyADapNodeWithoutFileAcces(DefaultMutableTreeNode parentNode) {
-        testThatChildIsADapNode(parentNode);
+    private void testThatChildIsOnlyDapNodeWithoutFileAccess(DefaultMutableTreeNode parentNode) {
+        testThatChildIsDapNode(parentNode);
         assertEquals(false, CatalogTree.isFileNode(parentNode.getChildAt(0)));
     }
 
-    private void testThatChildIsADapNodeWhichHasFileAccesToo(DefaultMutableTreeNode parentNode) {
-        testThatChildIsADapNode(parentNode);
+    private void testThatChildIsDapNodeWhichHasFileAccessToo(DefaultMutableTreeNode parentNode) {
+        testThatChildIsDapNode(parentNode);
         assertEquals(true, CatalogTree.isFileNode(parentNode.getChildAt(0)));
     }
 
-    private void testThatChildIsADapNode(DefaultMutableTreeNode parentNode) {
+    private void testThatChildIsDapNode(DefaultMutableTreeNode parentNode) {
         assertEquals(1, parentNode.getChildCount());
         assertEquals(true, parentNode.getChildAt(0).isLeaf());
         assertEquals(true, CatalogTree.isDapNode(parentNode.getChildAt(0)));
     }
 
-    private InvDatasetImpl createADataset(String[] serviceTypeNames) throws URISyntaxException {
+    private InvDatasetImpl createDataset(String[] serviceTypeNames) throws URISyntaxException {
         final InvDatasetImpl dapDataset = new InvDatasetImpl(null, "datasetName", FeatureType.NONE, serviceTypeNames[0], "http://wherever.you.want.bc");
 
         final InvCatalogImpl catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         dapDataset.setCatalog(catalog);
 
         for (String serviceName : serviceTypeNames) {
-            final InvService dapService = new InvService(serviceName, serviceName, "nonrelevant", "nonrelevant", "nonrelevant");
+            final InvService dapService = new InvService(serviceName, serviceName, "irrelevant", "irrelevant", "irrelevant");
             final InvAccessImpl invAccess = new InvAccessImpl(dapDataset, "http://y.z", dapService);
             dapDataset.addAccess(invAccess);
         }
