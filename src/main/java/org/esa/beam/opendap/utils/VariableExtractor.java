@@ -1,15 +1,14 @@
 package org.esa.beam.opendap.utils;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 import opendap.dap.BaseType;
-import opendap.dap.DASException;
 import opendap.dap.DArray;
 import opendap.dap.DArrayDimension;
 import opendap.dap.DDS;
-import opendap.dap.DGrid;
 import org.esa.beam.opendap.DAPVariable;
+
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 
 public class VariableExtractor {
 
@@ -48,11 +47,11 @@ public class VariableExtractor {
         return array.getPrimitiveVector().getTemplate().getTypeName();
     }
 
-    private static DArrayDimension[] getDimenstions(DArray array) {
-        final Enumeration dimens = array.getDimensions();
+    private static DArrayDimension[] getDimensions(DArray array) {
+        final Enumeration dimensions = array.getDimensions();
         final List<DArrayDimension> dims = new ArrayList();
-        while (dimens.hasMoreElements()) {
-            DArrayDimension dimension = (DArrayDimension) dimens.nextElement();
+        while (dimensions.hasMoreElements()) {
+            DArrayDimension dimension = (DArrayDimension) dimensions.nextElement();
             dims.add(dimension);
         }
         return dims.toArray(new DArrayDimension[dims.size()]);
