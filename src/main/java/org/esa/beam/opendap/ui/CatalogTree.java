@@ -211,7 +211,6 @@ class CatalogTree {
     }
 
     static void appendToNode(final JTree jTree, List<InvDataset> datasets, MutableTreeNode parentNode, final boolean goDeeper) {
-        // todo ... write Tests
         for (InvDataset dataset : datasets) {
             final MutableTreeNode deeperParent;
             if (!goDeeper || !isHyraxId(dataset.getID())) {
