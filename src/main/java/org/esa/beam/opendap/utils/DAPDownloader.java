@@ -13,7 +13,6 @@ import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.Variable;
 import ucar.nc2.dods.DODSNetcdfFile;
 
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import java.io.File;
 import java.io.IOException;
@@ -39,11 +38,12 @@ public class DAPDownloader {
         downloadedFiles = new HashSet<File>();
     }
 
-    public void saveProducts() {
-        final File targetDir = fetchTargetDirectory();
+    public void saveProducts(File targetDir) {
         if (targetDir != null && targetDir.isDirectory()) {
-            downloadDapFiles(targetDir);
-            downloadFiles(targetDir);
+            downloadFilesWithDapAccess(targetDir);
+            downloadFilesWithFileAccess(targetDir);
+        } else {
+            JOptionPane.showMessageDialog(null, "Could not save to directory' "+targetDir+"'");
         }
     }
 
@@ -54,7 +54,7 @@ public class DAPDownloader {
         }
     }
 
-    private void downloadDapFiles(File targetDir) {
+    private void downloadFilesWithDapAccess(File targetDir) {
         for (String dapURI : dapUris) {
             final String errorMessagePrefix = "Unable to download '" + dapURI + "' due to Exception\n" +
                     "Message: ";
@@ -234,7 +234,7 @@ public class DAPDownloader {
         return variableNames;
     }
 
-    private void downloadFiles(File targetDir) {
+    private void downloadFilesWithFileAccess(File targetDir) {
         for (String fileURI : fileURIs) {
             try {
                 downloadFile(targetDir, fileURI);
@@ -251,18 +251,6 @@ public class DAPDownloader {
         final URL fileUrl = new URI(fileURI).toURL();
         final File file = FileDownloader.downloadFile(fileUrl, targetDir, null);
         downloadedFiles.add(file);
-    }
-
-    private File fetchTargetDirectory() {
-        final JFileChooser chooser = new JFileChooser();
-        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setDialogTitle("Select Target Directory");
-        final int i = chooser.showDialog(null, "Save to directory");
-        if (i == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile();
-        }
-        return null;
     }
 
 }

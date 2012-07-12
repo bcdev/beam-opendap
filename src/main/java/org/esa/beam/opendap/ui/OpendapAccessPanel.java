@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import com.jidesoft.combobox.FolderChooserExComboBox;
 import com.jidesoft.utils.Lm;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DDS;
@@ -16,6 +17,7 @@ import thredds.catalog.InvDataset;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -35,6 +37,7 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -192,6 +195,7 @@ public class OpendapAccessPanel extends JPanel {
 
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout());
         final JButton downloadButton = new JButton("Download");
+        final FolderChooserExComboBox folderChooserComboBox = new FolderChooserExComboBox();
         downloadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -216,10 +220,18 @@ public class OpendapAccessPanel extends JPanel {
                     return;
                 }
                 final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs);
-                downloader.saveProducts();
+                File targetDirectory;
+                if(folderChooserComboBox.getSelectedItem() == null) {
+                    targetDirectory = fetchTargetDirectory();
+                } else {
+                    targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
+                }
+                downloader.saveProducts(targetDirectory);
                 downloader.openProducts(VisatApp.getApp());
             }
         });
+        folderChooserComboBox.setEditable(true);
+        downloadButtonPanel.add(folderChooserComboBox);
         downloadButtonPanel.add(downloadButton, BorderLayout.EAST);
 
         final JPanel centerRightPane = new JPanel(new BorderLayout());
@@ -235,6 +247,18 @@ public class OpendapAccessPanel extends JPanel {
         this.setBorder(new EmptyBorder(8, 8, 8, 8));
         this.add(urlPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
+    }
+
+    private File fetchTargetDirectory() {
+        final JFileChooser chooser = new JFileChooser();
+        chooser.setDialogType(JFileChooser.OPEN_DIALOG);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setDialogTitle("Select Target Directory");
+        final int i = chooser.showDialog(null, "Save to directory");
+        if (i == JFileChooser.APPROVE_OPTION) {
+            return chooser.getSelectedFile();
+        }
+        return null;
     }
 
     private void refresh() {
