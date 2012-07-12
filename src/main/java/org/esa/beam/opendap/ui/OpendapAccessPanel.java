@@ -240,7 +240,8 @@ public class OpendapAccessPanel extends JPanel {
 
         final JPanel optionalPanel = new TitledPanel(null, null);
 
-        final JPanel downloadButtonPanel = new JPanel(new BorderLayout());
+        final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 0));
+        downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
         final JButton downloadButton = new JButton("Download");
         final FolderChooserExComboBox folderChooserComboBox = new FolderChooserExComboBox() {
             @Override
@@ -279,7 +280,8 @@ public class OpendapAccessPanel extends JPanel {
                 }
                 final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs);
                 File targetDirectory;
-                if (folderChooserComboBox.getSelectedItem() == null || folderChooserComboBox.getSelectedItem().toString().equals("")) {
+                if (folderChooserComboBox.getSelectedItem() == null ||
+                    folderChooserComboBox.getSelectedItem().toString().equals("")) {
                     targetDirectory = fetchTargetDirectory();
                 } else {
                     targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
