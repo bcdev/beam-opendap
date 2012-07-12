@@ -285,11 +285,14 @@ class CatalogTree {
 
 
     MutableTreeNode getNode(OpendapLeaf leaf) {
-        return getNode(jTree.getModel(), jTree.getModel().getRoot(), leaf);
+        final MutableTreeNode node = getNode(jTree.getModel(), jTree.getModel().getRoot(), leaf);
+        if (node == null) {
+            throw new IllegalStateException("node of leaf '" + leaf.toString() + "' is null.");
+        }
+        return node;
     }
 
     private MutableTreeNode getNode(TreeModel model, Object node, OpendapLeaf leaf) {
-        MutableTreeNode result = null;
         for (int i = 0; i < model.getChildCount(node); i++) {
             final DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (model.getChild(node, i));
             if (childNode.getUserObject() == leaf) {
@@ -301,7 +304,7 @@ class CatalogTree {
                 }
             }
         }
-        return result;
+        return null;
     }
 
     OpendapLeaf[] getLeaves() {
@@ -345,8 +348,8 @@ class CatalogTree {
         if (!leafIsRemovedFromTree) {
             final MutableTreeNode node = getNode(leaf);
             final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
+            leafToParentNode.put(leaf, (MutableTreeNode) node.getParent());
             model.removeNodeFromParent(node);
-            leafToParentNode.put(leaf, (MutableTreeNode)node.getParent());
         }
     }
 
