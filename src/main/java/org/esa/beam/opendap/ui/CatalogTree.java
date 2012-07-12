@@ -44,6 +44,7 @@ class CatalogTree {
 
     private final JTree jTree;
     private final HashMap<OpendapLeaf, MutableTreeNode> leafToParentNode = new HashMap<OpendapLeaf, MutableTreeNode>();
+    private final Set<CatalogTreeListener> catalogTreeListeners = new HashSet<CatalogTreeListener>();
 
     public CatalogTree(final ResponseDispatcher responseDispatcher) {
         jTree = new JTree();
@@ -210,12 +211,17 @@ class CatalogTree {
         return false;
     }
 
-    static void appendToNode(final JTree jTree, List<InvDataset> datasets, MutableTreeNode parentNode, final boolean goDeeper) {
+    void appendToNode(final JTree jTree, List<InvDataset> datasets, MutableTreeNode parentNode, boolean goDeeper) {
         for (InvDataset dataset : datasets) {
             final MutableTreeNode deeperParent;
             if (!goDeeper || !isHyraxId(dataset.getID())) {
                 appendToNode(jTree, dataset, parentNode);
                 deeperParent = (MutableTreeNode) parentNode.getChildAt(parentNode.getChildCount() - 1);
+                if (isDapNode(deeperParent) || isFileNode(deeperParent)) {
+                    final boolean hasNestedDatasets = dataset.hasNestedDatasets();
+                    final OpendapLeaf leaf = (OpendapLeaf) ((DefaultMutableTreeNode) deeperParent).getUserObject();
+                    fireLeafAdded(leaf, hasNestedDatasets);
+                }
             } else {
                 deeperParent = parentNode;
             }
@@ -229,7 +235,7 @@ class CatalogTree {
         return id != null && id.startsWith("/") && id.endsWith("/");
     }
 
-    private static void appendToNode(JTree jTree, InvDataset dataset, MutableTreeNode parentNode) {
+    private void appendToNode(JTree jTree, InvDataset dataset, MutableTreeNode parentNode) {
         final DefaultTreeModel treeModel = (DefaultTreeModel) jTree.getModel();
         if (dataset instanceof InvCatalogRef) {
             appendCatalogNodeToParent(parentNode, treeModel, (InvCatalogRef) dataset);
@@ -248,7 +254,7 @@ class CatalogTree {
         treeModel.insertNodeInto(catalogNode, parentNode, parentNode.getChildCount());
     }
 
-    static void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
+    void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
         final OpendapLeaf leafObject = new OpendapLeaf(dataset.getName(), dataset);
 
         final InvAccess dapAccess = dataset.getAccess(ServiceType.OPENDAP);
@@ -268,7 +274,6 @@ class CatalogTree {
                 }
             }
         }
-
 
         final DefaultMutableTreeNode leafNode = new DefaultMutableTreeNode(leafObject);
         treeModel.insertNodeInto(leafNode, parentNode, parentNode.getChildCount());
@@ -317,7 +322,7 @@ class CatalogTree {
         for (int i = 0; i < model.getChildCount(node); i++) {
             if (model.isLeaf(model.getChild(node, i))) {
                 final DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (model.getChild(node, i));
-                if (!isCatalogReferenceNode(childNode)) {
+                if (isDapNode(childNode) || isFileNode(childNode)) {
                     result.add((OpendapLeaf) childNode.getUserObject());
                 }
             } else {
@@ -336,8 +341,8 @@ class CatalogTree {
 
     private void setLeafVisible(OpendapLeaf leaf) {
         final boolean leafIsRemovedFromTree = leafToParentNode.containsKey(leaf);
-        if(leafIsRemovedFromTree) {
-            appendDataNodeToParent(leafToParentNode.get(leaf), (DefaultTreeModel)jTree.getModel(), leaf.getDataset());
+        if (leafIsRemovedFromTree) {
+            appendDataNodeToParent(leafToParentNode.get(leaf), (DefaultTreeModel) jTree.getModel(), leaf.getDataset());
             leafToParentNode.remove(leaf);
         }
     }
@@ -352,6 +357,15 @@ class CatalogTree {
         }
     }
 
+    private void fireLeafAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
+        for (CatalogTreeListener catalogTreeListener : catalogTreeListeners) {
+            catalogTreeListener.dataNodeAdded(leaf, hasNestedDatasets);
+        }
+    }
+
+    void addCatalogTreeListener(CatalogTreeListener listener) {
+        catalogTreeListeners.add(listener);
+    }
 
     public static interface ResponseDispatcher {
 
@@ -360,5 +374,11 @@ class CatalogTree {
         void dispatchDDSResponse(String response);
 
         void dispatchFileResponse(String response);
+    }
+
+    static interface CatalogTreeListener {
+
+        void dataNodeAdded(OpendapLeaf leaf, boolean hasNestedDatasets);
+
     }
 }

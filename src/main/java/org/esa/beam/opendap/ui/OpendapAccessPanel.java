@@ -141,6 +141,22 @@ public class OpendapAccessPanel extends JPanel {
         timeRangeFilter = new TimeRangeFilter();
         regionFilter = new RegionFilter();
         variableNameFilter = new VariableNameFilter();
+
+
+        catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
+            @Override
+            public void dataNodeAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
+                if(hasNestedDatasets) {
+                    return;
+                }
+                // todo - add other filters
+                if(datasetNameFilter.accept(leaf)) {
+                    catalogTree.setLeafVisible(leaf, true);
+                } else {
+                    catalogTree.setLeafVisible(leaf, false);
+                }
+            }
+        });
     }
 
     private void initContentPane() {
