@@ -10,6 +10,8 @@ import javax.swing.JPanel;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 public class TimeRangeFilter implements FilterComponent {
 
@@ -18,12 +20,16 @@ public class TimeRangeFilter implements FilterComponent {
     final JButton applyButton;
 
     public TimeRangeFilter() {
-        final int width = 120;
-
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
         startTimePicker = new DateExComboBox();
+        startTimePicker.setLocale(Locale.ENGLISH);
+        startTimePicker.setFormat(dateFormat);
         stopTimePicker = new DateExComboBox();
-        final Dimension ps = startTimePicker.getPreferredSize();
+        stopTimePicker.setLocale(Locale.ENGLISH);
+        stopTimePicker.setFormat(dateFormat);
 
+        final int width = 120;
+        final Dimension ps = startTimePicker.getPreferredSize();
         startTimePicker.setPreferredSize(new Dimension(width, ps.height));
         startTimePicker.setMinimumSize(new Dimension(width, ps.height));
         stopTimePicker.setPreferredSize(new Dimension(width, ps.height));
@@ -67,6 +73,8 @@ public class TimeRangeFilter implements FilterComponent {
 
     @Override
     public boolean accept(OpendapLeaf leaf) {
+
+        leaf.getDasUri();
         return false;
     }
 
