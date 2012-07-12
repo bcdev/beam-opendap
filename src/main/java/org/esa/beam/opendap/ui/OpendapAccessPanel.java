@@ -69,6 +69,7 @@ public class OpendapAccessPanel extends JPanel {
     private FilterComponent variableNameFilter;
 
     private final PropertyMap propertyMap;
+    private JCheckBox openInVisat;
 
 
     public static void main(String[] args) {
@@ -173,7 +174,6 @@ public class OpendapAccessPanel extends JPanel {
         regionFilter = new RegionFilter();
         variableNameFilter = new VariableNameFilter();
 
-
         catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
             @Override
             public void dataNodeAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
@@ -188,6 +188,8 @@ public class OpendapAccessPanel extends JPanel {
                 }
             }
         });
+
+        openInVisat = new JCheckBox("Open in VISAT");
     }
 
     private void updateUrlField() {
@@ -240,7 +242,7 @@ public class OpendapAccessPanel extends JPanel {
 
         final JPanel optionalPanel = new TitledPanel(null, null);
 
-        final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 0));
+        final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
         final JButton downloadButton = new JButton("Download");
         final FolderChooserExComboBox folderChooserComboBox = new FolderChooserExComboBox() {
@@ -287,10 +289,15 @@ public class OpendapAccessPanel extends JPanel {
                     targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
                 }
                 downloader.saveProducts(targetDirectory);
-                downloader.openProducts(VisatApp.getApp());
+                if (openInVisat.isSelected()) {
+                    downloader.openProducts(VisatApp.getApp());
+                }
             }
         });
         folderChooserComboBox.setEditable(true);
+        if (VisatApp.getApp() != null) {
+            downloadButtonPanel.add(openInVisat, BorderLayout.NORTH);
+        }
         downloadButtonPanel.add(folderChooserComboBox);
         downloadButtonPanel.add(downloadButton, BorderLayout.EAST);
 
