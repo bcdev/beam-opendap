@@ -9,6 +9,8 @@ import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.DAPDownloader;
 import org.esa.beam.opendap.utils.VariableCollector;
 import org.esa.beam.util.Debug;
+import org.esa.beam.util.PropertyMap;
+import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvCatalogImpl;
@@ -17,6 +19,7 @@ import thredds.catalog.InvDataset;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -25,7 +28,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
 import javax.swing.JTree;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
@@ -33,7 +35,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -45,7 +46,9 @@ import java.util.List;
 
 public class OpendapAccessPanel extends JPanel {
 
-    private JTextField urlField;
+    private static final String PROPERTY_KEY_SERVER_URLS = "opendap-server-urls";
+
+    private JComboBox urlField;
     private JButton refreshButton;
     private CatalogTree catalogTree;
     private JTextArea dapResponseArea;
@@ -62,6 +65,8 @@ public class OpendapAccessPanel extends JPanel {
     private JCheckBox useVariableNameFilter;
     private FilterComponent variableNameFilter;
 
+    private final PropertyMap propertyMap;
+
 
     public static void main(String[] args) {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
@@ -71,7 +76,7 @@ public class OpendapAccessPanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel();
+        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel(new PropertyMap());
         final JFrame mainFrame = new JFrame("OPeNDAP Access");
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainFrame.setContentPane(opendapAccessPanel);
@@ -81,16 +86,17 @@ public class OpendapAccessPanel extends JPanel {
         mainFrame.setVisible(true);
     }
 
-    public OpendapAccessPanel() throws HeadlessException {
+    public OpendapAccessPanel(PropertyMap propertyMap) {
         super();
+        this.propertyMap = propertyMap;
         initComponents();
         initContentPane();
     }
 
     private void initComponents() {
-        urlField = new JTextField();
-        urlField.setColumns(60);
-        urlField.addKeyListener(new KeyAdapter() {
+        urlField = new JComboBox();
+        urlField.setEditable(true);
+        urlField.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
                 if (e.getKeyChar() == KeyEvent.VK_ENTER) {
@@ -98,11 +104,20 @@ public class OpendapAccessPanel extends JPanel {
                 }
             }
         });
+        updateUrlField();
         refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                refresh();
+                final boolean usingUrl = refresh();
+                if (usingUrl) {
+                    final String urls = propertyMap.getPropertyString(PROPERTY_KEY_SERVER_URLS);
+                    final String currentUrl = urlField.getSelectedItem().toString();
+                    if (!urls.contains(currentUrl)) {
+                        propertyMap.setPropertyString(PROPERTY_KEY_SERVER_URLS, urls + "\n" + currentUrl);
+                        updateUrlField();
+                    }
+                }
             }
         });
         dapResponseArea = new JTextArea(10, 40);
@@ -143,7 +158,7 @@ public class OpendapAccessPanel extends JPanel {
             public void filterChanged() {
                 final OpendapLeaf[] leaves = catalogTree.getLeaves();
                 for (OpendapLeaf leaf : leaves) {
-                    if(datasetNameFilter.accept(leaf)) {
+                    if (datasetNameFilter.accept(leaf)) {
                         catalogTree.setLeafVisible(leaf, true);
                     } else {
                         catalogTree.setLeafVisible(leaf, false);
@@ -159,17 +174,36 @@ public class OpendapAccessPanel extends JPanel {
         catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
             @Override
             public void dataNodeAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
-                if(hasNestedDatasets) {
+                if (hasNestedDatasets) {
                     return;
                 }
                 // todo - add other filters
-                if(datasetNameFilter.accept(leaf)) {
+                if (datasetNameFilter.accept(leaf)) {
                     catalogTree.setLeafVisible(leaf, true);
                 } else {
                     catalogTree.setLeafVisible(leaf, false);
                 }
             }
         });
+    }
+
+    private void updateUrlField() {
+        final String urlsProperty = propertyMap.getPropertyString(PROPERTY_KEY_SERVER_URLS);
+        final String[] urls = urlsProperty.split("\n");
+        for (String url : urls) {
+            if (StringUtils.isNotNullAndNotEmpty(url) && !contains(urlField, url)) {
+                urlField.addItem(url);
+            }
+        }
+    }
+
+    private boolean contains(JComboBox urlField, String url) {
+        for (int i = 0; i < urlField.getItemCount(); i++) {
+            if (urlField.getItemAt(i).toString().equals(url)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void initContentPane() {
@@ -271,8 +305,8 @@ public class OpendapAccessPanel extends JPanel {
         return null;
     }
 
-    private void refresh() {
-        final String text = urlField.getText();
+    private boolean refresh() {
+        final String text = urlField.getSelectedItem().toString();
         final String catalogUrl;
         if (!text.toLowerCase().endsWith("/catalog.xml")) {
             catalogUrl = text + "/catalog.xml";
@@ -285,9 +319,10 @@ public class OpendapAccessPanel extends JPanel {
 
         if (datasets.size() == 0) {
             JOptionPane.showMessageDialog(this, "'" + text + "' is not a valid OPeNDAP URL.");
-            return;
+            return false;
         }
 
         catalogTree.setNewRootDatasets(datasets);
+        return true;
     }
 }
