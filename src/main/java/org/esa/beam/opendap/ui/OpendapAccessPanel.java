@@ -46,7 +46,7 @@ import java.util.List;
 
 public class OpendapAccessPanel extends JPanel {
 
-    private static final String PROPERTY_KEY_SERVER_URLS = "opendap-server-urls";
+    private static final String PROPERTY_KEY_SERVER_URLS = "opendap.server.urls";
 
     private JComboBox urlField;
     private JButton refreshButton;
