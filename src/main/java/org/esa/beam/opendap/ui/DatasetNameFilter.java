@@ -31,9 +31,10 @@ class DatasetNameFilter implements FilterComponent {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateUIState(false);
-                if (checkBox.isSelected() && StringUtils.isNotNullAndNotEmpty(expressionTextField.getText())) {
+                if (StringUtils.isNotNullAndNotEmpty(expressionTextField.getText())) {
                     fireFilterChangedEvent();
                 }
+
             }
         });
         expressionTextField = new JTextField();
