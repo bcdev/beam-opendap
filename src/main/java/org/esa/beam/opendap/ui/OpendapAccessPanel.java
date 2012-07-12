@@ -1,6 +1,8 @@
 package org.esa.beam.opendap.ui;
 
 import com.jidesoft.combobox.FolderChooserExComboBox;
+import com.jidesoft.combobox.PopupPanel;
+import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.utils.Lm;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DDS;
@@ -20,6 +22,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -239,7 +242,18 @@ public class OpendapAccessPanel extends JPanel {
 
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout());
         final JButton downloadButton = new JButton("Download");
-        final FolderChooserExComboBox folderChooserComboBox = new FolderChooserExComboBox();
+        final FolderChooserExComboBox folderChooserComboBox = new FolderChooserExComboBox() {
+            @Override
+            public PopupPanel createPopupComponent() {
+                final PopupPanel popupComponent = super.createPopupComponent();
+                final JScrollPane content = (JScrollPane) popupComponent.getComponents()[0];
+                final JComponent upperPane = (JComponent) content.getComponents()[0];
+                FolderChooser folderChooser = (FolderChooser) upperPane.getComponents()[0];
+                folderChooser.setRecentListVisible(false);
+                popupComponent.setTitle("Choose download directory");
+                return popupComponent;
+            }
+        };
         downloadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -265,7 +279,7 @@ public class OpendapAccessPanel extends JPanel {
                 }
                 final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs);
                 File targetDirectory;
-                if(folderChooserComboBox.getSelectedItem() == null) {
+                if (folderChooserComboBox.getSelectedItem() == null || folderChooserComboBox.getSelectedItem().toString().equals("")) {
                     targetDirectory = fetchTargetDirectory();
                 } else {
                     targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
