@@ -1,15 +1,17 @@
 package org.esa.beam.opendap.ui;
 
 import com.jidesoft.combobox.DateExComboBox;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import org.esa.beam.opendap.OpendapLeaf;
+
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
-public class TimeRangeFilter implements Filter {
+public class TimeRangeFilter implements FilterComponent {
 
     final DateExComboBox startTimePicker;
     final DateExComboBox stopTimePicker;
@@ -61,5 +63,14 @@ public class TimeRangeFilter implements Filter {
         filterUI.add(applyButton, gbc);
 
         return filterUI;
+    }
+
+    @Override
+    public boolean accept(OpendapLeaf leaf) {
+        return false;
+    }
+
+    @Override
+    public void addFilterChangeListener(FilterChangeListener listener) {
     }
 }

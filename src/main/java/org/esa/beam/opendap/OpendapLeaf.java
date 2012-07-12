@@ -16,6 +16,8 @@
 
 package org.esa.beam.opendap;
 
+import thredds.catalog.InvDataset;
+
 import java.util.ArrayList;
 
 /**
@@ -28,6 +30,7 @@ import java.util.ArrayList;
 public class OpendapLeaf {
 
     private final String name;
+    private final InvDataset dataset;
     private boolean dapAccess;
     private boolean fileAccess;
     private boolean catalogReference;
@@ -37,13 +40,13 @@ public class OpendapLeaf {
     private ArrayList<DAPVariable> variables;
 
     public OpendapLeaf(String name) {
-        this.name = name;
-        this.variables = new ArrayList<DAPVariable>();
+        this(name, null);
     }
 
-    @Override
-    public String toString() {
-        return name;
+    public OpendapLeaf(String name, InvDataset dataset) {
+        this.name = name;
+        this.dataset = dataset;
+        this.variables = new ArrayList<DAPVariable>();
     }
 
     public boolean isCatalogReference() {
@@ -114,4 +117,16 @@ public class OpendapLeaf {
         variables.add(variable);
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public InvDataset getDataset() {
+        return dataset;
+    }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

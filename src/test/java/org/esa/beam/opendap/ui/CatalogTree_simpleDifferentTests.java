@@ -1,7 +1,14 @@
 package org.esa.beam.opendap.ui;
 
 import org.esa.beam.opendap.OpendapLeaf;
-import org.junit.*;
+import org.junit.Test;
+import thredds.catalog.InvAccessImpl;
+import thredds.catalog.InvCatalog;
+import thredds.catalog.InvCatalogImpl;
+import thredds.catalog.InvDataset;
+import thredds.catalog.InvDatasetImpl;
+import thredds.catalog.InvService;
+import ucar.nc2.constants.FeatureType;
 
 import javax.swing.ImageIcon;
 import javax.swing.JTree;
@@ -12,6 +19,9 @@ import javax.swing.tree.TreeCellRenderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -125,4 +135,33 @@ public class CatalogTree_simpleDifferentTests {
         assertEquals(background1, tcr3.getBackground());
         assertEquals(font1, tcr3.getFont());
     }
+
+    @Test
+    public void testGetLeaves() throws Exception {
+        final CatalogTree catalogTree = new CatalogTree(null);
+        List<InvDataset> datasets = new ArrayList<InvDataset>();
+        InvCatalog catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
+        final InvDataset rootDataset = createDataset(catalog, "first", "OPENDAP");
+        rootDataset.getDatasets().add(createDataset(catalog, "second", "OPENDAP"));
+        rootDataset.getDatasets().add(createDataset(catalog, "third", "OPENDAP"));
+
+        datasets.add(rootDataset);
+        catalogTree.setNewRootDatasets(datasets);
+
+        OpendapLeaf[] leaves = catalogTree.getLeaves();
+        assertEquals(2, leaves.length);
+        assertEquals("second", leaves[0].getName());
+        assertEquals("third", leaves[1].getName());
+    }
+
+    private InvDataset createDataset(InvCatalog catalog, String datasetName, final String serviceName) {
+        final InvDatasetImpl dapDataset =
+                new InvDatasetImpl(null, datasetName, FeatureType.NONE, serviceName, "http://wherever.you.want.bc");
+        dapDataset.setCatalog(catalog);
+        final InvService dapService = new InvService(serviceName, serviceName, "irrelevant", "irrelevant", "irrelevant");
+        dapDataset.addAccess(new InvAccessImpl(dapDataset, "http://y.z", dapService));
+        dapDataset.finish();
+        return dapDataset;
+    }
+
 }

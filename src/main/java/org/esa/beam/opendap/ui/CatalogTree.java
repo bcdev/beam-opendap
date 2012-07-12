@@ -24,6 +24,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.Component;
@@ -34,11 +35,15 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class CatalogTree {
+class CatalogTree {
 
     private final JTree jTree;
+    private final HashMap<OpendapLeaf, MutableTreeNode> leafToParentNode = new HashMap<OpendapLeaf, MutableTreeNode>();
 
     public CatalogTree(final ResponseDispatcher responseDispatcher) {
         jTree = new JTree();
@@ -237,7 +242,7 @@ public class CatalogTree {
     static void appendCatalogNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
         final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
         final String catalogPath = catalogRef.getURI().toASCIIString();
-        final OpendapLeaf opendapLeaf = new OpendapLeaf(catalogPath);
+        final OpendapLeaf opendapLeaf = new OpendapLeaf(catalogPath, catalogRef);
         opendapLeaf.setCatalogReference(true);
         opendapLeaf.setCatalogUri(catalogPath);
         catalogNode.add(new DefaultMutableTreeNode(opendapLeaf));
@@ -245,7 +250,7 @@ public class CatalogTree {
     }
 
     static void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
-        final OpendapLeaf leafObject = new OpendapLeaf(dataset.getName());
+        final OpendapLeaf leafObject = new OpendapLeaf(dataset.getName(), dataset);
 
         final InvAccess dapAccess = dataset.getAccess(ServiceType.OPENDAP);
         if (dapAccess != null) {
@@ -277,6 +282,74 @@ public class CatalogTree {
     static DefaultMutableTreeNode createRootNode() {
         return new DefaultMutableTreeNode("root", true);
     }
+
+
+    MutableTreeNode getNode(OpendapLeaf leaf) {
+        return getNode(jTree.getModel(), jTree.getModel().getRoot(), leaf);
+    }
+
+    private MutableTreeNode getNode(TreeModel model, Object node, OpendapLeaf leaf) {
+        MutableTreeNode result = null;
+        for (int i = 0; i < model.getChildCount(node); i++) {
+            final DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (model.getChild(node, i));
+            if (childNode.getUserObject() == leaf) {
+                return childNode;
+            } else {
+                final MutableTreeNode temp = getNode(model, model.getChild(node, i), leaf);
+                if (temp != null) {
+                    return temp;
+                }
+            }
+        }
+        return result;
+    }
+
+    OpendapLeaf[] getLeaves() {
+        final Set<OpendapLeaf> leafs = new HashSet<OpendapLeaf>();
+        getLeaves(jTree.getModel().getRoot(), jTree.getModel(), leafs);
+        leafs.addAll(leafToParentNode.keySet());
+        return leafs.toArray(new OpendapLeaf[leafs.size()]);
+    }
+
+    private void getLeaves(Object node, TreeModel model, Set<OpendapLeaf> result) {
+        for (int i = 0; i < model.getChildCount(node); i++) {
+            if (model.isLeaf(model.getChild(node, i))) {
+                final DefaultMutableTreeNode childNode = (DefaultMutableTreeNode) (model.getChild(node, i));
+                if (!isCatalogReferenceNode(childNode)) {
+                    result.add((OpendapLeaf) childNode.getUserObject());
+                }
+            } else {
+                getLeaves(model.getChild(node, i), model, result);
+            }
+        }
+    }
+
+    void setLeafVisible(OpendapLeaf leaf, boolean visible) {
+        if (visible) {
+            setLeafVisible(leaf);
+        } else {
+            setLeafInvisible(leaf);
+        }
+    }
+
+    private void setLeafVisible(OpendapLeaf leaf) {
+        final boolean leafIsRemovedFromTree = leafToParentNode.containsKey(leaf);
+        if(leafIsRemovedFromTree) {
+            appendDataNodeToParent(leafToParentNode.get(leaf), (DefaultTreeModel)jTree.getModel(), leaf.getDataset());
+            leafToParentNode.remove(leaf);
+        }
+    }
+
+    private void setLeafInvisible(OpendapLeaf leaf) {
+        final boolean leafIsRemovedFromTree = leafToParentNode.containsKey(leaf);
+        if (!leafIsRemovedFromTree) {
+            final MutableTreeNode node = getNode(leaf);
+            final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
+            model.removeNodeFromParent(node);
+            leafToParentNode.put(leaf, (MutableTreeNode)node.getParent());
+        }
+    }
+
 
     public static interface ResponseDispatcher {
 

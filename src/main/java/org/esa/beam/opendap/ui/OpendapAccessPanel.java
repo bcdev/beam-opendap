@@ -1,13 +1,18 @@
 package org.esa.beam.opendap.ui;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.HeadlessException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
-import java.util.List;
+import com.jidesoft.utils.Lm;
+import opendap.dap.DAP2Exception;
+import opendap.dap.DDS;
+import opendap.dap.parser.ParseException;
+import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.utils.DAPDownloader;
+import org.esa.beam.opendap.utils.VariableCollector;
+import org.esa.beam.util.Debug;
+import org.esa.beam.visat.VisatApp;
+import thredds.catalog.InvCatalogFactory;
+import thredds.catalog.InvCatalogImpl;
+import thredds.catalog.InvDataset;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -24,18 +29,14 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
-
-import opendap.dap.DAP2Exception;
-import opendap.dap.DDS;
-import opendap.dap.parser.ParseException;
-import org.esa.beam.opendap.OpendapLeaf;
-import org.esa.beam.opendap.utils.DAPDownloader;
-import org.esa.beam.opendap.utils.VariableCollector;
-import org.esa.beam.util.Debug;
-import org.esa.beam.visat.VisatApp;
-import thredds.catalog.InvCatalogFactory;
-import thredds.catalog.InvCatalogImpl;
-import thredds.catalog.InvDataset;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.HeadlessException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OpendapAccessPanel extends JPanel {
 
@@ -45,19 +46,21 @@ public class OpendapAccessPanel extends JPanel {
     private JTextArea dapResponseArea;
 
     private JCheckBox useDatasetNameFilter;
-    private Filter datasetNameFilter;
+    private FilterComponent datasetNameFilter;
 
     private JCheckBox useTimeRangeFilter;
-    private Filter timeRangeFilter;
+    private FilterComponent timeRangeFilter;
 
     private JCheckBox useRegionFilter;
-    private Filter regionFilter;
+    private FilterComponent regionFilter;
 
     private JCheckBox useVariableNameFilter;
-    private Filter variableNameFilter;
+    private FilterComponent variableNameFilter;
 
 
     public static void main(String[] args) {
+        Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
+
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
@@ -121,7 +124,20 @@ public class OpendapAccessPanel extends JPanel {
         useTimeRangeFilter = new JCheckBox("Use time range filter");
         useRegionFilter = new JCheckBox("Use region filter");
         useVariableNameFilter = new JCheckBox("Use variable name filter");
-        datasetNameFilter = new DatasetNameFilter();
+        datasetNameFilter = new DatasetNameFilter(useDatasetNameFilter);
+        datasetNameFilter.addFilterChangeListener(new FilterChangeListener() {
+            @Override
+            public void filterChanged() {
+                final OpendapLeaf[] leaves = catalogTree.getLeaves();
+                for (OpendapLeaf leaf : leaves) {
+                    if(datasetNameFilter.accept(leaf)) {
+                        catalogTree.setLeafVisible(leaf, true);
+                    } else {
+                        catalogTree.setLeafVisible(leaf, false);
+                    }
+                }
+            }
+        });
         timeRangeFilter = new TimeRangeFilter();
         regionFilter = new RegionFilter();
         variableNameFilter = new VariableNameFilter();
@@ -171,7 +187,7 @@ public class OpendapAccessPanel extends JPanel {
                 List<String> fileURIs = new ArrayList<String>();
                 for (TreePath selectionPath : selectionPaths) {
                     final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
-                    if(CatalogTree.isDapNode(treeNode)){
+                    if (CatalogTree.isDapNode(treeNode)) {
                         final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
                         if (leaf.isDapAccess()) {
                             dapURIs.add(leaf.getDapUri());
