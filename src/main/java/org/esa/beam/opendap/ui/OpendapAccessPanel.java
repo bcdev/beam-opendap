@@ -36,6 +36,8 @@ import java.awt.Dimension;
 import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
@@ -88,6 +90,14 @@ public class OpendapAccessPanel extends JPanel {
     private void initComponents() {
         urlField = new JTextField();
         urlField.setColumns(60);
+        urlField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    refreshButton.doClick();
+                }
+            }
+        });
         refreshButton = new JButton("Refresh");
         refreshButton.addActionListener(new ActionListener() {
             @Override
