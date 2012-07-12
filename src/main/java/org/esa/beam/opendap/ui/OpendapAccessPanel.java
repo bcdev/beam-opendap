@@ -170,7 +170,7 @@ public class OpendapAccessPanel extends JPanel {
                 }
             }
         });
-        timeRangeFilter = new TimeRangeFilter();
+        timeRangeFilter = new TimeRangeFilter(useTimeRangeFilter);
         regionFilter = new RegionFilter();
         variableNameFilter = new VariableNameFilter();
 

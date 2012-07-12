@@ -15,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 // todo - this is stolen from module 'PixExOp' -- move original class to beam-core and delete this copy
-class TimeStampExtractor {
+public class TimeStampExtractor {
 
     private static final String LEGAL_DATE_TIME_CHAR_MATCHER = "[yMdhms:_\\.-]+";
     private static final String LEGAL_FILENAME_CHAR_MATCHER = "[\\?\\*\\w\\. -]*";
@@ -31,13 +31,13 @@ class TimeStampExtractor {
 
     private TimeStampAccess timeStampAccess;
 
-    TimeStampExtractor(String dateInterpretationPattern, String filenameInterpretationPattern) {
+    public TimeStampExtractor(String dateInterpretationPattern, String filenameInterpretationPattern) {
         datePattern = dateInterpretationPattern;
         filenamePattern = filenameInterpretationPattern;
         init();
     }
 
-    ProductData.UTC[] extractTimeStamps(String fileName) throws ValidationException {
+    public ProductData.UTC[] extractTimeStamps(String fileName) throws ValidationException {
         final ProductData.UTC startTime = timeStampAccess.getStartTime(fileName);
         final ProductData.UTC stopTime = timeStampAccess.getStopTime(fileName);
         return new ProductData.UTC[]{startTime, stopTime};
