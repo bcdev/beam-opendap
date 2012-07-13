@@ -19,7 +19,9 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class TimeRangeFilter implements FilterComponent {
@@ -31,13 +33,10 @@ public class TimeRangeFilter implements FilterComponent {
     private JButton applyButton;
     private JCheckBox filterCheckBox;
     TimeStampExtractor timeStampExtractor;
+    List<FilterChangeListener> listeners;
 
     Date startDate;
     Date endDate;
-
-    TimeRangeFilter() {
-
-    }
 
     public TimeRangeFilter(final JCheckBox filterCheckBox) {
         this.filterCheckBox = filterCheckBox;
@@ -67,7 +66,15 @@ public class TimeRangeFilter implements FilterComponent {
 
         final UIUpdater uiUpdater = new UIUpdater();
         final TimePickerValidator timePickerValidator = new TimePickerValidator();
-        filterCheckBox.addActionListener(uiUpdater);
+        filterCheckBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateUIState();
+                if (timeStampExtractor != null) {
+                    fireFilterChangedEvent();
+                }
+            }
+        });
         startTimePicker.addActionListener(uiUpdater);
         startTimePicker.addActionListener(timePickerValidator);
         stopTimePicker.addActionListener(uiUpdater);
@@ -75,17 +82,19 @@ public class TimeRangeFilter implements FilterComponent {
         datePatternComboBox.addActionListener(uiUpdater);
         fileNamePatternComboBox.addActionListener(uiUpdater);
 
+        listeners = new ArrayList<FilterChangeListener>();
+
         applyButton = new JButton("Apply");
         applyButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 timeStampExtractor = new TimeStampExtractor(datePatternComboBox.getSelectedItem().toString(),
-                                                            fileNamePatternComboBox.getSelectedItem().toString());
+                        fileNamePatternComboBox.getSelectedItem().toString());
                 startDate = startTimePicker.getDate();
                 endDate = stopTimePicker.getDate();
                 updateUIState();
                 applyButton.setEnabled(false);
-
+                fireFilterChangedEvent();
             }
         });
         updateUIState();
@@ -170,6 +179,9 @@ public class TimeRangeFilter implements FilterComponent {
 
     @Override
     public boolean accept(OpendapLeaf leaf) {
+        if (!filterCheckBox.isSelected()) {
+            return true;
+        }
         try {
             final ProductData.UTC[] timeStamps = timeStampExtractor.extractTimeStamps(leaf.getName());
 
@@ -208,6 +220,13 @@ public class TimeRangeFilter implements FilterComponent {
 
     @Override
     public void addFilterChangeListener(FilterChangeListener listener) {
+        listeners.add(listener);
+    }
+
+    private void fireFilterChangedEvent() {
+        for (FilterChangeListener listener : listeners) {
+            listener.filterChanged();
+        }
     }
 
     private class UIUpdater implements ActionListener {

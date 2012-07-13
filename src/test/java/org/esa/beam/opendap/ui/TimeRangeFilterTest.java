@@ -20,9 +20,11 @@ import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.TimeStampExtractor;
 import org.junit.Test;
 
+import javax.swing.JCheckBox;
 import java.util.GregorianCalendar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Thomas Storm
@@ -31,32 +33,21 @@ import static org.junit.Assert.*;
 public class TimeRangeFilterTest {
 
     @Test
-    public void testAccept_UserEndFileStart() throws Exception {
-        TimeRangeFilter filter = new TimeRangeFilter();
-        filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
-
-        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
-
-        assertTrue(filter.accept(new OpendapLeaf("sth__20080101:192345.nc")));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20111231:192345.nc")));
-    }
-
-    @Test
-    public void testAccept_UserBothFileStart() throws Exception {
-        TimeRangeFilter filter = new TimeRangeFilter();
-        filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
-        filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
-
-        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
+    public void testAccept_EverythingWhenCheckboxIsUnchecked() throws Exception {
+        final JCheckBox filterCheckBox = new JCheckBox();
+        filterCheckBox.setSelected(false);
+        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
 
         assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc")));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345.nc")));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc")));
         assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern")));
     }
 
     @Test
     public void testAccept_UserStartFileStart() throws Exception {
-        TimeRangeFilter filter = new TimeRangeFilter();
+        final JCheckBox filterCheckBox = new JCheckBox();
+        filterCheckBox.setSelected(true);
+        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
         filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
         filter.endDate = null;
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
@@ -67,8 +58,70 @@ public class TimeRangeFilterTest {
     }
 
     @Test
+    public void testAccept_UserStartFileBoth() throws Exception {
+        final JCheckBox filterCheckBox = new JCheckBox();
+        filterCheckBox.setSelected(true);
+        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
+        filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
+        filter.endDate = null;
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
+
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc")));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc")));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20091231:233012__.nc")));
+    }
+
+    @Test
+    public void testAccept_UserEndFileStart() throws Exception {
+        final JCheckBox filterCheckBox = new JCheckBox();
+        filterCheckBox.setSelected(true);
+        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
+        filter.startDate = null;
+        filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
+
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
+
+        assertTrue(filter.accept(new OpendapLeaf("sth__20080101:192345.nc")));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20111231:192345.nc")));
+    }
+
+    @Test
+    public void testAccept_UserEndFileBoth() throws Exception {
+        final JCheckBox filterCheckBox = new JCheckBox();
+        filterCheckBox.setSelected(true);
+        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
+        filter.startDate = null;
+        filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
+
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
+
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc")));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100103:012345__.nc")));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20100103:192345___20100103:233012__.nc")));
+    }
+
+    @Test
+    public void testAccept_UserBothFileStart() throws Exception {
+        final JCheckBox filterCheckBox = new JCheckBox();
+        filterCheckBox.setSelected(true);
+        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
+        filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
+        filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
+
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
+
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc")));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345.nc")));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20111231:192345.nc")));
+        assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern")));
+    }
+
+
+    @Test
     public void testAccept_UserBothFileBoth() throws Exception {
-        TimeRangeFilter filter = new TimeRangeFilter();
+        final JCheckBox filterCheckBox = new JCheckBox();
+        filterCheckBox.setSelected(true);
+        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
         filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
@@ -83,4 +136,5 @@ public class TimeRangeFilterTest {
         assertTrue(filter.accept(new OpendapLeaf("sth__20100104:192345_does_not_match_naming_pattern.nc")));
         assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern")));
     }
+
 }

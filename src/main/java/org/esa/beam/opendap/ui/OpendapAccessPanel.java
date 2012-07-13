@@ -157,22 +157,13 @@ public class OpendapAccessPanel extends JPanel {
         useRegionFilter = new JCheckBox("Use region filter");
         useVariableNameFilter = new JCheckBox("Use variable name filter");
         datasetNameFilter = new DatasetNameFilter(useDatasetNameFilter);
-        datasetNameFilter.addFilterChangeListener(new FilterChangeListener() {
-            @Override
-            public void filterChanged() {
-                final OpendapLeaf[] leaves = catalogTree.getLeaves();
-                for (OpendapLeaf leaf : leaves) {
-                    if (datasetNameFilter.accept(leaf)) {
-                        catalogTree.setLeafVisible(leaf, true);
-                    } else {
-                        catalogTree.setLeafVisible(leaf, false);
-                    }
-                }
-            }
-        });
+        datasetNameFilter.addFilterChangeListener(new DefaultFilterChangeListener());
         timeRangeFilter = new TimeRangeFilter(useTimeRangeFilter);
+        timeRangeFilter.addFilterChangeListener(new DefaultFilterChangeListener());
         regionFilter = new RegionFilter();
+        regionFilter.addFilterChangeListener(new DefaultFilterChangeListener());
         variableNameFilter = new VariableNameFilter();
+        variableNameFilter.addFilterChangeListener(new DefaultFilterChangeListener());
 
         catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
             @Override
@@ -180,16 +171,22 @@ public class OpendapAccessPanel extends JPanel {
                 if (hasNestedDatasets) {
                     return;
                 }
-                // todo - add other filters
-                if (datasetNameFilter.accept(leaf)) {
-                    catalogTree.setLeafVisible(leaf, true);
-                } else {
-                    catalogTree.setLeafVisible(leaf, false);
-                }
+                filterLeaf(leaf);
             }
         });
 
         openInVisat = new JCheckBox("Open in VISAT");
+    }
+
+    private void filterLeaf(OpendapLeaf leaf) {
+        if (datasetNameFilter.accept(leaf) &&
+                timeRangeFilter.accept(leaf) &&
+                regionFilter.accept(leaf) &&
+                variableNameFilter.accept(leaf)) {
+            catalogTree.setLeafVisible(leaf, true);
+        } else {
+            catalogTree.setLeafVisible(leaf, false);
+        }
     }
 
     private void updateUrlField() {
@@ -283,7 +280,7 @@ public class OpendapAccessPanel extends JPanel {
                 final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs);
                 File targetDirectory;
                 if (folderChooserComboBox.getSelectedItem() == null ||
-                    folderChooserComboBox.getSelectedItem().toString().equals("")) {
+                        folderChooserComboBox.getSelectedItem().toString().equals("")) {
                     targetDirectory = fetchTargetDirectory();
                 } else {
                     targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
@@ -348,4 +345,17 @@ public class OpendapAccessPanel extends JPanel {
         catalogTree.setNewRootDatasets(datasets);
         return true;
     }
+
+    private class DefaultFilterChangeListener implements FilterChangeListener {
+
+        @Override
+        public void filterChanged() {
+            final OpendapLeaf[] leaves = catalogTree.getLeaves();
+            for (OpendapLeaf leaf : leaves) {
+                filterLeaf(leaf);
+            }
+        }
+
+    }
+
 }

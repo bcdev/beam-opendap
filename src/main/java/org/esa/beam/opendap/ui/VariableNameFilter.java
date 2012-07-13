@@ -23,7 +23,7 @@ public class VariableNameFilter implements FilterComponent {
 
     @Override
     public boolean accept(OpendapLeaf leaf) {
-        return false;
+        return true;
     }
 
     @Override
