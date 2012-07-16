@@ -25,10 +25,8 @@ public class VariableFilter implements FilterComponent {
 
     @Override
     public JComponent getUI() {
-        final JPanel ui = new JPanel(new BorderLayout(4, 4));
-        final JList namesList = new JList();
-//        final JList namesList = new JList(new Object[]{"scanning variable names ..."});
-//        namesList.setListData(); //On scan completed;
+        JPanel ui = new JPanel(new BorderLayout(4, 4));
+        JList namesList = new JList();
         ui.add(namesList);
         return ui;
     }
@@ -58,6 +56,11 @@ public class VariableFilter implements FilterComponent {
         return true;
     }
 
+    boolean hasVariableSet(){
+        return allVariables.size()>0;
+    }
+
+
     @Override
     public void addFilterChangeListener(FilterChangeListener listener) {
     }
@@ -69,4 +72,13 @@ public class VariableFilter implements FilterComponent {
     public void setVariableSelected(DAPVariable dapVariable, boolean selected) {
         variableToSelected.put(dapVariable, selected);
     }
+
+    void setVariables(Set<DAPVariable> variables) {
+        allVariables = variables;
+        for (DAPVariable variable : allVariables) {
+            Boolean selected = false;
+            setVariableSelected(variable, selected);
+        }
+    }
+
 }

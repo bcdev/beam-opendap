@@ -19,6 +19,7 @@ package org.esa.beam.opendap;
 import thredds.catalog.InvDataset;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
 * This is a container for opendap-leaf related information.
@@ -128,5 +129,9 @@ public class OpendapLeaf {
     @Override
     public String toString() {
         return name;
+    }
+
+    public void addDAPVariables(DAPVariable[] dapVariables) {
+        Collections.addAll(variables, dapVariables);
     }
 }

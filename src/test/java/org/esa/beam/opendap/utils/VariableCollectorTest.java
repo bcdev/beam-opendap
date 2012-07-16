@@ -31,7 +31,7 @@ public class VariableCollectorTest {
         final DDS dds = createDDSWithTwoVariables();
 
         // execution
-        variableCollector.collectFrom(dds);
+        variableCollector.collectDAPVariablesFromDDS(dds);
 
         // verification
         assertExpectedVariableNamesInList(variableNames, variableCollector.getVariableNames());
@@ -48,7 +48,7 @@ public class VariableCollectorTest {
         final DDS dds = getDDS(variableNames);
 
         //execution
-        variableCollector.collectFrom(dds);
+        variableCollector.collectDAPVariablesFromDDS(dds);
 
         //verification
         assertExpectedVariableNamesInList(variableNames, variableCollector.getVariableNames());
@@ -62,8 +62,8 @@ public class VariableCollectorTest {
         final DDS dds2 = createDDSWithMultipleVariables();
 
         //execution
-        variableCollector.collectFrom(dds);
-        variableCollector.collectFrom(dds2);
+        variableCollector.collectDAPVariablesFromDDS(dds);
+        variableCollector.collectDAPVariablesFromDDS(dds2);
 
         //verification
         assertExpectedVariableNamesInList(variableNames, variableCollector.getVariableNames());

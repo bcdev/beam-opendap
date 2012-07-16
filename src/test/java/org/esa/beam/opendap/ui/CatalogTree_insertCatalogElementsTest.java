@@ -40,7 +40,7 @@ public class CatalogTree_insertCatalogElementsTest {
             catalogIS = getThreddsCatalogInputStreamWithOneChildCatalogReference();
 
             //execution
-            catalogTree.insertCatalogElements(catalogIS, catalogBaseUri, parentNode);
+            catalogTree.insertCatalogElements(catalogIS, catalogBaseUri, parentNode, false);
 
             //verification
             assertEquals(1, parentNode.getChildCount());
@@ -64,7 +64,7 @@ public class CatalogTree_insertCatalogElementsTest {
             catalogIS = getThreddsCatalogInputStreamWithTwoChildDapDatasets();
 
             //execution
-            catalogTree.insertCatalogElements(catalogIS, catalogBaseUri, parentNode);
+            catalogTree.insertCatalogElements(catalogIS, catalogBaseUri, parentNode, false);
 
             //verification
             assertEquals(2, parentNode.getChildCount());

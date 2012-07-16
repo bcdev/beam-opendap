@@ -7,8 +7,10 @@ import com.jidesoft.utils.Lm;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DDS;
 import opendap.dap.parser.ParseException;
+import org.esa.beam.opendap.DAPVariable;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.DAPDownloader;
+import org.esa.beam.opendap.utils.DAPInfoDispatcher;
 import org.esa.beam.opendap.utils.VariableCollector;
 import org.esa.beam.util.Debug;
 import org.esa.beam.util.PropertyMap;
@@ -32,6 +34,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -46,6 +49,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 
 public class OpendapAccessPanel extends JPanel {
 
@@ -65,8 +70,8 @@ public class OpendapAccessPanel extends JPanel {
     private JCheckBox useRegionFilter;
     private FilterComponent regionFilter;
 
-    private JCheckBox useVariableNameFilter;
-    private FilterComponent variableNameFilter;
+    private JCheckBox useVariableFilter;
+    private FilterComponent variableFilter;
 
     private final PropertyMap propertyMap;
     private JCheckBox openInVisat;
@@ -139,7 +144,7 @@ public class OpendapAccessPanel extends JPanel {
                 final DDS dds = new DDS();
                 try {
                     dds.parse(new ByteArrayInputStream(response.getBytes()));
-                    variableCollector.collectFrom(dds);
+                    variableCollector.collectDAPVariablesFromDDS(dds);
                 } catch (ParseException e) {
                     Debug.trace(e);
                 } catch (DAP2Exception e) {
@@ -155,15 +160,26 @@ public class OpendapAccessPanel extends JPanel {
         useDatasetNameFilter = new JCheckBox("Use dataset name filter");
         useTimeRangeFilter = new JCheckBox("Use time range filter");
         useRegionFilter = new JCheckBox("Use region filter");
-        useVariableNameFilter = new JCheckBox("Use variable name filter");
+        useVariableFilter = new JCheckBox("Use variable name filter");
+
         datasetNameFilter = new DatasetNameFilter(useDatasetNameFilter);
         datasetNameFilter.addFilterChangeListener(new DefaultFilterChangeListener());
         timeRangeFilter = new TimeRangeFilter(useTimeRangeFilter);
         timeRangeFilter.addFilterChangeListener(new DefaultFilterChangeListener());
         regionFilter = new RegionFilter();
         regionFilter.addFilterChangeListener(new DefaultFilterChangeListener());
-        variableNameFilter = new VariableFilter(new JCheckBox());
-        variableNameFilter.addFilterChangeListener(new DefaultFilterChangeListener());
+        variableFilter = new VariableFilter(new JCheckBox());
+        variableFilter.addFilterChangeListener(new DefaultFilterChangeListener());
+
+        useVariableFilter.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!((VariableFilter)variableFilter).hasVariableSet()) {
+                    final DAPInfoCollector dapInfoCollector = new DAPInfoCollector();
+                    dapInfoCollector.execute();
+                }
+            }
+        });
 
         catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
             @Override
@@ -183,7 +199,7 @@ public class OpendapAccessPanel extends JPanel {
                 (!useDatasetNameFilter.isSelected() || datasetNameFilter.accept(leaf)) &&
                 (!useTimeRangeFilter.isSelected() || timeRangeFilter.accept(leaf)) &&
                 (!useRegionFilter.isSelected() || regionFilter.accept(leaf)) &&
-                (!useVariableNameFilter.isSelected() || variableNameFilter.accept(leaf))) {
+                (!useVariableFilter.isSelected() || variableFilter.accept(leaf))) {
             catalogTree.setLeafVisible(leaf, true);
         } else {
             catalogTree.setLeafVisible(leaf, false);
@@ -234,7 +250,7 @@ public class OpendapAccessPanel extends JPanel {
         filterPanel.add(new TitledPanel(useDatasetNameFilter, datasetNameFilter.getUI()));
         filterPanel.add(new TitledPanel(useTimeRangeFilter, timeRangeFilter.getUI()));
         filterPanel.add(new TitledPanel(useRegionFilter, regionFilter.getUI()));
-        filterPanel.add(new TitledPanel(useVariableNameFilter, variableNameFilter.getUI()));
+        filterPanel.add(new TitledPanel(useVariableFilter, variableFilter.getUI()));
         final Dimension size = filterPanel.getSize();
         filterPanel.setMinimumSize(new Dimension(460, size.height));
 
@@ -281,7 +297,7 @@ public class OpendapAccessPanel extends JPanel {
                 final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs);
                 File targetDirectory;
                 if (folderChooserComboBox.getSelectedItem() == null ||
-                        folderChooserComboBox.getSelectedItem().toString().equals("")) {
+                    folderChooserComboBox.getSelectedItem().toString().equals("")) {
                     targetDirectory = fetchTargetDirectory();
                 } else {
                     targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
@@ -357,6 +373,53 @@ public class OpendapAccessPanel extends JPanel {
             }
         }
 
+    }
+
+    private class DAPInfoCollector extends SwingWorker<Set<DAPVariable>, Object> implements CatalogTree.CatalogTreeListener {
+
+        private DAPInfoDispatcher dispatcher;
+
+        private DAPInfoCollector() {
+            dispatcher = new DAPInfoDispatcher();
+        }
+
+        @Override
+        protected Set<DAPVariable> doInBackground() throws Exception {
+            final DefaultMutableTreeNode root =
+                    (DefaultMutableTreeNode) ( ((JTree) catalogTree.getComponent()).getModel()).getRoot();
+            resolveNode(root);
+            return dispatcher.getVariablesFromAllLeaves();
+        }
+
+        @Override
+        protected void done() {
+            try {
+                ((VariableFilter)variableFilter).setVariables(get());
+            } catch (InterruptedException e) {
+                //todo handle Exceptions
+            } catch (ExecutionException e) {
+                //todo handle Exceptions
+            }
+        }
+
+        private void resolveNode(DefaultMutableTreeNode node) {
+            if(node.isLeaf()) {
+                return;
+            }
+            for(int i=0; i<node.getChildCount(); i++) {
+                final DefaultMutableTreeNode child = (DefaultMutableTreeNode)node.getChildAt(i);
+                resolveNode(child);
+                if(CatalogTree.isCatalogReferenceNode(child)) {
+                    catalogTree.resolveCatalogReferenceNode(node, child, false);
+                    i--;
+                }
+            }
+        }
+
+        @Override
+        public void dataNodeAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
+            dispatcher.dispatchLeafInfo(leaf);
+        }
     }
 
 }

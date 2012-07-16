@@ -18,12 +18,13 @@ public class VariableCollector {
         variables = new HashSet<DAPVariable>();
     }
 
-    public void collectFrom(DDS dds) {
+    public DAPVariable[] collectDAPVariablesFromDDS(DDS dds) {
         final DAPVariable[] dapVariables = VariableExtractor.extractVariables(dds);
         for (DAPVariable dapVariable : dapVariables) {
             variables.add(dapVariable);
             variableNames.add(dapVariable.getName());
         }
+        return dapVariables;
     }
 
     public Set<String> getVariableNames() {

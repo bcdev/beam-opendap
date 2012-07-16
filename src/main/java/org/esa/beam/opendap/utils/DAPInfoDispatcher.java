@@ -4,11 +4,25 @@ import opendap.dap.DDS;
 import opendap.dap.http.HTTPException;
 import opendap.dap.http.HTTPMethod;
 import opendap.dap.http.HTTPSession;
+import org.esa.beam.opendap.DAPVariable;
 import org.esa.beam.opendap.OpendapLeaf;
 
+import java.util.Set;
+
+/**
+ * A class responsible for dealing with DAP node related information
+ *
+ * @author Tonio Fincke
+ */
 public class DAPInfoDispatcher {
 
-    public static void dispatchLeafInfo(OpendapLeaf leaf){
+    private VariableCollector variableCollector;
+
+    public DAPInfoDispatcher() {
+        variableCollector = new VariableCollector();
+    }
+
+    public void dispatchLeafInfo(OpendapLeaf leaf){
         final String ddsUri = leaf.getDdsUri();
         DDS dds = null;
         try {
@@ -19,7 +33,12 @@ public class DAPInfoDispatcher {
             // todo handle exceptions
             e.printStackTrace();
         }
-        //todo continue work on class
+        final DAPVariable[] dapVariables = variableCollector.collectDAPVariablesFromDDS(dds);
+        leaf.addDAPVariables(dapVariables);
+    }
+
+    public Set<DAPVariable> getVariablesFromAllLeaves() {
+        return variableCollector.getVariables();
     }
 
 }

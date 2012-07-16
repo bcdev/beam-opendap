@@ -95,24 +95,8 @@ class CatalogTree {
                 final Object lastPathComponent = event.getPath().getLastPathComponent();
                 final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) lastPathComponent;
                 final TreeNode child = parent.getChildAt(0);
-                if (isCatalogReferenceNode(child)) {
-                    final DefaultMutableTreeNode dapNode = (DefaultMutableTreeNode) child;
-                    final OpendapLeaf catalogLeaf = (OpendapLeaf) dapNode.getUserObject();
-                    final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
-                    model.removeNodeFromParent(dapNode);
-                    try {
-                        final URL catalogUrl = new URL(catalogLeaf.getCatalogUri());
-                        final URLConnection urlConnection = catalogUrl.openConnection();
-                        final InputStream inputStream = urlConnection.getInputStream();
-                        insertCatalogElements(inputStream, catalogUrl.toURI(), parent);
-                    } catch (MalformedURLException e) {
-                        // todo handle with error collection and message dialog at the end.
-                        Debug.trace(e);
-                    } catch (URISyntaxException e) {
-                        Debug.trace(e);
-                    } catch (IOException e) {
-                        Debug.trace(e);
-                    }
+                if(isCatalogReferenceNode(child)) {
+                    resolveCatalogReferenceNode(parent, child, true);
                 }
             }
 
@@ -123,12 +107,37 @@ class CatalogTree {
         });
     }
 
-    void insertCatalogElements(InputStream catalogIS, URI catalogBaseUri, DefaultMutableTreeNode parent) {
+    public synchronized void resolveCatalogReferenceNode(DefaultMutableTreeNode parent, TreeNode child, boolean expandPath) {
+        if (isCatalogReferenceNode(child)) {
+            final DefaultMutableTreeNode dapNode = (DefaultMutableTreeNode) child;
+            final OpendapLeaf catalogLeaf = (OpendapLeaf) dapNode.getUserObject();
+            final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
+            model.removeNodeFromParent(dapNode);
+            try {
+                final URL catalogUrl = new URL(catalogLeaf.getCatalogUri());
+                final URLConnection urlConnection = catalogUrl.openConnection();
+                final InputStream inputStream = urlConnection.getInputStream();
+                insertCatalogElements(inputStream, catalogUrl.toURI(), parent, expandPath);
+            } catch (MalformedURLException e) {
+                // todo handle with error collection and message dialog at the end.
+                Debug.trace(e);
+            } catch (URISyntaxException e) {
+                Debug.trace(e);
+            } catch (IOException e) {
+                Debug.trace(e);
+            }
+        }
+    }
+
+    void insertCatalogElements(InputStream catalogIS, URI catalogBaseUri, DefaultMutableTreeNode parent,
+                               boolean expandPath) {
         final InvCatalogFactory factory = InvCatalogFactory.getDefaultFactory(true);
         final InvCatalogImpl catalog = factory.readXML(catalogIS, catalogBaseUri);
         final List<InvDataset> catalogDatasets = catalog.getDatasets();
         appendToNode(jTree, catalogDatasets, parent, true);
-        expandPath(parent);
+        if(expandPath) {
+            expandPath(parent);
+        }
     }
 
     static void addTreeSelectionListener(final JTree jTree, final ResponseDispatcher responseDispatcher) {

@@ -10,8 +10,12 @@ public class DAPInfoDispatcherTest {
     @Test
     public void testThatNoDAPVariablesAreAddedWhenLeafHasNoVariables() {
         OpendapLeaf leaf = new OpendapLeaf("empty");
-        DAPInfoDispatcher.dispatchLeafInfo(leaf);
+
+        DAPInfoDispatcher dapInfoDispatcher = new DAPInfoDispatcher();
+        dapInfoDispatcher.dispatchLeafInfo(leaf);
+
         assertEquals(0, leaf.getDAPVariables().length);
+        assertEquals(0, dapInfoDispatcher.getVariablesFromAllLeaves().size());
     }
 
 } 
