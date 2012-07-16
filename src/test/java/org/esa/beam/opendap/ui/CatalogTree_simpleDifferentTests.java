@@ -21,6 +21,8 @@ import java.awt.Component;
 import java.awt.Font;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -149,6 +151,12 @@ public class CatalogTree_simpleDifferentTests {
         catalogTree.setNewRootDatasets(datasets);
 
         OpendapLeaf[] leaves = catalogTree.getLeaves();
+        Arrays.sort(leaves, new Comparator<OpendapLeaf>() {
+            @Override
+            public int compare(OpendapLeaf o1, OpendapLeaf o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
         assertEquals(2, leaves.length);
         assertEquals("second", leaves[0].getName());
         assertEquals("third", leaves[1].getName());

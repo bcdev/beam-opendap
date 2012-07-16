@@ -1,12 +1,10 @@
 package org.esa.beam.opendap;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.Arrays;
+import com.bc.ceres.core.Assert;
 import opendap.dap.DArrayDimension;
-import org.esa.beam.util.Guardian;
+import org.esa.beam.util.StringUtils;
 
-public class DAPVariable {
+public class DAPVariable implements Comparable<DAPVariable> {
 
     private final String name;
     private final String type;
@@ -14,13 +12,13 @@ public class DAPVariable {
     private final DArrayDimension[] dimensions;
 
     public DAPVariable(String name, String type, String dataType, DArrayDimension[] dimensions) {
-        Guardian.assertNotNullOrEmpty("name", name);
-        Guardian.assertTrue("'" + name + "' is not a valid name", name.trim().length() > 0);
-//        Guardian.assertNotNullOrEmpty("type", type);
-//        Guardian.assertTrue("'" + type + "' is not a valid type", type.trim().length() > 0);
-//        Guardian.assertNotNullOrEmpty("dataType", dataType);
-//        Guardian.assertTrue("'" + dataType + "' is not a valid dataType", dataType.trim().length() > 0);
-//        Guardian.assertNotNullOrEmpty("dimensions", dimensions);
+        Assert.argument(StringUtils.isNotNullAndNotEmpty(name), "name");
+        Assert.argument(name.trim().length() > 0, "'" + name + "' is not a valid name");
+        Assert.argument(StringUtils.isNotNullAndNotEmpty(type), "type");
+        Assert.argument(type.trim().length() > 0, "'" + type + "' is not a valid type");
+        Assert.argument(StringUtils.isNotNullAndNotEmpty(dataType), "dataType");
+        Assert.argument(dataType.trim().length() > 0, "'" + dataType + "' is not a valid dataType");
+        Assert.argument(dimensions != null && dimensions.length > 0, "dimensions");
 
         this.name = name;
         this.type = type;
@@ -32,17 +30,17 @@ public class DAPVariable {
         return name;
     }
 
-//    public String getType() {
-//        return type;
-//    }
-//
-//    public String getDataType() {
-//        return dataType;
-//    }
-//
-//    public DArrayDimension[] getDimensions() {
-//        return dimensions;
-//    }
+    public String getType() {
+        return type;
+    }
+
+    public String getDataType() {
+        return dataType;
+    }
+
+    public DArrayDimension[] getDimensions() {
+        return dimensions;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -58,7 +56,9 @@ public class DAPVariable {
         if (dataType != null ? !dataType.equals(that.dataType) : that.dataType != null) {
             return false;
         }
-        if (!Arrays.equals(dimensions, that.dimensions)) {
+
+        boolean dimensionsAreEqual = dimensionsAreEqual(that);
+        if (!dimensionsAreEqual) {
             return false;
         }
         if (name != null ? !name.equals(that.name) : that.name != null) {
@@ -71,30 +71,78 @@ public class DAPVariable {
         return true;
     }
 
+    private boolean dimensionsAreEqual(DAPVariable that) {
+        if (dimensions == that.dimensions) {
+            return true;
+        }
+        if (dimensions == null || that.dimensions == null) {
+            return false;
+        }
+
+        if (dimensions.length != that.dimensions.length) {
+            return false;
+        }
+        for (int i = 0; i < dimensions.length; i++) {
+            DArrayDimension dimension1 = dimensions[i];
+            DArrayDimension dimension2 = that.dimensions[i];
+            if (dimension1 == null ^ dimension2 == null) {
+                return false;
+            }
+            if (dimension1 == null) {
+                return true;
+            }
+
+            boolean dimsEqual = dimension1.getSize() == dimension2.getSize();
+            dimsEqual &= dimension1.getName().equals(dimension2.getName());
+            if (!dimsEqual) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public int hashCode() {
         int result = name != null ? name.hashCode() : 0;
         result = 31 * result + (type != null ? type.hashCode() : 0);
         result = 31 * result + (dataType != null ? dataType.hashCode() : 0);
-        result = 31 * result + (dimensions != null ? Arrays.hashCode(dimensions) : 0);
+        result = 31 * result + (dimensions != null ? dimensions.length : 0);
         return result;
     }
 
     public String getInfotext() {
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-        pw.println("Name: " + getName());
-//        pw.println("Type: " + getType());
-//        pw.println("Dimensions: " + getNumDimensions());
-//        pw.println("Datatype: " + getDataType());
-//        for (DArrayDimension dimension : dimensions) {
-//            pw.println("dim(" + dimension.getName() + ") size: " + dimension.getSize());
-//        }
-        pw.close();
-        return sw.toString();
+        final StringBuilder builder = new StringBuilder();
+        builder.append("Name: " + getName() + "\n");
+        builder.append("Type: " + getType() + "\n");
+        builder.append("Dimensions: " + getNumDimensions() + "\n");
+        builder.append("Datatype: " + getDataType() + "\n");
+        for (int i = 0; i < dimensions.length; i++) {
+            final DArrayDimension dimension = dimensions[i];
+            builder.append("dim(" + dimension.getName() + ") size: " + dimension.getSize());
+            if(i < dimensions.length - 1) {
+                builder.append("\n");
+            }
+        }
+        return builder.toString();
     }
 
-//    public int getNumDimensions() {
-//        return dimensions.length;
-//    }
+    public int getNumDimensions() {
+        return dimensions.length;
+    }
+
+    @Override
+    public int compareTo(DAPVariable o) {
+        if (name.equals(o.getName()) && type.equals(o.getType()) && dataType.equals(o.getDataType()) &&
+            dimensions.length == o.getNumDimensions()) {
+            final DArrayDimension[] oDimensions = o.getDimensions();
+            for (int i = 0; i < getNumDimensions(); i++) {
+                if (!dimensions[i].equals(oDimensions[i])) {
+                    return -1;
+                }
+            }
+            return 0;
+        } else {
+            return -1;
+        }
+    }
 }

@@ -31,10 +31,8 @@ public class DatasetNameFilterTest {
 
     @Test
     public void testAccept() throws Exception {
-        final JCheckBox checkBox = new JCheckBox();
-        DatasetNameFilter datasetNameFilter = new DatasetNameFilter(checkBox);
+        DatasetNameFilter datasetNameFilter = new DatasetNameFilter(new JCheckBox());
         assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName")));
-        checkBox.setSelected(true);
         assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName")));
         datasetNameFilter.expressionTextField.setText("x");
         assertFalse(datasetNameFilter.accept(new OpendapLeaf("leafName")));
@@ -51,8 +49,5 @@ public class DatasetNameFilterTest {
         assertFalse(datasetNameFilter.accept(new OpendapLeaf("leafNam")));
         datasetNameFilter.expressionTextField.setText("*afna*");
         assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafNam")));
-
-        checkBox.setSelected(false);
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("hotzenplotz")));
     }
 }

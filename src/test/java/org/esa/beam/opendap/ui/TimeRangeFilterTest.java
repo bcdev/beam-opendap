@@ -16,15 +16,16 @@
 
 package org.esa.beam.opendap.ui;
 
+import com.jidesoft.utils.Lm;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.TimeStampExtractor;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import javax.swing.JCheckBox;
 import java.util.GregorianCalendar;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Storm
@@ -32,15 +33,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class TimeRangeFilterTest {
 
-    @Test
-    public void testAccept_EverythingWhenCheckboxIsUnchecked() throws Exception {
-        final JCheckBox filterCheckBox = new JCheckBox();
-        filterCheckBox.setSelected(false);
-        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
-
-        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc")));
-        assertTrue(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc")));
-        assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern")));
+    @BeforeClass
+    public static void setUp() throws Exception {
+        Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
     }
 
     @Test
@@ -87,9 +82,7 @@ public class TimeRangeFilterTest {
 
     @Test
     public void testAccept_UserEndFileBoth() throws Exception {
-        final JCheckBox filterCheckBox = new JCheckBox();
-        filterCheckBox.setSelected(true);
-        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
+        TimeRangeFilter filter = new TimeRangeFilter(new JCheckBox());
         filter.startDate = null;
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
 
@@ -102,9 +95,7 @@ public class TimeRangeFilterTest {
 
     @Test
     public void testAccept_UserBothFileStart() throws Exception {
-        final JCheckBox filterCheckBox = new JCheckBox();
-        filterCheckBox.setSelected(true);
-        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
+        TimeRangeFilter filter = new TimeRangeFilter(new JCheckBox());
         filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
 
@@ -119,9 +110,7 @@ public class TimeRangeFilterTest {
 
     @Test
     public void testAccept_UserBothFileBoth() throws Exception {
-        final JCheckBox filterCheckBox = new JCheckBox();
-        filterCheckBox.setSelected(true);
-        TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
+        TimeRangeFilter filter = new TimeRangeFilter(new JCheckBox());
         filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");

@@ -79,9 +79,6 @@ class DatasetNameFilter implements FilterComponent {
 
     @Override
     public boolean accept(OpendapLeaf leaf) {
-        if (!checkBox.isSelected()) {
-            return true;
-        }
         String text = expressionTextField.getText();
         if (StringUtils.isNullOrEmpty(text)) {
             return true;

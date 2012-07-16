@@ -1,12 +1,10 @@
 package org.esa.beam.opendap;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.fail;
-
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import opendap.dap.DArrayDimension;
-import org.junit.*;
+import org.junit.Before;
+import org.junit.Test;
+
+import static junit.framework.Assert.*;
 
 public class DAPVariableTest {
 
@@ -32,23 +30,64 @@ public class DAPVariableTest {
     @Test
     public void testGetInfoString() {
         //preparation
-        final StringWriter sw = new StringWriter();
-        final PrintWriter pw = new PrintWriter(sw);
-//        final DArrayDimension[] dimensions = dapVariable.getDimensions();
-        pw.println("Name: " + dapVariable.getName());
-//        pw.println("Type: " + dapVariable.getType());
-//        pw.println("Dimensions: " + dimensions.length);
-//        pw.println("Datatype: " + dapVariable.getDataType());
-//        for (DArrayDimension dimension : dimensions) {
-//            pw.println("dim(" + dimension.getName() + ") size: " + dimension.getSize());
-//        }
-        pw.close();
+        StringBuilder builder = new StringBuilder();
+
+        final DArrayDimension[] dimensions = dapVariable.getDimensions();
+        builder
+                .append("Name: " + dapVariable.getName() + "\n")
+                .append("Type: " + dapVariable.getType() + "\n")
+                .append("Dimensions: " + dimensions.length + "\n")
+                .append("Datatype: " + dapVariable.getDataType() + "\n");
+        for (int i = 0; i < dimensions.length; i++) {
+            final DArrayDimension dimension = dimensions[i];
+            builder.append("dim(" + dimension.getName() + ") size: " + dimension.getSize());
+            if (i < dimensions.length - 1) {
+                builder.append("\n");
+            }
+        }
+
 
         //execution
         final String infotext = dapVariable.getInfotext();
 
         //verification
-        assertEquals(sw.toString(), infotext);
+        assertEquals(builder.toString(), infotext);
+    }
+
+    @Test
+    public void testCompareTo() {
+        //preparation
+        DAPVariable dapVariable2 = new DAPVariable(vName, vType, vDataType, vDimensions);
+        DAPVariable dapVariable3 = new DAPVariable("otherName", vType, vDataType, vDimensions);
+        DAPVariable dapVariable4 = new DAPVariable(vName, "otherType", vDataType, vDimensions);
+        DAPVariable dapVariable5 = new DAPVariable(vName, vType, "otherDataType", vDimensions);
+        final DArrayDimension otherDimension = new DArrayDimension(1000, "otherDimension");
+        DAPVariable dapVariable6 = new DAPVariable(vName, vType, vDataType, new DArrayDimension[]{otherDimension});
+
+        //verification
+        assertEquals(0, dapVariable.compareTo(dapVariable2));
+        assertEquals(-1, dapVariable.compareTo(dapVariable3));
+        assertEquals(-1, dapVariable.compareTo(dapVariable4));
+        assertEquals(-1, dapVariable.compareTo(dapVariable5));
+        assertEquals(-1, dapVariable.compareTo(dapVariable6));
+    }
+
+    @Test
+    public void testEquals() throws Exception {
+        //preparation
+        DAPVariable dapVariable2 = new DAPVariable(vName, vType, vDataType, vDimensions);
+        final DArrayDimension otherDimension = new DArrayDimension(1000, "otherDimension");
+        DAPVariable dapVariable3 = new DAPVariable(vName, vType, vDataType, new DArrayDimension[]{otherDimension});
+
+        final DArrayDimension otherXDimension = new DArrayDimension(1121, "X");
+        final DArrayDimension otherYDimension = new DArrayDimension(812, "Y");
+        DArrayDimension[] otherDimensions = {otherYDimension, otherXDimension};
+        DAPVariable dapVariable4 = new DAPVariable(vName, vType, vDataType, otherDimensions);
+
+        //verification
+        assertTrue(dapVariable.equals(dapVariable2));
+        assertFalse(dapVariable.equals(dapVariable3));
+        assertTrue(dapVariable.equals(dapVariable4));
     }
 
     @Test
@@ -61,14 +100,14 @@ public class DAPVariableTest {
             new DAPVariable(invalidName1, vType, vDataType, vDimensions);
             fail("never come here");
         } catch (IllegalArgumentException e) {
-            assertEquals("[name] is null", e.getMessage());
+            assertEquals("name", e.getMessage());
         }
 
         try {
             new DAPVariable(invalidName2, vType, vDataType, vDimensions);
             fail("never come here");
         } catch (IllegalArgumentException e) {
-            assertEquals("[name] is an empty string", e.getMessage());
+            assertEquals("name", e.getMessage());
         }
 
         try {
@@ -79,80 +118,80 @@ public class DAPVariableTest {
         }
     }
 
-//    @Test
-//    public void testIllegalArgumentExceptionIsThrownIfTypeIsNotValid() {
-//        final String invalidType1 = null;
-//        final String invalidType2 = "";
-//        final String invalidType3 = "    ";
-//
-//        try {
-//            new DAPVariable(vName, invalidType1, vDataType, vDimensions);
-//            fail("never come here");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals("[type] is null", e.getMessage());
-//        }
-//
-//        try {
-//            new DAPVariable(vName, invalidType2, vDataType, vDimensions);
-//            fail("never come here");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals("[type] is an empty string", e.getMessage());
-//        }
-//
-//        try {
-//            new DAPVariable(vName, invalidType3, vDataType, vDimensions);
-//            fail("never come here");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals("'    ' is not a valid type", e.getMessage());
-//        }
-//    }
-//
-//    @Test
-//    public void testIllegalArgumentExceptionIsThrownIfDataTypeIsNotValid() {
-//        final String invalidDataType1 = null;
-//        final String invalidDataType2 = "";
-//        final String invalidDataType3 = "    ";
-//
-//        try {
-//            new DAPVariable(vName, vType, invalidDataType1, vDimensions);
-//            fail("never come here");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals("[dataType] is null", e.getMessage());
-//        }
-//
-//        try {
-//            new DAPVariable(vName, vType, invalidDataType2, vDimensions);
-//            fail("never come here");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals("[dataType] is an empty string", e.getMessage());
-//        }
-//
-//        try {
-//            new DAPVariable(vName, vType, invalidDataType3, vDimensions);
-//            fail("never come here");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals("'    ' is not a valid dataType", e.getMessage());
-//        }
-//    }
-//
-//    @Test
-//    public void testIllegalArgumentExceptionIsThrownIfDimensionsIsNotValid() {
-//        final DArrayDimension[] invalidDimensions1 = null;
-//        final DArrayDimension[] invalidDimensions2 = new DArrayDimension[0];
-//
-//        try {
-//            new DAPVariable(vName, vType, vDataType, invalidDimensions1);
-//            fail("never come here");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals("[dimensions] is null", e.getMessage());
-//        }
-//
-//        try {
-//            new DAPVariable(vName, vType, vDataType, invalidDimensions2);
-//            fail("never come here");
-//        } catch (IllegalArgumentException e) {
-//            assertEquals("[dimensions] is an empty array", e.getMessage());
-//        }
-//
-//    }
+    @Test
+    public void testIllegalArgumentExceptionIsThrownIfTypeIsNotValid() {
+        final String invalidType1 = null;
+        final String invalidType2 = "";
+        final String invalidType3 = "    ";
+
+        try {
+            new DAPVariable(vName, invalidType1, vDataType, vDimensions);
+            fail("never come here");
+        } catch (IllegalArgumentException e) {
+            assertEquals("type", e.getMessage());
+        }
+
+        try {
+            new DAPVariable(vName, invalidType2, vDataType, vDimensions);
+            fail("never come here");
+        } catch (IllegalArgumentException e) {
+            assertEquals("type", e.getMessage());
+        }
+
+        try {
+            new DAPVariable(vName, invalidType3, vDataType, vDimensions);
+            fail("never come here");
+        } catch (IllegalArgumentException e) {
+            assertEquals("'    ' is not a valid type", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testIllegalArgumentExceptionIsThrownIfDataTypeIsNotValid() {
+        final String invalidDataType1 = null;
+        final String invalidDataType2 = "";
+        final String invalidDataType3 = "    ";
+
+        try {
+            new DAPVariable(vName, vType, invalidDataType1, vDimensions);
+            fail("never come here");
+        } catch (IllegalArgumentException e) {
+            assertEquals("dataType", e.getMessage());
+        }
+
+        try {
+            new DAPVariable(vName, vType, invalidDataType2, vDimensions);
+            fail("never come here");
+        } catch (IllegalArgumentException e) {
+            assertEquals("dataType", e.getMessage());
+        }
+
+        try {
+            new DAPVariable(vName, vType, invalidDataType3, vDimensions);
+            fail("never come here");
+        } catch (IllegalArgumentException e) {
+            assertEquals("'    ' is not a valid dataType", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testIllegalArgumentExceptionIsThrownIfDimensionsIsNotValid() {
+        final DArrayDimension[] invalidDimensions1 = null;
+        final DArrayDimension[] invalidDimensions2 = new DArrayDimension[0];
+
+        try {
+            new DAPVariable(vName, vType, vDataType, invalidDimensions1);
+            fail("never come here");
+        } catch (IllegalArgumentException e) {
+            assertEquals("dimensions", e.getMessage());
+        }
+
+        try {
+            new DAPVariable(vName, vType, vDataType, invalidDimensions2);
+            fail("never come here");
+        } catch (IllegalArgumentException e) {
+            assertEquals("dimensions", e.getMessage());
+        }
+
+    }
 }

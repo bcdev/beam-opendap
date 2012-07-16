@@ -162,7 +162,7 @@ public class OpendapAccessPanel extends JPanel {
         timeRangeFilter.addFilterChangeListener(new DefaultFilterChangeListener());
         regionFilter = new RegionFilter();
         regionFilter.addFilterChangeListener(new DefaultFilterChangeListener());
-        variableNameFilter = new VariableNameFilter();
+        variableNameFilter = new VariableFilter(new JCheckBox());
         variableNameFilter.addFilterChangeListener(new DefaultFilterChangeListener());
 
         catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
@@ -179,10 +179,11 @@ public class OpendapAccessPanel extends JPanel {
     }
 
     private void filterLeaf(OpendapLeaf leaf) {
-        if (datasetNameFilter.accept(leaf) &&
-                timeRangeFilter.accept(leaf) &&
-                regionFilter.accept(leaf) &&
-                variableNameFilter.accept(leaf)) {
+        if (
+                (!useDatasetNameFilter.isSelected() || datasetNameFilter.accept(leaf)) &&
+                (!useTimeRangeFilter.isSelected() || timeRangeFilter.accept(leaf)) &&
+                (!useRegionFilter.isSelected() || regionFilter.accept(leaf)) &&
+                (!useVariableNameFilter.isSelected() || variableNameFilter.accept(leaf))) {
             catalogTree.setLeafVisible(leaf, true);
         } else {
             catalogTree.setLeafVisible(leaf, false);

@@ -30,14 +30,14 @@ public class VariableExtractorTest {
 
         assertEquals(1, dapVariables.length);
         assertEquals("Chlorophyll", dapVariables[0].getName());
-//        assertEquals("Grid", dapVariables[0].getType());
-//        assertEquals("Float32", dapVariables[0].getDataType());
-//        assertEquals(2, dapVariables[0].getNumDimensions());
-//        final DArrayDimension[] dimensions = dapVariables[0].getDimensions();
-//        assertEquals("Y", dimensions[0].getName());
-//        assertEquals(849, dimensions[0].getSize());
-//        assertEquals("X", dimensions[1].getName());
-//        assertEquals(1121, dimensions[1].getSize());
+        assertEquals("Grid", dapVariables[0].getType());
+        assertEquals("Float32", dapVariables[0].getDataType());
+        assertEquals(2, dapVariables[0].getNumDimensions());
+        final DArrayDimension[] dimensions = dapVariables[0].getDimensions();
+        assertEquals("Y", dimensions[0].getName());
+        assertEquals(849, dimensions[0].getSize());
+        assertEquals("X", dimensions[1].getName());
+        assertEquals(1121, dimensions[1].getSize());
     }
 
     @Test

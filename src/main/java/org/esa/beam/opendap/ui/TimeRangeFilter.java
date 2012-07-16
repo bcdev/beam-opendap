@@ -179,9 +179,6 @@ public class TimeRangeFilter implements FilterComponent {
 
     @Override
     public boolean accept(OpendapLeaf leaf) {
-        if (!filterCheckBox.isSelected()) {
-            return true;
-        }
         try {
             final ProductData.UTC[] timeStamps = timeStampExtractor.extractTimeStamps(leaf.getName());
 

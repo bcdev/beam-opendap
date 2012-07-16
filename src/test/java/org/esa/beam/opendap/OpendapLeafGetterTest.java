@@ -45,10 +45,10 @@ public class OpendapLeafGetterTest {
 
     @Test
     public void testGetVariables() {
-        DAPVariable variable = new DAPVariable("vname", "vtype", "vdatatype", new DArrayDimension[0]);
+        DAPVariable variable = new DAPVariable("vname", "vtype", "vdatatype", new DArrayDimension[]{new DArrayDimension(10, "dname")});
         opendapLeaf.addDAPVariable(variable);
         assertEquals(1, opendapLeaf.getDAPVariables().length);
-        assertEquals(variable, opendapLeaf.getDAPVariables()[0]);
+        assertSame(variable, opendapLeaf.getDAPVariables()[0]);
     }
 
 }
