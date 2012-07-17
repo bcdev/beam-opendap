@@ -3,26 +3,29 @@ package org.esa.beam.opendap.utils;
 import opendap.dap.BaseType;
 import opendap.dap.DArray;
 import opendap.dap.DArrayDimension;
+import opendap.dap.DConnect2;
 import opendap.dap.DDS;
 import opendap.dap.DGrid;
-import opendap.dap.http.HTTPException;
-import opendap.dap.http.HTTPMethod;
-import opendap.dap.http.HTTPSession;
 import org.esa.beam.opendap.DAPVariable;
 import org.esa.beam.opendap.OpendapLeaf;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
 public class VariableExtractor {
 
-    public static DAPVariable[] extractVariables(OpendapLeaf leaf) {
-        DDS dds = getDDS(leaf);
+    private DDS dds = new DDS();
+
+    public DAPVariable[] extractVariables(OpendapLeaf leaf) {
+        DDS dds = getDDS(leaf.getDdsUri());
         return extractVariables(dds);
     }
 
-    public static DAPVariable[] extractVariables(DDS dds) {
+    public DAPVariable[] extractVariables(DDS dds) {
         final Enumeration ddsVariables = dds.getVariables();
         final List<DAPVariable> dapVariables = new ArrayList<DAPVariable>();
         while (ddsVariables.hasMoreElements()) {
@@ -33,16 +36,26 @@ public class VariableExtractor {
         return dapVariables.toArray(new DAPVariable[dapVariables.size()]);
     }
 
-    private static DDS getDDS(OpendapLeaf leaf) {
-        final String ddsUri = leaf.getDdsUri();
-        DDS dds = null;
+    private DDS getDDS(String uri) {
+        InputStream stream = null;
+        DConnect2 dConnect2 = null;
         try {
-            HTTPSession session = new HTTPSession();
-            final HTTPMethod httpMethod = session.newMethodGet(ddsUri);
-            dds = new DDS(httpMethod.getResponseAsString());
-        } catch (HTTPException e) {
-            // todo handle exceptions
-            e.printStackTrace();
+            stream = new URI(uri).toURL().openStream();
+            dConnect2 = new DConnect2(stream);
+            dds = dConnect2.getDDS();
+        } catch (Exception e) {
+            // todo - handle exception
+        } finally {
+            if (dConnect2 != null) {
+                dConnect2.closeSession();
+            }
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+//                    ignore
+                }
+            }
         }
         return dds;
     }
@@ -72,7 +85,7 @@ public class VariableExtractor {
 
     private static DArrayDimension[] getDimensions(DArray array) {
         final Enumeration dimensions = array.getDimensions();
-        final List<DArrayDimension> dims = new ArrayList();
+        final List<DArrayDimension> dims = new ArrayList<DArrayDimension>();
         while (dimensions.hasMoreElements()) {
             DArrayDimension dimension = (DArrayDimension) dimensions.nextElement();
             dims.add(dimension);

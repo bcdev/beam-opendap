@@ -92,8 +92,7 @@ public class DAPVariable implements Comparable<DAPVariable> {
                 return true;
             }
 
-            boolean dimsEqual = dimension1.getSize() == dimension2.getSize();
-            dimsEqual &= dimension1.getName().equals(dimension2.getName());
+            boolean dimsEqual = dimension1.getName().equals(dimension2.getName());
             if (!dimsEqual) {
                 return false;
             }
@@ -119,7 +118,7 @@ public class DAPVariable implements Comparable<DAPVariable> {
         for (int i = 0; i < dimensions.length; i++) {
             final DArrayDimension dimension = dimensions[i];
             builder.append("dim(" + dimension.getName() + ") size: " + dimension.getSize());
-            if(i < dimensions.length - 1) {
+            if (i < dimensions.length - 1) {
                 builder.append("\n");
             }
         }
@@ -132,17 +131,27 @@ public class DAPVariable implements Comparable<DAPVariable> {
 
     @Override
     public int compareTo(DAPVariable o) {
-        if (name.equals(o.getName()) && type.equals(o.getType()) && dataType.equals(o.getDataType()) &&
-            dimensions.length == o.getNumDimensions()) {
-            final DArrayDimension[] oDimensions = o.getDimensions();
-            for (int i = 0; i < getNumDimensions(); i++) {
-                if (!dimensions[i].equals(oDimensions[i])) {
-                    return -1;
-                }
-            }
-            return 0;
-        } else {
+        int i = name.toLowerCase().compareTo(o.getName().toLowerCase());
+        if(i > 0) {
+            return 1;
+        } else if (i < 0){
             return -1;
         }
+        return 0;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(name + "(");
+        for (int i = 0; i < dimensions.length; i++) {
+            final DArrayDimension dimension = dimensions[i];
+            builder.append(dimension.getName());
+            if (i < dimensions.length - 1) {
+                builder.append(",");
+            }
+        }
+        builder.append(") : ")
+                .append(dataType);
+        return builder.toString();
     }
 }

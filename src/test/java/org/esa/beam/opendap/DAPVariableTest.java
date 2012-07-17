@@ -58,18 +58,17 @@ public class DAPVariableTest {
     public void testCompareTo() {
         //preparation
         DAPVariable dapVariable2 = new DAPVariable(vName, vType, vDataType, vDimensions);
-        DAPVariable dapVariable3 = new DAPVariable("otherName", vType, vDataType, vDimensions);
-        DAPVariable dapVariable4 = new DAPVariable(vName, "otherType", vDataType, vDimensions);
-        DAPVariable dapVariable5 = new DAPVariable(vName, vType, "otherDataType", vDimensions);
-        final DArrayDimension otherDimension = new DArrayDimension(1000, "otherDimension");
-        DAPVariable dapVariable6 = new DAPVariable(vName, vType, vDataType, new DArrayDimension[]{otherDimension});
+        DAPVariable dapVariable3 = new DAPVariable("zzzzzzName", vType, vDataType, vDimensions);
+        DAPVariable dapVariable4 = new DAPVariable("ZzzzzzName", vType, vDataType, vDimensions);
+        DAPVariable dapVariable5 = new DAPVariable("aAAnotherName", vType, vDataType, vDimensions);
+        DAPVariable dapVariable6 = new DAPVariable("AAAnotherName", vType, vDataType, vDimensions);
 
         //verification
         assertEquals(0, dapVariable.compareTo(dapVariable2));
         assertEquals(-1, dapVariable.compareTo(dapVariable3));
         assertEquals(-1, dapVariable.compareTo(dapVariable4));
-        assertEquals(-1, dapVariable.compareTo(dapVariable5));
-        assertEquals(-1, dapVariable.compareTo(dapVariable6));
+        assertEquals(1, dapVariable.compareTo(dapVariable5));
+        assertEquals(1, dapVariable.compareTo(dapVariable6));
     }
 
     @Test

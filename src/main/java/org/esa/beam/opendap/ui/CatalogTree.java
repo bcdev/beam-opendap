@@ -110,12 +110,12 @@ class CatalogTree {
         if (catalogReferenceNode != null) {
             final CatalogNode catalogNode = (CatalogNode) catalogReferenceNode.getUserObject();
             final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
+            final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) catalogReferenceNode.getParent();
             model.removeNodeFromParent(catalogReferenceNode);
             try {
                 final URL catalogUrl = new URL(catalogNode.getCatalogUri());
                 final URLConnection urlConnection = catalogUrl.openConnection();
                 final InputStream inputStream = urlConnection.getInputStream();
-                final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) catalogReferenceNode.getParent();
                 insertCatalogElements(inputStream, catalogUrl.toURI(), parent, expandPath);
             } catch (MalformedURLException e) {
                 // todo handle with error collection and message dialog at the end.

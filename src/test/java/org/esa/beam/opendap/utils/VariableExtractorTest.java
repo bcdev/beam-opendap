@@ -18,7 +18,7 @@ public class VariableExtractorTest {
     public void testThatNoVariableCanBeExtractedFromEmptyDDS() {
         OpendapLeaf leaf = new OpendapLeaf("empty");
 
-        final DAPVariable[] dapVariables = VariableExtractor.extractVariables(leaf);
+        final DAPVariable[] dapVariables = new VariableExtractor().extractVariables(leaf);
 
         assertEquals(0, dapVariables.length);
     }
@@ -27,7 +27,7 @@ public class VariableExtractorTest {
     public void testThatAVariableCanBeExtractedFromADDSWithOneVariable() throws DAP2Exception, ParseException {
         DDS dds = createDDSWithOneVariable();
 
-        final DAPVariable[] dapVariables = VariableExtractor.extractVariables(dds);
+        final DAPVariable[] dapVariables = new VariableExtractor().extractVariables(dds);
 
         assertEquals(1, dapVariables.length);
         assertEquals("Chlorophyll", dapVariables[0].getName());
@@ -45,7 +45,7 @@ public class VariableExtractorTest {
     public void testThatMultipleVariablesCanBeExtractedFromADDSWithMultipleVariables() throws DAP2Exception, ParseException {
         DDS dds = createDDSWithMultipleVariables();
 
-        final DAPVariable[] dapVariables = VariableExtractor.extractVariables(dds);
+        final DAPVariable[] dapVariables = new VariableExtractor().extractVariables(dds);
 
         assertEquals(6, dapVariables.length);
         assertEquals("Chlorophyll", dapVariables[0].getName());

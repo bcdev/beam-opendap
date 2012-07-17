@@ -13,20 +13,22 @@ public class VariableCollector {
 
     private final Set<String> variableNames;
     private final Set<DAPVariable> variables;
+    private VariableExtractor variableExtractor;
 
     public VariableCollector() {
         variableNames = new TreeSet<String>();
         variables = new HashSet<DAPVariable>();
+        variableExtractor = new VariableExtractor();
     }
 
     public DAPVariable[] collectDAPVariables(DDS dds) {
-        final DAPVariable[] dapVariables = VariableExtractor.extractVariables(dds);
+        final DAPVariable[] dapVariables = variableExtractor.extractVariables(dds);
         storeDAPVariables(dapVariables);
         return dapVariables;
     }
 
     public DAPVariable[] collectDAPVariables(OpendapLeaf leaf) {
-        final DAPVariable[] dapVariables = VariableExtractor.extractVariables(leaf);
+        final DAPVariable[] dapVariables = variableExtractor.extractVariables(leaf);
         storeDAPVariables(dapVariables);
         return dapVariables;
     }
