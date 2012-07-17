@@ -174,7 +174,7 @@ public class OpendapAccessPanel extends JPanel {
         useVariableFilter.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!((VariableFilter)variableFilter).hasVariableSet()) {
+                if (!((VariableFilter) variableFilter).hasVariableSet()) {
                     final DAPInfoCollector dapInfoCollector = new DAPInfoCollector();
                     dapInfoCollector.execute();
                 }
@@ -385,8 +385,7 @@ public class OpendapAccessPanel extends JPanel {
 
         @Override
         protected Set<DAPVariable> doInBackground() throws Exception {
-            final DefaultMutableTreeNode root =
-                    (DefaultMutableTreeNode) ( ((JTree) catalogTree.getComponent()).getModel()).getRoot();
+            final DefaultMutableTreeNode root = (DefaultMutableTreeNode) (((JTree) catalogTree.getComponent()).getModel()).getRoot();
             resolveNode(root);
             return dispatcher.getVariablesFromAllLeaves();
         }
@@ -394,7 +393,7 @@ public class OpendapAccessPanel extends JPanel {
         @Override
         protected void done() {
             try {
-                ((VariableFilter)variableFilter).setVariables(get());
+                ((VariableFilter) variableFilter).setVariables(get());
             } catch (InterruptedException e) {
                 //todo handle Exceptions
             } catch (ExecutionException e) {
@@ -403,13 +402,13 @@ public class OpendapAccessPanel extends JPanel {
         }
 
         private void resolveNode(DefaultMutableTreeNode node) {
-            if(node.isLeaf()) {
+            if (node.isLeaf()) {
                 return;
             }
-            for(int i=0; i<node.getChildCount(); i++) {
-                final DefaultMutableTreeNode child = (DefaultMutableTreeNode)node.getChildAt(i);
+            for (int i = 0; i < node.getChildCount(); i++) {
+                final DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
                 resolveNode(child);
-                if(CatalogTree.isCatalogReferenceNode(child)) {
+                if (CatalogTree.isCatalogReferenceNode(child)) {
                     catalogTree.resolveCatalogReferenceNode(node, child, false);
                     i--;
                 }
