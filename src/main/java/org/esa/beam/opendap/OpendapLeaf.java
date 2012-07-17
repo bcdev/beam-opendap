@@ -18,8 +18,9 @@ package org.esa.beam.opendap;
 
 import thredds.catalog.InvDataset;
 
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
 * This is a container for opendap-leaf related information.
@@ -28,34 +29,21 @@ import java.util.Collections;
 * @author Tonio Fincke
 *
 */
-public class OpendapLeaf {
+public class OpendapLeaf extends OpendapNode {
 
-    private final String name;
-    private final InvDataset dataset;
     private boolean dapAccess;
     private boolean fileAccess;
-    private boolean catalogReference;
-    private String catalogUri;
     private String dapUri;
     private String fileUri;
-    private ArrayList<DAPVariable> variables;
+    private Set<DAPVariable> variables;
 
     public OpendapLeaf(String name) {
         this(name, null);
     }
 
     public OpendapLeaf(String name, InvDataset dataset) {
-        this.name = name;
-        this.dataset = dataset;
-        this.variables = new ArrayList<DAPVariable>();
-    }
-
-    public boolean isCatalogReference() {
-        return catalogReference;
-    }
-
-    public void setCatalogReference(boolean catalogReference) {
-        this.catalogReference = catalogReference;
+        super(name, dataset);
+        this.variables = new HashSet<DAPVariable>();
     }
 
     public boolean isDapAccess() {
@@ -102,33 +90,12 @@ public class OpendapLeaf {
         this.fileAccess = fileAccess;
     }
 
-    public String getCatalogUri() {
-        return catalogUri;
-    }
-
-    public void setCatalogUri(String catalogUri) {
-        this.catalogUri = catalogUri;
-    }
-
     public DAPVariable[] getDAPVariables(){
         return variables.toArray(new DAPVariable[variables.size()]);
     }
 
     public void addDAPVariable(DAPVariable variable){
         variables.add(variable);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public InvDataset getDataset() {
-        return dataset;
-    }
-
-    @Override
-    public String toString() {
-        return name;
     }
 
     public void addDAPVariables(DAPVariable[] dapVariables) {

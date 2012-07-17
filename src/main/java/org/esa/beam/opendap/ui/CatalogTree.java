@@ -4,6 +4,7 @@ import opendap.dap.http.HTTPException;
 import opendap.dap.http.HTTPMethod;
 import opendap.dap.http.HTTPSession;
 import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.opendap.CatalogNode;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.util.Debug;
 import thredds.catalog.InvAccess;
@@ -25,7 +26,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.ExpandVetoException;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeModel;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.Component;
 import java.io.IOException;
@@ -94,29 +94,28 @@ class CatalogTree {
             public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
                 final Object lastPathComponent = event.getPath().getLastPathComponent();
                 final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) lastPathComponent;
-                final TreeNode child = parent.getChildAt(0);
-                if(isCatalogReferenceNode(child)) {
-                    resolveCatalogReferenceNode(parent, child, true);
+                final DefaultMutableTreeNode child = (DefaultMutableTreeNode)parent.getChildAt(0);
+                if (isCatalogReferenceNode(child)) {
+                    resolveCatalogReferenceNode(child, true);
                 }
             }
 
             @Override
             public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
-                //Todo change body of created method. Use File | Settings | File Templates to change
             }
         });
     }
 
-    public synchronized void resolveCatalogReferenceNode(DefaultMutableTreeNode parent, TreeNode child, boolean expandPath) {
-        if (isCatalogReferenceNode(child)) {
-            final DefaultMutableTreeNode dapNode = (DefaultMutableTreeNode) child;
-            final OpendapLeaf catalogLeaf = (OpendapLeaf) dapNode.getUserObject();
+    public synchronized void resolveCatalogReferenceNode(DefaultMutableTreeNode catalogReferenceNode, boolean expandPath) {
+        if (catalogReferenceNode != null) {
+            final CatalogNode catalogNode = (CatalogNode) catalogReferenceNode.getUserObject();
             final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
-            model.removeNodeFromParent(dapNode);
+            model.removeNodeFromParent(catalogReferenceNode);
             try {
-                final URL catalogUrl = new URL(catalogLeaf.getCatalogUri());
+                final URL catalogUrl = new URL(catalogNode.getCatalogUri());
                 final URLConnection urlConnection = catalogUrl.openConnection();
                 final InputStream inputStream = urlConnection.getInputStream();
+                final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) catalogReferenceNode.getParent();
                 insertCatalogElements(inputStream, catalogUrl.toURI(), parent, expandPath);
             } catch (MalformedURLException e) {
                 // todo handle with error collection and message dialog at the end.
@@ -153,28 +152,12 @@ class CatalogTree {
                 }
                 final OpendapLeaf dapObject = (OpendapLeaf) userObject;
                 if (dapObject.isDapAccess()) {
-//                final String uri = dapObject.getDodsUri();
-//                final String uri = dapObject.getDdxUri();
                     final String uri = dapObject.getDdsUri();
-//                final String uri = dapObject.getDasUri();
                     try {
                         HTTPSession session = new HTTPSession();
                         final HTTPMethod httpMethod = session.newMethodGet(uri);
-                        final int execute = httpMethod.execute();
+                        httpMethod.execute();
                         responseDispatcher.dispatchDDSResponse(httpMethod.getResponseAsString());
-
-                        // final DODSNetcdfFile netcdfFile = new DODSNetcdfFile(uri);
-                        // System.out.println(netcdfFile.getFileTypeId());
-                        // final Iterator<ProductReaderPlugIn> readerPlugIns = ProductIOPlugInManager.getInstance().getReaderPlugIns(Constants.FORMAT_NAME);
-                        // while (readerPlugIns.hasNext()) {
-                        //     ProductReaderPlugIn readerPlugIn = readerPlugIns.next();
-                        //     if (readerPlugIn instanceof GenericNetCdfReaderPlugIn) {
-                        //         final ProductReader readerInstance = readerPlugIn.createReaderInstance();
-                        //         final Product product = readerInstance.readProductNodes(netcdfFile, null);
-                        //         System.out.println("product.getNumBands() = " + product.getNumBands());
-                        //         product.closeIO();
-                        //     }
-                        // }
                     } catch (IOException e1) {
                         //todo
                         Debug.trace(e1);
@@ -184,7 +167,7 @@ class CatalogTree {
                     try {
                         HTTPSession session = new HTTPSession();
                         final HTTPMethod httpMethod = session.newMethodGet(fileUri);
-                        final int execute = httpMethod.execute();
+                        httpMethod.execute();
                         responseDispatcher.dispatchFileResponse(httpMethod.getResponseAsString());
                     } catch (HTTPException e1) {
                         //todo
@@ -215,7 +198,7 @@ class CatalogTree {
     static boolean isCatalogReferenceNode(Object value) {
         if (value instanceof DefaultMutableTreeNode) {
             final Object userObject = ((DefaultMutableTreeNode) value).getUserObject();
-            return (userObject instanceof OpendapLeaf) && ((OpendapLeaf) userObject).isCatalogReference();
+            return (userObject instanceof CatalogNode);
         }
         return false;
     }
@@ -256,10 +239,9 @@ class CatalogTree {
     static void appendCatalogNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
         final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
         final String catalogPath = catalogRef.getURI().toASCIIString();
-        final OpendapLeaf opendapLeaf = new OpendapLeaf(catalogPath, catalogRef);
-        opendapLeaf.setCatalogReference(true);
-        opendapLeaf.setCatalogUri(catalogPath);
-        catalogNode.add(new DefaultMutableTreeNode(opendapLeaf));
+        final CatalogNode opendapNode = new CatalogNode(catalogPath, catalogRef);
+        opendapNode.setCatalogUri(catalogPath);
+        catalogNode.add(new DefaultMutableTreeNode(opendapNode));
         treeModel.insertNodeInto(catalogNode, parentNode, parentNode.getChildCount());
     }
 
@@ -368,7 +350,7 @@ class CatalogTree {
 
     private void fireLeafAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
         for (CatalogTreeListener catalogTreeListener : catalogTreeListeners) {
-            catalogTreeListener.dataNodeAdded(leaf, hasNestedDatasets);
+            catalogTreeListener.leafAdded(leaf, hasNestedDatasets);
         }
     }
 
@@ -387,7 +369,7 @@ class CatalogTree {
 
     static interface CatalogTreeListener {
 
-        void dataNodeAdded(OpendapLeaf leaf, boolean hasNestedDatasets);
+        void leafAdded(OpendapLeaf leaf, boolean hasNestedDatasets);
 
     }
 }

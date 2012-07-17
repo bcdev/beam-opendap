@@ -5,7 +5,11 @@ import opendap.dap.DArray;
 import opendap.dap.DArrayDimension;
 import opendap.dap.DDS;
 import opendap.dap.DGrid;
+import opendap.dap.http.HTTPException;
+import opendap.dap.http.HTTPMethod;
+import opendap.dap.http.HTTPSession;
 import org.esa.beam.opendap.DAPVariable;
+import org.esa.beam.opendap.OpendapLeaf;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -13,15 +17,34 @@ import java.util.List;
 
 public class VariableExtractor {
 
+    public static DAPVariable[] extractVariables(OpendapLeaf leaf) {
+        DDS dds = getDDS(leaf);
+        return extractVariables(dds);
+    }
+
     public static DAPVariable[] extractVariables(DDS dds) {
         final Enumeration ddsVariables = dds.getVariables();
-        ArrayList<DAPVariable> dapVariables = new ArrayList<DAPVariable>();
+        final List<DAPVariable> dapVariables = new ArrayList<DAPVariable>();
         while (ddsVariables.hasMoreElements()) {
             final BaseType ddsVariable = (BaseType) ddsVariables.nextElement();
             DAPVariable dapVariable = convertToDAPVariable(ddsVariable);
             dapVariables.add(dapVariable);
         }
         return dapVariables.toArray(new DAPVariable[dapVariables.size()]);
+    }
+
+    private static DDS getDDS(OpendapLeaf leaf) {
+        final String ddsUri = leaf.getDdsUri();
+        DDS dds = null;
+        try {
+            HTTPSession session = new HTTPSession();
+            final HTTPMethod httpMethod = session.newMethodGet(ddsUri);
+            dds = new DDS(httpMethod.getResponseAsString());
+        } catch (HTTPException e) {
+            // todo handle exceptions
+            e.printStackTrace();
+        }
+        return dds;
     }
 
     private static DAPVariable convertToDAPVariable(BaseType ddsVariable) {
@@ -41,7 +64,6 @@ public class VariableExtractor {
         final DArrayDimension[] dimensions = getDimensions(array);
 
         return new DAPVariable(name, typeName, dataTypeName, dimensions);
-//        return new DAPVariable(name, null, null, null);
     }
 
     private static String getDataTypeName(DArray array) {

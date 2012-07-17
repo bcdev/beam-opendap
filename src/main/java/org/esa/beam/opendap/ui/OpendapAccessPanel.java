@@ -4,15 +4,10 @@ import com.jidesoft.combobox.FolderChooserExComboBox;
 import com.jidesoft.combobox.PopupPanel;
 import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.utils.Lm;
-import opendap.dap.DAP2Exception;
-import opendap.dap.DDS;
-import opendap.dap.parser.ParseException;
 import org.esa.beam.opendap.DAPVariable;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.DAPDownloader;
-import org.esa.beam.opendap.utils.DAPInfoDispatcher;
 import org.esa.beam.opendap.utils.VariableCollector;
-import org.esa.beam.util.Debug;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
@@ -45,7 +40,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -130,7 +124,6 @@ public class OpendapAccessPanel extends JPanel {
             }
         });
         dapResponseArea = new JTextArea(10, 40);
-        final VariableCollector variableCollector = new VariableCollector();
         catalogTree = new CatalogTree(new CatalogTree.ResponseDispatcher() {
             @Override
             public void dispatchDASResponse(String response) {
@@ -140,16 +133,6 @@ public class OpendapAccessPanel extends JPanel {
             @Override
             public void dispatchDDSResponse(String response) {
                 dapResponseArea.setText(response);
-
-                final DDS dds = new DDS();
-                try {
-                    dds.parse(new ByteArrayInputStream(response.getBytes()));
-                    variableCollector.collectDAPVariablesFromDDS(dds);
-                } catch (ParseException e) {
-                    Debug.trace(e);
-                } catch (DAP2Exception e) {
-                    Debug.trace(e);
-                }
             }
 
             @Override
@@ -183,7 +166,7 @@ public class OpendapAccessPanel extends JPanel {
 
         catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
             @Override
-            public void dataNodeAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
+            public void leafAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
                 if (hasNestedDatasets) {
                     return;
                 }
@@ -377,17 +360,17 @@ public class OpendapAccessPanel extends JPanel {
 
     private class DAPInfoCollector extends SwingWorker<Set<DAPVariable>, Object> implements CatalogTree.CatalogTreeListener {
 
-        private DAPInfoDispatcher dispatcher;
+        private VariableCollector collector;
 
         private DAPInfoCollector() {
-            dispatcher = new DAPInfoDispatcher();
+            collector = new VariableCollector();
         }
 
         @Override
         protected Set<DAPVariable> doInBackground() throws Exception {
             final DefaultMutableTreeNode root = (DefaultMutableTreeNode) (((JTree) catalogTree.getComponent()).getModel()).getRoot();
             resolveNode(root);
-            return dispatcher.getVariablesFromAllLeaves();
+            return collector.getVariables();
         }
 
         @Override
@@ -409,15 +392,18 @@ public class OpendapAccessPanel extends JPanel {
                 final DefaultMutableTreeNode child = (DefaultMutableTreeNode) node.getChildAt(i);
                 resolveNode(child);
                 if (CatalogTree.isCatalogReferenceNode(child)) {
-                    catalogTree.resolveCatalogReferenceNode(node, child, false);
+                    catalogTree.resolveCatalogReferenceNode(child, false);
+                    // because above line removes a tree node, the children indices are all decreased by 1
+                    // to address the next child correctly, we have to do the following:
                     i--;
                 }
             }
         }
 
         @Override
-        public void dataNodeAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
-            dispatcher.dispatchLeafInfo(leaf);
+        public void leafAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
+            DAPVariable[] leafVariables = collector.collectDAPVariables(leaf);
+            leaf.addDAPVariables(leafVariables);
         }
     }
 

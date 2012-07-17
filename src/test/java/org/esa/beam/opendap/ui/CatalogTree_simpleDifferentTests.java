@@ -100,9 +100,9 @@ public class CatalogTree_simpleDifferentTests {
         // todo change the expected icon to a realistic icon
         assertEquals("/NoAccess16.png", icon1.getDescription().substring(icon1.getDescription().lastIndexOf("/")));
 
-        final Color foreground1 = tcr1.getForeground();
-        final Color background1 = tcr1.getBackground();
-        final Font font1 = tcr1.getFont();
+        final Color foreground = tcr1.getForeground();
+        final Color background = tcr1.getBackground();
+        final Font font = tcr1.getFont();
 
         final Component component2 = dapCellRenderer.getTreeCellRendererComponent(jTree, dapNode, false, false, true, 0, false);
 
@@ -116,9 +116,9 @@ public class CatalogTree_simpleDifferentTests {
         // todo change the expected icon to a realistic icon
         assertEquals("/DRsProduct16.png", icon2.getDescription().substring(icon2.getDescription().lastIndexOf("/")));
 
-        assertEquals(foreground1, tcr2.getForeground());
-        assertEquals(background1, tcr2.getBackground());
-        assertEquals(font1, tcr2.getFont());
+        assertEquals(foreground, tcr2.getForeground());
+        assertEquals(background, tcr2.getBackground());
+        assertEquals(font, tcr2.getFont());
 
 
         final Component component3 = dapCellRenderer.getTreeCellRendererComponent(jTree, fileNode, false, false, true, 0, false);
@@ -133,9 +133,9 @@ public class CatalogTree_simpleDifferentTests {
         // todo change the expected icon to a realistic icon
         assertEquals("/FRsProduct16.png", icon3.getDescription().substring(icon3.getDescription().lastIndexOf("/")));
 
-        assertEquals(foreground1, tcr3.getForeground());
-        assertEquals(background1, tcr3.getBackground());
-        assertEquals(font1, tcr3.getFont());
+        assertEquals(foreground, tcr3.getForeground());
+        assertEquals(background, tcr3.getBackground());
+        assertEquals(font, tcr3.getFont());
     }
 
     @Test

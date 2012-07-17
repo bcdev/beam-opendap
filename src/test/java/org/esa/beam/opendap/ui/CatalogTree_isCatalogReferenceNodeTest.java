@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.opendap.CatalogNode;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.*;
 
@@ -31,8 +32,7 @@ public class CatalogTree_isCatalogReferenceNodeTest {
 
     @Test
     public void testThatOpendapLeafWhichIsCatalogRefIsResolvedToTrue() {
-        final OpendapLeaf opendapLeaf = new OpendapLeaf("any");
-        opendapLeaf.setCatalogReference(true);
+        final CatalogNode opendapLeaf = new CatalogNode("any", null);
         final DefaultMutableTreeNode notDapNode = new DefaultMutableTreeNode(opendapLeaf);
         assertEquals(true, CatalogTree.isCatalogReferenceNode(notDapNode));
     }

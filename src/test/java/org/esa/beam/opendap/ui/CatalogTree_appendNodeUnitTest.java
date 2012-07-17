@@ -1,6 +1,6 @@
 package org.esa.beam.opendap.ui;
 
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.CatalogNode;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -91,12 +91,9 @@ public class CatalogTree_appendNodeUnitTest {
         assertEquals("catalogRefName/", child1.getUserObject());
 
         final DefaultMutableTreeNode child2 = (DefaultMutableTreeNode) parentNode.getChildAt(0).getChildAt(0);
-        assertEquals(true, child2.getUserObject() instanceof OpendapLeaf);
-        final OpendapLeaf opendapLeaf = (OpendapLeaf) child2.getUserObject();
-        assertEquals("http://a.b", opendapLeaf.getCatalogUri());
-        assertEquals(true, opendapLeaf.isCatalogReference());
-        assertEquals(false, opendapLeaf.isFileAccess());
-        assertEquals(false, opendapLeaf.isDapAccess());
+        assertEquals(true, child2.getUserObject() instanceof CatalogNode);
+        final CatalogNode catalogNode = (CatalogNode) child2.getUserObject();
+        assertEquals("http://a.b", catalogNode.getCatalogUri());
     }
 
     private void testThatChildIsNeitherDapNodeNorFileNode(DefaultMutableTreeNode parentNode) {

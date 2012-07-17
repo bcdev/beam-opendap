@@ -2,6 +2,7 @@ package org.esa.beam.opendap.utils;
 
 import opendap.dap.DDS;
 import org.esa.beam.opendap.DAPVariable;
+import org.esa.beam.opendap.OpendapLeaf;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,13 +19,23 @@ public class VariableCollector {
         variables = new HashSet<DAPVariable>();
     }
 
-    public DAPVariable[] collectDAPVariablesFromDDS(DDS dds) {
+    public DAPVariable[] collectDAPVariables(DDS dds) {
         final DAPVariable[] dapVariables = VariableExtractor.extractVariables(dds);
+        storeDAPVariables(dapVariables);
+        return dapVariables;
+    }
+
+    public DAPVariable[] collectDAPVariables(OpendapLeaf leaf) {
+        final DAPVariable[] dapVariables = VariableExtractor.extractVariables(leaf);
+        storeDAPVariables(dapVariables);
+        return dapVariables;
+    }
+
+    private void storeDAPVariables(DAPVariable[] dapVariables) {
         for (DAPVariable dapVariable : dapVariables) {
             variables.add(dapVariable);
             variableNames.add(dapVariable.getName());
         }
-        return dapVariables;
     }
 
     public Set<String> getVariableNames() {
