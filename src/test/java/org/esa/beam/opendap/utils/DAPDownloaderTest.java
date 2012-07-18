@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.utils;
 
+import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -45,7 +46,7 @@ public class DAPDownloaderTest {
 
     @Test
     public void testDownloadFile() throws Exception {
-        DAPDownloader dapDownloader = new DAPDownloader(new ArrayList<String>(), new ArrayList<String>());
+        DAPDownloader dapDownloader = new DAPDownloader(new ArrayList<String>(), new ArrayList<String>(), ProgressMonitor.NULL);
         String fileName = "fileToTextDownload.txt";
         assertFalse(getTestFile(fileName).exists());
         assertEquals(0, dapDownloader.downloadedFiles.size());
@@ -185,7 +186,7 @@ public class DAPDownloaderTest {
     @Ignore
     @Test
     public void testActualWriting() throws Exception {
-        final DAPDownloader dapDownloader = new DAPDownloader(null, null);
+        final DAPDownloader dapDownloader = new DAPDownloader(null, null, ProgressMonitor.NULL);
         final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile("http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
         dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "", sourceNetcdfFile);
 
@@ -199,7 +200,7 @@ public class DAPDownloaderTest {
     @Ignore
     @Test
     public void testActualWriting_WithConstraint() throws Exception {
-        final DAPDownloader dapDownloader = new DAPDownloader(null, null);
+        final DAPDownloader dapDownloader = new DAPDownloader(null, null, ProgressMonitor.NULL);
         final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile("http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
         dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "COADSX[0:1:4]", sourceNetcdfFile);
 

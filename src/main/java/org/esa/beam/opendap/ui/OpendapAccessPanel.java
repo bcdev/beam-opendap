@@ -1,5 +1,7 @@
 package org.esa.beam.opendap.ui;
 
+import com.bc.ceres.core.ProgressBarProgressMonitor;
+import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.combobox.FolderChooserExComboBox;
 import com.jidesoft.combobox.PopupPanel;
 import com.jidesoft.swing.FolderChooser;
@@ -12,6 +14,7 @@ import org.esa.beam.visat.VisatApp;
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvDataset;
+import thredds.catalog.InvDatasetImpl;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -23,10 +26,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -232,6 +237,9 @@ public class OpendapAccessPanel extends JPanel {
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
         final JButton downloadButton = new JButton("Download");
+        final JProgressBar progressBar = new JProgressBar();
+        JLabel messageLabel = new JLabel();
+        final ProgressMonitor pm = new MyProgressBarProgressMonitor(progressBar, messageLabel);
         final FolderChooserExComboBox folderChooserComboBox = new FolderChooserExComboBox() {
             @Override
             public PopupPanel createPopupComponent() {
@@ -253,10 +261,12 @@ public class OpendapAccessPanel extends JPanel {
                 }
                 List<String> dapURIs = new ArrayList<String>();
                 List<String> fileURIs = new ArrayList<String>();
+                int datasize = 0;
                 for (TreePath selectionPath : selectionPaths) {
                     final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
                     if (CatalogTree.isDapNode(treeNode)) {
                         final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
+                        datasize += ((InvDatasetImpl) leaf.getDataset()).getLocalMetadata().getDataSize() / (1024 * 1024);
                         if (leaf.isDapAccess()) {
                             dapURIs.add(leaf.getDapUri());
                         } else {
@@ -267,18 +277,32 @@ public class OpendapAccessPanel extends JPanel {
                 if (dapURIs.size() == 0) {
                     return;
                 }
-                final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs);
-                File targetDirectory;
+                pm.beginTask("Downloading", datasize);
+                final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, pm);
+                final File targetDirectory;
                 if (folderChooserComboBox.getSelectedItem() == null ||
                     folderChooserComboBox.getSelectedItem().toString().equals("")) {
                     targetDirectory = fetchTargetDirectory();
                 } else {
                     targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
                 }
-                downloader.saveProducts(targetDirectory);
-                if (openInVisat.isSelected()) {
-                    downloader.openProducts(VisatApp.getApp());
-                }
+                SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        downloader.saveProducts(targetDirectory);
+                        if (openInVisat.isSelected()) {
+                            downloader.openProducts(VisatApp.getApp());
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        pm.done();
+                    }
+                };
+                swingWorker.execute();
             }
         });
         folderChooserComboBox.setEditable(true);
@@ -286,7 +310,9 @@ public class OpendapAccessPanel extends JPanel {
             downloadButtonPanel.add(openInVisat, BorderLayout.NORTH);
         }
         downloadButtonPanel.add(folderChooserComboBox);
+        downloadButtonPanel.add(progressBar, BorderLayout.SOUTH);
         downloadButtonPanel.add(downloadButton, BorderLayout.EAST);
+        downloadButtonPanel.add(messageLabel, BorderLayout.NORTH);
 
         final JPanel centerRightPane = new JPanel(new BorderLayout());
         centerRightPane.add(filterPanel, BorderLayout.NORTH);
@@ -346,6 +372,29 @@ public class OpendapAccessPanel extends JPanel {
             }
         }
 
+    }
+
+    private static class MyProgressBarProgressMonitor extends ProgressBarProgressMonitor {
+
+        private MyProgressBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
+            super(progressBar, messageLabel);
+        }
+
+        @Override
+        protected void setDescription(String description) {
+        }
+
+        @Override
+        protected void setVisibility(boolean visible) {
+        }
+
+        @Override
+        protected void setRunning() {
+        }
+
+        @Override
+        protected void finish() {
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.utils;
 
+import com.bc.ceres.core.ProgressMonitor;
 import com.bc.io.FileDownloader;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
@@ -30,11 +31,13 @@ public class DAPDownloader {
 
     final List<String> dapUris;
     final List<String> fileURIs;
+    private final ProgressMonitor pm;
     final Set<File> downloadedFiles;
 
-    public DAPDownloader(List<String> dapUris, List<String> fileURIs) {
+    public DAPDownloader(List<String> dapUris, List<String> fileURIs, ProgressMonitor pm) {
         this.dapUris = dapUris;
         this.fileURIs = fileURIs;
+        this.pm = pm;
         downloadedFiles = new HashSet<File>();
     }
 
@@ -43,7 +46,7 @@ public class DAPDownloader {
             downloadFilesWithDapAccess(targetDir);
             downloadFilesWithFileAccess(targetDir);
         } else {
-            JOptionPane.showMessageDialog(null, "Could not save to directory' "+targetDir+"'");
+            JOptionPane.showMessageDialog(null, "Could not save to directory' " + targetDir + "'");
         }
     }
 
@@ -57,7 +60,7 @@ public class DAPDownloader {
     private void downloadFilesWithDapAccess(File targetDir) {
         for (String dapURI : dapUris) {
             final String errorMessagePrefix = "Unable to download '" + dapURI + "' due to Exception\n" +
-                    "Message: ";
+                                              "Message: ";
             try {
                 downloadDapFile(targetDir, dapURI);
             } catch (IOException e) {
@@ -75,7 +78,7 @@ public class DAPDownloader {
         String[] uriComponents = dapURI.split("\\?");
         String fileName = dapURI.substring(uriComponents[0].lastIndexOf("/", uriComponents[0].length() - 1));
         String constraintExpression = "";
-        if(uriComponents.length > 1) {
+        if (uriComponents.length > 1) {
             constraintExpression = uriComponents[1];
         }
         writeNetcdfFile(targetDir, fileName, constraintExpression, netcdfFile);
@@ -84,7 +87,30 @@ public class DAPDownloader {
     void writeNetcdfFile(File targetDir, String fileName, String constraintExpression, DODSNetcdfFile sourceNetcdfFile) throws IOException {
         final File file = new File(targetDir, fileName);
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
-            FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath());
+            List<FileWriter.FileWriterProgressListener> progressListeners = null;
+            boolean fileLongEnoughForMonitoring = file.length() > 50 * 1024 * 1024;
+            if (fileLongEnoughForMonitoring) {
+                progressListeners = new ArrayList<FileWriter.FileWriterProgressListener>();
+                progressListeners.add(new FileWriter.FileWriterProgressListener() {
+                    @Override
+                    public void writeProgress(FileWriter.FileWriterProgressEvent event) {
+                        if (event.getBytesWritten() != 0) {
+                            pm.worked((int) (event.getBytesWritten() / (1024 * 1024)));
+                            System.out.println("DAPDownloader.writeProgress");
+                        }
+                    }
+
+                    @Override
+                    public void writeStatus(FileWriter.FileWriterProgressEvent event) {
+                        System.out.println("event.getStatus() = " + event.getStatus());
+                    }
+                });
+            }
+            FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), false, false, progressListeners);
+            if (!fileLongEnoughForMonitoring) {
+                pm.worked((int) (file.length() / (1024 * 1024)));
+                System.out.println("DAPDownloader.writeNetcdfFile");
+            }
             downloadedFiles.add(file);
             return;
         }
@@ -113,7 +139,7 @@ public class DAPDownloader {
         final NetcdfFileWriteable targetNetCDF = NetcdfFileWriteable.createNew(file.getAbsolutePath());
         for (Dimension filteredDimension : filteredDimensions) {
             targetNetCDF.addDimension(filteredDimension.getName(), filteredDimension.getLength(),
-                    filteredDimension.isShared(), filteredDimension.isUnlimited(), filteredDimension.isVariableLength());
+                                      filteredDimension.isShared(), filteredDimension.isUnlimited(), filteredDimension.isVariableLength());
         }
         for (String filteredVariable : filteredVariables) {
             final Variable variable = sourceNetcdfFile.findVariable(NetcdfFile.escapeName(filteredVariable));
@@ -146,13 +172,13 @@ public class DAPDownloader {
     static String getConstraintExpression(String sourceVariable, String constraintExpression) {
         final String[] constraintExpressions = constraintExpression.split(",");
         for (String expression : constraintExpressions) {
-            if(expression.startsWith(sourceVariable + "[")) {
+            if (expression.startsWith(sourceVariable + "[")) {
                 return expression;
             }
         }
         throw new IllegalArgumentException(
                 MessageFormat.format("Source variable ''{0}'' must be included in expression ''{1}''.",
-                        sourceVariable, constraintExpression));
+                                     sourceVariable, constraintExpression));
     }
 
     static int[] getOrigin(String variableName, String constraintExpression, int dimensionCount) {
@@ -173,7 +199,7 @@ public class DAPDownloader {
                 if (rangeConstraints.length - 1 > dimensionCount) {
                     throw new IllegalArgumentException(
                             MessageFormat.format("Illegal expression: ''{0}'' for variable ''{1}''.",
-                                    constraintExpression, variableName));
+                                                 constraintExpression, variableName));
                 }
                 for (int i = 1; i < rangeConstraints.length; i++) {
                     String rangeConstraint = rangeConstraints[i];
@@ -243,6 +269,8 @@ public class DAPDownloader {
                 e.printStackTrace();
             } catch (URISyntaxException e) {
                 e.printStackTrace();
+            } finally {
+                System.out.println("DAPDownloader.downloadFilesWithFileAccess");
             }
         }
     }
