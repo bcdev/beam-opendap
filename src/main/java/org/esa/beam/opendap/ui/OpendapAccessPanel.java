@@ -2,7 +2,6 @@ package org.esa.beam.opendap.ui;
 
 import com.jidesoft.combobox.FolderChooserExComboBox;
 import com.jidesoft.combobox.PopupPanel;
-import com.jidesoft.status.StatusBar;
 import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.utils.Lm;
 import org.esa.beam.opendap.OpendapLeaf;
@@ -64,7 +63,6 @@ public class OpendapAccessPanel extends JPanel {
     private VariableFilter variableFilter;
 
     private JCheckBox openInVisat;
-    private StatusBar statusBar;
 
     private final PropertyMap propertyMap;
 
@@ -94,7 +92,6 @@ public class OpendapAccessPanel extends JPanel {
     }
 
     private void initComponents() {
-        statusBar = new StatusBar();
         urlField = new JComboBox();
         urlField.setEditable(true);
         urlField.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
