@@ -108,6 +108,7 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
             @Override
             public void actionPerformed(ActionEvent e) {
                 boolean useFilter = filterCheckBox.isSelected();
+                fireFilterChanged();
                 updateUI(useFilter, useFilter, useFilter);
             }
         });
