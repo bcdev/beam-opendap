@@ -150,7 +150,7 @@ public class OpendapAccessPanel extends JPanel {
         timeRangeFilter.addFilterChangeListener(filterChangeListener);
         regionFilter = new RegionFilter();
         regionFilter.addFilterChangeListener(filterChangeListener);
-        variableFilter = new VariableFilter(useVariableFilter, catalogTree, statusBar);
+        variableFilter = new VariableFilter(useVariableFilter, catalogTree);
         variableFilter.addFilterChangeListener(filterChangeListener);
 
         catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
