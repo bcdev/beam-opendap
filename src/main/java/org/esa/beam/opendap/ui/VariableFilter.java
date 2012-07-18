@@ -1,5 +1,7 @@
 package org.esa.beam.opendap.ui;
 
+import com.bc.ceres.core.ProgressBarProgressMonitor;
+import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.list.CheckBoxListSelectionModelWithWrapper;
 import com.jidesoft.list.FilterableCheckBoxList;
 import com.jidesoft.list.QuickListFilterField;
@@ -11,7 +13,9 @@ import org.esa.beam.opendap.utils.VariableCollector;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.SwingWorker;
@@ -37,6 +41,7 @@ import java.util.concurrent.ExecutionException;
 
 public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeListener {
 
+    private static final int MAX_THREAD_COUNT = 10;
     private final JCheckBox filterCheckBox;
     private VariableCollector collector = new VariableCollector();
 
@@ -48,6 +53,12 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
     private QuickListFilterField field;
     private List<FilterChangeListener> listeners;
     private final HashSet<VariableFilterPreparator> filterPreparators = new HashSet<VariableFilterPreparator>();
+    private final List<VariableFilterPreparator> filterPreparatorsInWait = new ArrayList<VariableFilterPreparator>();
+    private ProgressMonitor pm;
+    private JProgressBar progressBar;
+    private JLabel statusLabel;
+    private int totalWork;
+    private int worked;
 
     public VariableFilter(JCheckBox filterCheckBox, CatalogTree catalogTree) {
         this.filterCheckBox = filterCheckBox;
@@ -100,8 +111,6 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
                 updateUI(useFilter, useFilter, useFilter);
             }
         });
-
-
         checkBoxList.getCheckBoxListSelectionModel().addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -127,6 +136,8 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         selectAllButton.setFont(font);
         selectNoneButton.setFont(font);
         field.setHintText("Type here to filter variables");
+        statusLabel = new JLabel();
+        setProgressComponentsVisible(false);
     }
 
     private void addComponents(JPanel panel) {
@@ -134,11 +145,13 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
 
         JScrollPane scrollPane = new JScrollPane(checkBoxList);
         scrollPane.setPreferredSize(new Dimension(250, 100));
-        GridBagUtils.addToPanel(panel, field, gbc, "insets.top=5, gridx=0, gridy=0, gridwidth=3, anchor=WEST, fill=HORIZONTAL, weightx=1.0");
-        GridBagUtils.addToPanel(panel, scrollPane, gbc, "gridy=1");
-        GridBagUtils.addToPanel(panel, selectAllButton, gbc, "insets.right=5, gridy=2, gridwidth=1,fill=NONE, weightx=0");
-        GridBagUtils.addToPanel(panel, selectNoneButton, gbc, "gridx=1, gridy=2");
-        GridBagUtils.addToPanel(panel, applyButton, gbc, "insets.right=0, gridx=2, gridy=3, anchor=EAST");
+        GridBagUtils.addToPanel(panel, progressBar, gbc, "insets.top=5, gridx=0, gridy=0, gridwidth=2, anchor=WEST, fill=HORIZONTAL, weightx=1.0");
+        GridBagUtils.addToPanel(panel, statusLabel, gbc, "gridx=2, anchor=EAST, gridwidth=1, fill=NONE, weightx=0.0");
+        GridBagUtils.addToPanel(panel, field, gbc, "gridx=0, gridy=1, anchor=WEST, gridwidth=3, fill=HORIZONTAL, weightx=1.0");
+        GridBagUtils.addToPanel(panel, scrollPane, gbc, "gridy=2");
+        GridBagUtils.addToPanel(panel, selectAllButton, gbc, "insets.right=5, gridy=3, gridwidth=1, fill=NONE, weightx=0");
+        GridBagUtils.addToPanel(panel, selectNoneButton, gbc, "gridx=1");
+        GridBagUtils.addToPanel(panel, applyButton, gbc, "insets.right=0, gridx=2, gridy=4, anchor=EAST");
     }
 
     private void initComponents() {
@@ -148,6 +161,7 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         listModel = new FilterListModel();
         field = new QuickListFilterField(listModel);
         checkBoxList = new FilterableCheckBoxList(field.getDisplayListModel());
+        progressBar = new JProgressBar();
     }
 
     @Override
@@ -215,6 +229,12 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         private Set<ListDataListener> listeners = new HashSet<ListDataListener>();
 
         void addVariables(DAPVariable[] dapVariables) {
+            for (DAPVariable dapVariable : dapVariables) {
+                if (dapVariable.getName().startsWith("gauge_na")) {
+                    System.out.println("VariableFilter$FilterListModel.addVariables");
+                }
+            }
+
             allVariables.addAll(Arrays.asList(dapVariables));
             for (ListDataListener listener : listeners) {
                 listener.contentsChanged(new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize() - 1));
@@ -246,10 +266,29 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
     public void leafAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
         VariableFilterPreparator filterPreparator = new VariableFilterPreparator(leaf);
 
-        filterPreparators.add(filterPreparator);
-        filterPreparator.execute();
-        filterCheckBox.setEnabled(false);
-        filterCheckBox.setSelected(false);
+        if (totalWork > 0) {
+            setProgressComponentsVisible(true);
+        }
+
+        if (filterPreparators.size() <= MAX_THREAD_COUNT) {
+            filterPreparators.add(filterPreparator);
+            filterPreparator.execute();
+            filterCheckBox.setEnabled(false);
+            filterCheckBox.setSelected(false);
+            updateUI(false, false, false);
+        } else {
+            filterPreparatorsInWait.add(filterPreparator);
+        }
+
+        totalWork++;
+    }
+
+    @Override
+    public void catalogElementsInsertionFinished() {
+        pm = new VariableFilterProgressBarProgressMonitor(progressBar, statusLabel);
+        pm.setTaskName("");
+        pm.beginTask("", totalWork);
+        pm.worked(worked);
     }
 
     private class VariableFilterPreparator extends SwingWorker<DAPVariable[], Void> {
@@ -274,15 +313,59 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
                 listModel.addVariables(dapVariables);
             } catch (InterruptedException e) {
                 // todo - implement
+                e.printStackTrace();
             } catch (ExecutionException e) {
                 // todo - implement
+                e.printStackTrace();
             } finally {
                 filterPreparators.remove(this);
+                pm.worked(1);
+                worked++;
+                if (!filterPreparatorsInWait.isEmpty()) {
+                    VariableFilterPreparator nextFilterPreparator = filterPreparatorsInWait.remove(0);
+                    filterPreparators.add(nextFilterPreparator);
+                    nextFilterPreparator.execute();
+                }
+                int percentage = (int) (((double) worked / (double) totalWork) * 100);
+                pm.setTaskName(percentage + " %");
                 if (filterPreparators.isEmpty()) {
                     updateUI(true, true, true);
                     filterCheckBox.setEnabled(true);
+                    pm.done();
+                    setProgressComponentsVisible(false);
+                    worked = 0;
+                    totalWork = 0;
                 }
             }
         }
     }
+
+    private void setProgressComponentsVisible(boolean visible) {
+        progressBar.setVisible(visible);
+        statusLabel.setVisible(visible);
+    }
+
+    private static class VariableFilterProgressBarProgressMonitor extends ProgressBarProgressMonitor {
+
+        public VariableFilterProgressBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
+            super(progressBar, messageLabel);
+        }
+
+        @Override
+        protected void setDescription(String description) {
+        }
+
+        @Override
+        protected void setVisibility(boolean visible) {
+        }
+
+        @Override
+        protected void setRunning() {
+        }
+
+        @Override
+        protected void finish() {
+        }
+    }
+
 }

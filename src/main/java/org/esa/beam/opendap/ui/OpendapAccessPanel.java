@@ -2,7 +2,6 @@ package org.esa.beam.opendap.ui;
 
 import com.jidesoft.combobox.FolderChooserExComboBox;
 import com.jidesoft.combobox.PopupPanel;
-import com.jidesoft.status.ProgressStatusBarItem;
 import com.jidesoft.status.StatusBar;
 import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.utils.Lm;
@@ -64,10 +63,10 @@ public class OpendapAccessPanel extends JPanel {
     private JCheckBox useVariableFilter;
     private VariableFilter variableFilter;
 
-    private final PropertyMap propertyMap;
     private JCheckBox openInVisat;
-    private final StatusBar statusBar = new StatusBar();
+    private StatusBar statusBar;
 
+    private final PropertyMap propertyMap;
 
     public static void main(String[] args) {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
@@ -95,6 +94,7 @@ public class OpendapAccessPanel extends JPanel {
     }
 
     private void initComponents() {
+        statusBar = new StatusBar();
         urlField = new JComboBox();
         urlField.setEditable(true);
         urlField.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
@@ -160,6 +160,10 @@ public class OpendapAccessPanel extends JPanel {
                     return;
                 }
                 filterLeaf(leaf);
+            }
+
+            @Override
+            public void catalogElementsInsertionFinished() {
             }
         });
 
@@ -296,14 +300,10 @@ public class OpendapAccessPanel extends JPanel {
         centerPanel.setResizeWeight(1);
         centerPanel.setContinuousLayout(true);
 
-        final ProgressStatusBarItem progressBar = new ProgressStatusBarItem();
-        statusBar.add(progressBar);
-
         this.setLayout(new BorderLayout(15, 15));
         this.setBorder(new EmptyBorder(8, 8, 8, 8));
         this.add(urlPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
-        this.add(statusBar, BorderLayout.SOUTH);
     }
 
     private File fetchTargetDirectory() {

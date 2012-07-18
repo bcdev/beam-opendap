@@ -131,13 +131,24 @@ public class DAPVariable implements Comparable<DAPVariable> {
 
     @Override
     public int compareTo(DAPVariable o) {
-        int i = name.toLowerCase().compareTo(o.getName().toLowerCase());
-        if(i > 0) {
+        String thisDenominator = getDenominator(this);
+        String thatDenominator = getDenominator(o);
+
+        int i = thisDenominator.toLowerCase().compareTo(thatDenominator.toLowerCase());
+        if (i > 0) {
             return 1;
-        } else if (i < 0){
+        } else if (i < 0) {
             return -1;
         }
         return 0;
+    }
+
+    private String getDenominator(DAPVariable var) {
+        StringBuilder denominator = new StringBuilder(var.getName());
+        for (DArrayDimension dimension : var.dimensions) {
+            denominator.append(dimension.getName());
+        }
+        return denominator.toString();
     }
 
     @Override

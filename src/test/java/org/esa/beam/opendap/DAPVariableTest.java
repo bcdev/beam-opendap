@@ -62,6 +62,7 @@ public class DAPVariableTest {
         DAPVariable dapVariable4 = new DAPVariable("ZzzzzzName", vType, vDataType, vDimensions);
         DAPVariable dapVariable5 = new DAPVariable("aAAnotherName", vType, vDataType, vDimensions);
         DAPVariable dapVariable6 = new DAPVariable("AAAnotherName", vType, vDataType, vDimensions);
+        DAPVariable dapVariable7 = new DAPVariable(vName, vType, vDataType, new DArrayDimension[0]);
 
         //verification
         assertEquals(0, dapVariable.compareTo(dapVariable2));
@@ -69,6 +70,7 @@ public class DAPVariableTest {
         assertEquals(-1, dapVariable.compareTo(dapVariable4));
         assertEquals(1, dapVariable.compareTo(dapVariable5));
         assertEquals(1, dapVariable.compareTo(dapVariable6));
+        assertEquals(1, dapVariable.compareTo(dapVariable7));
     }
 
     @Test

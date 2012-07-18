@@ -94,7 +94,7 @@ class CatalogTree {
             public void treeWillExpand(TreeExpansionEvent event) throws ExpandVetoException {
                 final Object lastPathComponent = event.getPath().getLastPathComponent();
                 final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) lastPathComponent;
-                final DefaultMutableTreeNode child = (DefaultMutableTreeNode)parent.getChildAt(0);
+                final DefaultMutableTreeNode child = (DefaultMutableTreeNode) parent.getChildAt(0);
                 if (isCatalogReferenceNode(child)) {
                     resolveCatalogReferenceNode(child, true);
                 }
@@ -106,25 +106,23 @@ class CatalogTree {
         });
     }
 
-    public synchronized void resolveCatalogReferenceNode(DefaultMutableTreeNode catalogReferenceNode, boolean expandPath) {
-        if (catalogReferenceNode != null) {
-            final CatalogNode catalogNode = (CatalogNode) catalogReferenceNode.getUserObject();
-            final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
-            final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) catalogReferenceNode.getParent();
-            model.removeNodeFromParent(catalogReferenceNode);
-            try {
-                final URL catalogUrl = new URL(catalogNode.getCatalogUri());
-                final URLConnection urlConnection = catalogUrl.openConnection();
-                final InputStream inputStream = urlConnection.getInputStream();
-                insertCatalogElements(inputStream, catalogUrl.toURI(), parent, expandPath);
-            } catch (MalformedURLException e) {
-                // todo handle with error collection and message dialog at the end.
-                Debug.trace(e);
-            } catch (URISyntaxException e) {
-                Debug.trace(e);
-            } catch (IOException e) {
-                Debug.trace(e);
-            }
+    public void resolveCatalogReferenceNode(DefaultMutableTreeNode catalogReferenceNode, boolean expandPath) {
+        final CatalogNode catalogNode = (CatalogNode) catalogReferenceNode.getUserObject();
+        final DefaultTreeModel model = (DefaultTreeModel) jTree.getModel();
+        final DefaultMutableTreeNode parent = (DefaultMutableTreeNode) catalogReferenceNode.getParent();
+        model.removeNodeFromParent(catalogReferenceNode);
+        try {
+            final URL catalogUrl = new URL(catalogNode.getCatalogUri());
+            final URLConnection urlConnection = catalogUrl.openConnection();
+            final InputStream inputStream = urlConnection.getInputStream();
+            insertCatalogElements(inputStream, catalogUrl.toURI(), parent, expandPath);
+        } catch (MalformedURLException e) {
+            // todo handle with error collection and message dialog at the end.
+            Debug.trace(e);
+        } catch (URISyntaxException e) {
+            Debug.trace(e);
+        } catch (IOException e) {
+            Debug.trace(e);
         }
     }
 
@@ -134,7 +132,8 @@ class CatalogTree {
         final InvCatalogImpl catalog = factory.readXML(catalogIS, catalogBaseUri);
         final List<InvDataset> catalogDatasets = catalog.getDatasets();
         appendToNode(jTree, catalogDatasets, parent, true);
-        if(expandPath) {
+        fireCatalogElementsInsertionFinished();
+        if (expandPath) {
             expandPath(parent);
         }
     }
@@ -209,11 +208,6 @@ class CatalogTree {
             if (!goDeeper || !isHyraxId(dataset.getID())) {
                 appendToNode(jTree, dataset, parentNode);
                 deeperParent = (MutableTreeNode) parentNode.getChildAt(parentNode.getChildCount() - 1);
-                if (isDapNode(deeperParent) || isFileNode(deeperParent)) {
-                    final boolean hasNestedDatasets = dataset.hasNestedDatasets();
-                    final OpendapLeaf leaf = (OpendapLeaf) ((DefaultMutableTreeNode) deeperParent).getUserObject();
-                    fireLeafAdded(leaf, hasNestedDatasets);
-                }
             } else {
                 deeperParent = parentNode;
             }
@@ -264,6 +258,8 @@ class CatalogTree {
                 }
             }
         }
+        final boolean hasNestedDatasets = dataset.hasNestedDatasets();
+        fireLeafAdded(leaf, hasNestedDatasets);
         appendDataNodeToParent(parentNode, treeModel, leaf);
     }
 
@@ -356,6 +352,12 @@ class CatalogTree {
         }
     }
 
+    private void fireCatalogElementsInsertionFinished() {
+        for (CatalogTreeListener catalogTreeListener : catalogTreeListeners) {
+            catalogTreeListener.catalogElementsInsertionFinished();
+        }
+    }
+
     void addCatalogTreeListener(CatalogTreeListener listener) {
         catalogTreeListeners.add(listener);
     }
@@ -373,5 +375,6 @@ class CatalogTree {
 
         void leafAdded(OpendapLeaf leaf, boolean hasNestedDatasets);
 
+        void catalogElementsInsertionFinished();
     }
 }
