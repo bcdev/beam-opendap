@@ -246,27 +246,29 @@ class CatalogTree {
     }
 
     void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
-        final OpendapLeaf leafObject = new OpendapLeaf(dataset.getName(), dataset);
-
+        final OpendapLeaf leaf = new OpendapLeaf(dataset.getName(), dataset);
         final InvAccess dapAccess = dataset.getAccess(ServiceType.OPENDAP);
         if (dapAccess != null) {
-            leafObject.setDapAccess(true);
-            leafObject.setDapUri(dapAccess.getStandardUrlName());
+            leaf.setDapAccess(true);
+            leaf.setDapUri(dapAccess.getStandardUrlName());
 
             final InvAccess fileAccess = dataset.getAccess(ServiceType.FILE);
             if (fileAccess != null) {
-                leafObject.setFileAccess(true);
-                leafObject.setFileUri(fileAccess.getStandardUrlName());
+                leaf.setFileAccess(true);
+                leaf.setFileUri(fileAccess.getStandardUrlName());
             } else {
                 final InvAccess serverAccess = dataset.getAccess(ServiceType.HTTPServer);
                 if (serverAccess != null) {
-                    leafObject.setFileAccess(true);
-                    leafObject.setFileUri(serverAccess.getStandardUrlName());
+                    leaf.setFileAccess(true);
+                    leaf.setFileUri(serverAccess.getStandardUrlName());
                 }
             }
         }
+        appendDataNodeToParent(parentNode, treeModel, leaf);
+    }
 
-        final DefaultMutableTreeNode leafNode = new DefaultMutableTreeNode(leafObject);
+    private void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, OpendapLeaf leaf) {
+        final DefaultMutableTreeNode leafNode = new DefaultMutableTreeNode(leaf);
         treeModel.insertNodeInto(leafNode, parentNode, parentNode.getChildCount());
     }
 
@@ -333,7 +335,7 @@ class CatalogTree {
     private void setLeafVisible(OpendapLeaf leaf) {
         final boolean leafIsRemovedFromTree = leafToParentNode.containsKey(leaf);
         if (leafIsRemovedFromTree) {
-            appendDataNodeToParent(leafToParentNode.get(leaf), (DefaultTreeModel) jTree.getModel(), leaf.getDataset());
+            appendDataNodeToParent(leafToParentNode.get(leaf), (DefaultTreeModel) jTree.getModel(), leaf);
             leafToParentNode.remove(leaf);
         }
     }

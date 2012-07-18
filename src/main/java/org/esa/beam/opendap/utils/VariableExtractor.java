@@ -68,7 +68,7 @@ public class VariableExtractor {
         } else if (ddsVariable instanceof DArray) {
             array = (DArray) ddsVariable;
         } else {
-            array = null;
+            return convertToAtomicDAPVariable(ddsVariable);
         }
 
         final String name = ddsVariable.getName();
@@ -77,6 +77,16 @@ public class VariableExtractor {
         final DArrayDimension[] dimensions = getDimensions(array);
 
         return new DAPVariable(name, typeName, dataTypeName, dimensions);
+    }
+
+    private static DAPVariable convertToAtomicDAPVariable(BaseType ddsVariable) {
+        final String name = ddsVariable.getName();
+        final String typeName = "atomic";
+        final String dataTypeName = ddsVariable.getTypeName();
+        final DArrayDimension[] dimensions = new DArrayDimension[0];
+
+        return new DAPVariable(name, typeName, dataTypeName, dimensions);
+
     }
 
     private static String getDataTypeName(DArray array) {

@@ -2,6 +2,8 @@ package org.esa.beam.opendap.ui;
 
 import com.jidesoft.combobox.FolderChooserExComboBox;
 import com.jidesoft.combobox.PopupPanel;
+import com.jidesoft.status.ProgressStatusBarItem;
+import com.jidesoft.status.StatusBar;
 import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.utils.Lm;
 import org.esa.beam.opendap.OpendapLeaf;
@@ -64,6 +66,7 @@ public class OpendapAccessPanel extends JPanel {
 
     private final PropertyMap propertyMap;
     private JCheckBox openInVisat;
+    private final StatusBar statusBar = new StatusBar();
 
 
     public static void main(String[] args) {
@@ -147,7 +150,7 @@ public class OpendapAccessPanel extends JPanel {
         timeRangeFilter.addFilterChangeListener(filterChangeListener);
         regionFilter = new RegionFilter();
         regionFilter.addFilterChangeListener(filterChangeListener);
-        variableFilter = new VariableFilter(useVariableFilter, catalogTree);
+        variableFilter = new VariableFilter(useVariableFilter, catalogTree, statusBar);
         variableFilter.addFilterChangeListener(filterChangeListener);
 
         catalogTree.addCatalogTreeListener(new CatalogTree.CatalogTreeListener() {
@@ -293,10 +296,14 @@ public class OpendapAccessPanel extends JPanel {
         centerPanel.setResizeWeight(1);
         centerPanel.setContinuousLayout(true);
 
+        final ProgressStatusBarItem progressBar = new ProgressStatusBarItem();
+        statusBar.add(progressBar);
+
         this.setLayout(new BorderLayout(15, 15));
         this.setBorder(new EmptyBorder(8, 8, 8, 8));
         this.add(urlPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
+        this.add(statusBar, BorderLayout.SOUTH);
     }
 
     private File fetchTargetDirectory() {

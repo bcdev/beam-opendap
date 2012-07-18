@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -45,7 +46,8 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
     private JButton applyButton;
     private FilterableCheckBoxList checkBoxList;
     private QuickListFilterField field;
-    private ArrayList<FilterChangeListener> listeners;
+    private List<FilterChangeListener> listeners;
+    private final HashSet<VariableFilterPreparator> filterPreparators = new HashSet<VariableFilterPreparator>();
 
     public VariableFilter(JCheckBox filterCheckBox, CatalogTree catalogTree) {
         this.filterCheckBox = filterCheckBox;
@@ -90,6 +92,7 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
                 updateUI(false, selectAllButton.isEnabled(), selectNoneButton.isEnabled());
             }
         });
+        filterCheckBox.setEnabled(false);
         filterCheckBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -241,7 +244,12 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
 
     @Override
     public void leafAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
-        new VariableFilterPreparator(leaf).execute();
+        VariableFilterPreparator filterPreparator = new VariableFilterPreparator(leaf);
+
+        filterPreparators.add(filterPreparator);
+        filterPreparator.execute();
+        filterCheckBox.setEnabled(false);
+        filterCheckBox.setSelected(false);
     }
 
     private class VariableFilterPreparator extends SwingWorker<DAPVariable[], Void> {
@@ -268,6 +276,12 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
                 // todo - implement
             } catch (ExecutionException e) {
                 // todo - implement
+            } finally {
+                filterPreparators.remove(this);
+                if (filterPreparators.isEmpty()) {
+                    updateUI(true, true, true);
+                    filterCheckBox.setEnabled(true);
+                }
             }
         }
     }

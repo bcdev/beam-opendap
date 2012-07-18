@@ -42,6 +42,32 @@ public class VariableExtractorTest {
     }
 
     @Test
+    public void testThatByteVariableCanBeRead() throws DAP2Exception, ParseException {
+        DDS dds = createDDSWithByteVariable();
+
+        final DAPVariable[] dapVariables = new VariableExtractor().extractVariables(dds);
+
+        assertEquals(1, dapVariables.length);
+        assertEquals("metadata", dapVariables[0].getName());
+        assertEquals("atomic", dapVariables[0].getType());
+        assertEquals("Byte", dapVariables[0].getDataType());
+        assertEquals(0, dapVariables[0].getNumDimensions());
+    }
+
+    @Test
+    public void testThatFloatVariableCanBeRead() throws DAP2Exception, ParseException {
+        DDS dds = createDDSWithFloatVariable();
+
+        final DAPVariable[] dapVariables = new VariableExtractor().extractVariables(dds);
+
+        assertEquals(1, dapVariables.length);
+        assertEquals("metadata", dapVariables[0].getName());
+        assertEquals("atomic", dapVariables[0].getType());
+        assertEquals("Float32", dapVariables[0].getDataType());
+        assertEquals(0, dapVariables[0].getNumDimensions());
+    }
+
+    @Test
     public void testThatMultipleVariablesCanBeExtractedFromADDSWithMultipleVariables() throws DAP2Exception, ParseException {
         DDS dds = createDDSWithMultipleVariables();
 
@@ -54,6 +80,24 @@ public class VariableExtractorTest {
         assertEquals("l2_flags", dapVariables[3].getName());
         assertEquals("X", dapVariables[4].getName());
         assertEquals("Y", dapVariables[5].getName());
+    }
+
+    private DDS createDDSWithByteVariable() throws DAP2Exception, ParseException {
+        DDS dds = new DDS();
+        String ddsString = "Dataset {\n" +
+                           "    Byte metadata;\n" +
+                           "} coastcolour%2ftasmania24948_0001%2enc;";
+        dds.parse(new ByteArrayInputStream(ddsString.getBytes()));
+        return dds;
+    }
+
+    private DDS createDDSWithFloatVariable() throws DAP2Exception, ParseException {
+        DDS dds = new DDS();
+        String ddsString = "Dataset {\n" +
+                           "    Float32 metadata;\n" +
+                           "} coastcolour%2ftasmania24948_0001%2enc;";
+        dds.parse(new ByteArrayInputStream(ddsString.getBytes()));
+        return dds;
     }
 
     private DDS createDDSWithOneVariable() throws DAP2Exception, ParseException {
@@ -75,37 +119,37 @@ public class VariableExtractorTest {
     private DDS createDDSWithMultipleVariables() throws DAP2Exception, ParseException {
         DDS dds = new DDS();
         String ddsString = "Dataset {\n" +
-                "    Grid {\n" +
-                "      Array:\n" +
-                "        Float32 Chlorophyll[Y = 849][X = 1121];\n" +
-                "      Maps:\n" +
-                "        Int32 Y[Y = 849];\n" +
-                "        Int32 X[X = 1121];\n" +
-                "    } Chlorophyll;\n" +
-                "    Grid {\n" +
-                "      Array:\n" +
-                "        Float32 Total_suspended_matter[Y = 849][X = 1121];\n" +
-                "      Maps:\n" +
-                "        Int32 Y[Y = 849];\n" +
-                "        Int32 X[X = 1121];\n" +
-                "    } Total_suspended_matter;\n" +
-                "    Grid {\n" +
-                "      Array:\n" +
-                "        Float32 Yellow_substance[Y = 849][X = 1121];\n" +
-                "      Maps:\n" +
-                "        Int32 Y[Y = 849];\n" +
-                "        Int32 X[X = 1121];\n" +
-                "    } Yellow_substance;\n" +
-                "    Grid {\n" +
-                "      Array:\n" +
-                "        Int32 l2_flags[Y = 849][X = 1121];\n" +
-                "      Maps:\n" +
-                "        Int32 Y[Y = 849];\n" +
-                "        Int32 X[X = 1121];\n" +
-                "    } l2_flags;\n" +
-                "    Int32 X[X = 1121];\n" +
-                "    Int32 Y[Y = 849];\n" +
-                "} MER_RR__2PNKOF20120113_101320_000001493110_00324_51631_6150.N1.nc;";
+                           "    Grid {\n" +
+                           "      Array:\n" +
+                           "        Float32 Chlorophyll[Y = 849][X = 1121];\n" +
+                           "      Maps:\n" +
+                           "        Int32 Y[Y = 849];\n" +
+                           "        Int32 X[X = 1121];\n" +
+                           "    } Chlorophyll;\n" +
+                           "    Grid {\n" +
+                           "      Array:\n" +
+                           "        Float32 Total_suspended_matter[Y = 849][X = 1121];\n" +
+                           "      Maps:\n" +
+                           "        Int32 Y[Y = 849];\n" +
+                           "        Int32 X[X = 1121];\n" +
+                           "    } Total_suspended_matter;\n" +
+                           "    Grid {\n" +
+                           "      Array:\n" +
+                           "        Float32 Yellow_substance[Y = 849][X = 1121];\n" +
+                           "      Maps:\n" +
+                           "        Int32 Y[Y = 849];\n" +
+                           "        Int32 X[X = 1121];\n" +
+                           "    } Yellow_substance;\n" +
+                           "    Grid {\n" +
+                           "      Array:\n" +
+                           "        Int32 l2_flags[Y = 849][X = 1121];\n" +
+                           "      Maps:\n" +
+                           "        Int32 Y[Y = 849];\n" +
+                           "        Int32 X[X = 1121];\n" +
+                           "    } l2_flags;\n" +
+                           "    Int32 X[X = 1121];\n" +
+                           "    Int32 Y[Y = 849];\n" +
+                           "} MER_RR__2PNKOF20120113_101320_000001493110_00324_51631_6150.N1.nc;";
         dds.parse(new ByteArrayInputStream(ddsString.getBytes()));
         return dds;
     }

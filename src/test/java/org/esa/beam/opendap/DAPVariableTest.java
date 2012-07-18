@@ -175,22 +175,13 @@ public class DAPVariableTest {
 
     @Test
     public void testIllegalArgumentExceptionIsThrownIfDimensionsIsNotValid() {
-        final DArrayDimension[] invalidDimensions1 = null;
-        final DArrayDimension[] invalidDimensions2 = new DArrayDimension[0];
+        final DArrayDimension[] invalidDimensions = null;
 
         try {
-            new DAPVariable(vName, vType, vDataType, invalidDimensions1);
-            fail("never come here");
+            new DAPVariable(vName, vType, vDataType, invalidDimensions);
+            fail();
         } catch (IllegalArgumentException e) {
-            assertEquals("dimensions", e.getMessage());
+            assertEquals("dimensions may not be null", e.getMessage());
         }
-
-        try {
-            new DAPVariable(vName, vType, vDataType, invalidDimensions2);
-            fail("never come here");
-        } catch (IllegalArgumentException e) {
-            assertEquals("dimensions", e.getMessage());
-        }
-
     }
 }

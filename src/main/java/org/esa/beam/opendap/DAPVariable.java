@@ -18,7 +18,7 @@ public class DAPVariable implements Comparable<DAPVariable> {
         Assert.argument(type.trim().length() > 0, "'" + type + "' is not a valid type");
         Assert.argument(StringUtils.isNotNullAndNotEmpty(dataType), "dataType");
         Assert.argument(dataType.trim().length() > 0, "'" + dataType + "' is not a valid dataType");
-        Assert.argument(dimensions != null && dimensions.length > 0, "dimensions");
+        Assert.argument(dimensions != null, "dimensions may not be null");
 
         this.name = name;
         this.type = type;
