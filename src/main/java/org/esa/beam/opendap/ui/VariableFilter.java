@@ -137,7 +137,6 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         selectAllButton.setFont(font);
         selectNoneButton.setFont(font);
         field.setHintText("Type here to filter variables");
-        statusLabel = new JLabel();
         setProgressComponentsVisible(false);
     }
 
@@ -163,6 +162,8 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         field = new QuickListFilterField(listModel);
         checkBoxList = new FilterableCheckBoxList(field.getDisplayListModel());
         progressBar = new JProgressBar();
+        statusLabel = new JLabel();
+        pm = new VariableFilterProgressBarProgressMonitor(progressBar, statusLabel);
     }
 
     @Override
@@ -286,7 +287,6 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
 
     @Override
     public void catalogElementsInsertionFinished() {
-        pm = new VariableFilterProgressBarProgressMonitor(progressBar, statusLabel);
         pm.setTaskName("");
         pm.beginTask("", totalWork);
         pm.worked(worked);
