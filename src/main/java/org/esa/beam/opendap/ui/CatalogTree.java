@@ -64,6 +64,7 @@ class CatalogTree {
         final DefaultMutableTreeNode rootNode = createRootNode();
         model.setRoot(rootNode);
         appendToNode(jTree, rootDatasets, rootNode, true);
+        fireCatalogElementsInsertionFinished();
         expandPath(rootNode);
     }
 
