@@ -34,6 +34,7 @@ public class TimeRangeFilter implements FilterComponent {
     private JCheckBox filterCheckBox;
     TimeStampExtractor timeStampExtractor;
     List<FilterChangeListener> listeners;
+    List<JLabel> labels;
 
     Date startDate;
     Date endDate;
@@ -83,6 +84,7 @@ public class TimeRangeFilter implements FilterComponent {
         fileNamePatternComboBox.addActionListener(uiUpdater);
 
         listeners = new ArrayList<FilterChangeListener>();
+        labels = new ArrayList<JLabel>();
 
         applyButton = new JButton("Apply");
         applyButton.addActionListener(new ActionListener() {
@@ -97,7 +99,6 @@ public class TimeRangeFilter implements FilterComponent {
                 fireFilterChangedEvent();
             }
         });
-        updateUIState();
     }
 
     private void updateUIState() {
@@ -106,6 +107,9 @@ public class TimeRangeFilter implements FilterComponent {
         fileNamePatternComboBox.setEnabled(isSelected);
         startTimePicker.setEnabled(isSelected);
         stopTimePicker.setEnabled(isSelected);
+        for (JLabel label : labels) {
+            label.setEnabled(isSelected);
+        }
         final String datePattern = datePatternComboBox.getSelectedItem().toString();
         final String fileNamePattern = fileNamePatternComboBox.getSelectedItem().toString();
         final boolean hasStartDate = startTimePicker.getDate() != null;
@@ -145,26 +149,30 @@ public class TimeRangeFilter implements FilterComponent {
         gbc.insets.right = 4;
         gbc.anchor = GridBagConstraints.WEST;
 
-        filterUI.add(new JLabel("Date pattern:"), gbc);
+        JLabel datePatternLabel = new JLabel("Date pattern:");
+        filterUI.add(datePatternLabel, gbc);
         gbc.gridx++;
 
         filterUI.add(datePatternComboBox, gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
-        filterUI.add(new JLabel("Filename pattern:"), gbc);
+        JLabel filenamePatternLabel = new JLabel("Filename pattern:");
+        filterUI.add(filenamePatternLabel, gbc);
         gbc.gridx++;
         filterUI.add(fileNamePatternComboBox, gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
-        filterUI.add(new JLabel("Start date:"), gbc);
+        JLabel startDateLabel = new JLabel("Start date:");
+        filterUI.add(startDateLabel, gbc);
         gbc.gridx++;
         filterUI.add(startTimePicker, gbc);
 
         gbc.gridx = 0;
         gbc.gridy++;
-        filterUI.add(new JLabel("Stop date:"), gbc);
+        JLabel stopDateLabel = new JLabel("Stop date:");
+        filterUI.add(stopDateLabel, gbc);
 
         gbc.gridx++;
         filterUI.add(stopTimePicker, gbc);
@@ -173,6 +181,13 @@ public class TimeRangeFilter implements FilterComponent {
         gbc.weightx = 1;
         gbc.anchor = GridBagConstraints.EAST;
         filterUI.add(applyButton, gbc);
+
+        labels.add(datePatternLabel);
+        labels.add(filenamePatternLabel);
+        labels.add(startDateLabel);
+        labels.add(stopDateLabel);
+
+        updateUIState();
 
         return filterUI;
     }

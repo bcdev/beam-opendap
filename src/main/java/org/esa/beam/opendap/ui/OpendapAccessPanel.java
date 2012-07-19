@@ -176,7 +176,6 @@ public class OpendapAccessPanel extends JPanel {
         useDatasetNameFilter = new JCheckBox("Use dataset name filter");
         useTimeRangeFilter = new JCheckBox("Use time range filter");
         useRegionFilter = new JCheckBox("Use region filter");
-        useRegionFilter.setEnabled(false);
         useVariableFilter = new JCheckBox("Use variable name filter");
 
         DefaultFilterChangeListener filterChangeListener = new DefaultFilterChangeListener();
@@ -198,6 +197,8 @@ public class OpendapAccessPanel extends JPanel {
                 if (leaf.getDataset().getGeospatialCoverage() != null) {
                     useRegionFilter.setEnabled(true);
                 }
+                useDatasetNameFilter.setEnabled(true);
+                useTimeRangeFilter.setEnabled(true);
                 filterLeaf(leaf);
             }
 
@@ -218,6 +219,11 @@ public class OpendapAccessPanel extends JPanel {
         progressBar = progressBarItem.getProgressBar();
 
         statusBar.add(progressBarItem, JideBoxLayout.FIX);
+
+        useRegionFilter.setEnabled(false);
+        useDatasetNameFilter.setEnabled(false);
+        useTimeRangeFilter.setEnabled(false);
+        useVariableFilter.setEnabled(false);
     }
 
     private void updateStatusBar(String message) {
