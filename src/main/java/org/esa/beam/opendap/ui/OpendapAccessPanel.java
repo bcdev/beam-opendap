@@ -412,16 +412,16 @@ public class OpendapAccessPanel extends JPanel {
             List<String> fileURIs = new ArrayList<String>();
             for (TreePath selectionPath : selectionPaths) {
                 final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
-                if (CatalogTree.isDapNode(treeNode)) {
+                if (CatalogTree.isDapNode(treeNode) || CatalogTree.isFileNode(treeNode)) {
                     final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
                     if (leaf.isDapAccess()) {
                         dapURIs.add(leaf.getDapUri());
-                    } else {
+                    } else if (leaf.isFileAccess()){
                         fileURIs.add(leaf.getFileUri());
                     }
                 }
             }
-            if (dapURIs.size() == 0) {
+            if (dapURIs.size() == 0 && fileURIs.size() == 0) {
                 return;
             }
             pm.beginTask("Downloading", (int) currentDataSize);

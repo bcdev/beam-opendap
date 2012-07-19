@@ -253,17 +253,16 @@ class CatalogTree {
         if (dapAccess != null) {
             leaf.setDapAccess(true);
             leaf.setDapUri(dapAccess.getStandardUrlName());
-
-            final InvAccess fileAccess = dataset.getAccess(ServiceType.FILE);
-            if (fileAccess != null) {
+        }
+        final InvAccess fileAccess = dataset.getAccess(ServiceType.FILE);
+        if (fileAccess != null) {
+            leaf.setFileAccess(true);
+            leaf.setFileUri(fileAccess.getStandardUrlName());
+        } else {
+            final InvAccess serverAccess = dataset.getAccess(ServiceType.HTTPServer);
+            if (serverAccess != null) {
                 leaf.setFileAccess(true);
-                leaf.setFileUri(fileAccess.getStandardUrlName());
-            } else {
-                final InvAccess serverAccess = dataset.getAccess(ServiceType.HTTPServer);
-                if (serverAccess != null) {
-                    leaf.setFileAccess(true);
-                    leaf.setFileUri(serverAccess.getStandardUrlName());
-                }
+                leaf.setFileUri(serverAccess.getStandardUrlName());
             }
         }
         final boolean hasNestedDatasets = dataset.hasNestedDatasets();

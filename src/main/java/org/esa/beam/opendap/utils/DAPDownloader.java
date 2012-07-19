@@ -88,7 +88,7 @@ public class DAPDownloader {
     void writeNetcdfFile(File targetDir, String fileName, String constraintExpression, DODSNetcdfFile sourceNetcdfFile) throws IOException {
         final File file = new File(targetDir, fileName);
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
-            FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), false, false, createProgressListeners());
+            FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
             pm.worked((int) (file.length() / (1024 * 1024)) - progressListener.amount);
             downloadedFiles.add(file);
             return;
