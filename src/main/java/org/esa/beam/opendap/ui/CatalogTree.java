@@ -1,8 +1,5 @@
 package org.esa.beam.opendap.ui;
 
-import opendap.dap.http.HTTPException;
-import opendap.dap.http.HTTPMethod;
-import opendap.dap.http.HTTPSession;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.opendap.CatalogNode;
 import org.esa.beam.opendap.OpendapLeaf;
@@ -48,13 +45,13 @@ class CatalogTree {
     private final HashMap<OpendapLeaf, MutableTreeNode> leafToParentNode = new HashMap<OpendapLeaf, MutableTreeNode>();
     private final Set<CatalogTreeListener> catalogTreeListeners = new HashSet<CatalogTreeListener>();
 
-    public CatalogTree(final ResponseDispatcher responseDispatcher) {
+    public CatalogTree(final LeafSelectionListener leafSelectionListener) {
         jTree = new JTree();
         jTree.setRootVisible(false);
         ((DefaultTreeModel) jTree.getModel()).setRoot(createRootNode());
         addCellRenderer(jTree);
         addWillExpandListener();
-        addTreeSelectionListener(jTree, responseDispatcher);
+        addTreeSelectionListener(jTree, leafSelectionListener);
     }
 
     public Component getComponent() {
@@ -151,40 +148,33 @@ class CatalogTree {
         }
     }
 
-    static void addTreeSelectionListener(final JTree jTree, final ResponseDispatcher responseDispatcher) {
+    static void addTreeSelectionListener(final JTree jTree, final LeafSelectionListener leafSelectionListener) {
 
         jTree.addTreeSelectionListener(new TreeSelectionListener() {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
-                final TreePath path = e.getPath();
+                final TreePath[] paths = e.getPaths();
+                for (TreePath path : paths) {
+                    final DefaultMutableTreeNode lastPathComponent = (DefaultMutableTreeNode) path.getLastPathComponent();
+                    final Object userObject = lastPathComponent.getUserObject();
+                    if (!(userObject instanceof OpendapLeaf)) {
+                        continue;
+                    }
+                    final OpendapLeaf dapObject = (OpendapLeaf) userObject;
+                    leafSelectionListener.leafSelectionChanged(e.isAddedPath(path), dapObject);
+                }
+
+                TreePath path = e.getPath();
                 final DefaultMutableTreeNode lastPathComponent = (DefaultMutableTreeNode) path.getLastPathComponent();
                 final Object userObject = lastPathComponent.getUserObject();
                 if (!(userObject instanceof OpendapLeaf)) {
                     return;
                 }
-                final OpendapLeaf dapObject = (OpendapLeaf) userObject;
-                if (dapObject.isDapAccess()) {
-                    final String uri = dapObject.getDdsUri();
-                    try {
-                        HTTPSession session = new HTTPSession();
-                        final HTTPMethod httpMethod = session.newMethodGet(uri);
-                        httpMethod.execute();
-                        responseDispatcher.dispatchDDSResponse(httpMethod.getResponseAsString());
-                    } catch (IOException e1) {
-                        //todo
-                        Debug.trace(e1);
-                    }
-                } else if (dapObject.isFileAccess()) {
-                    final String fileUri = dapObject.getFileUri();
-                    try {
-                        HTTPSession session = new HTTPSession();
-                        final HTTPMethod httpMethod = session.newMethodGet(fileUri);
-                        httpMethod.execute();
-                        responseDispatcher.dispatchFileResponse(httpMethod.getResponseAsString());
-                    } catch (HTTPException e1) {
-                        //todo
-                        Debug.trace(e1);
-                    }
+                OpendapLeaf opendapLeaf = (OpendapLeaf) userObject;
+                if (opendapLeaf.isDapAccess()) {
+                    leafSelectionListener.dapLeafSelected(opendapLeaf);
+                } else if (opendapLeaf.isFileAccess()) {
+                    leafSelectionListener.fileLeafSelected(opendapLeaf);
                 }
             }
         });
@@ -377,13 +367,13 @@ class CatalogTree {
         catalogTreeListeners.add(listener);
     }
 
-    public static interface ResponseDispatcher {
+    static interface LeafSelectionListener {
 
-        void dispatchDASResponse(String response);
+        void dapLeafSelected(OpendapLeaf leaf);
 
-        void dispatchDDSResponse(String response);
+        void fileLeafSelected(OpendapLeaf leaf);
 
-        void dispatchFileResponse(String response);
+        void leafSelectionChanged(boolean isSelected, OpendapLeaf dapObject);
     }
 
     static interface CatalogTreeListener {
