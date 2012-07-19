@@ -28,6 +28,8 @@ import thredds.catalog.ThreddsMetadata;
 import ucar.unidata.geoloc.LatLonPointImpl;
 import ucar.unidata.geoloc.LatLonRect;
 
+import javax.swing.JCheckBox;
+
 import static org.junit.Assert.*;
 
 /**
@@ -49,7 +51,7 @@ public class RegionFilterTest {
      */
     @Before
     public void setUp() throws ValidationException {
-        regionFilter = new RegionFilter(null);
+        regionFilter = new RegionFilter(new JCheckBox());
 
         regionFilter.eastBoundProperty = new Property(new PropertyDescriptor("east", Double.class), new DefaultPropertyAccessor());
         regionFilter.westBoundProperty = new Property(new PropertyDescriptor("west", Double.class), new DefaultPropertyAccessor());
