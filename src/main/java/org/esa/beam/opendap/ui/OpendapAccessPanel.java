@@ -81,6 +81,8 @@ public class OpendapAccessPanel extends JPanel {
     private final PropertyMap propertyMap;
     private FolderChooserExComboBox folderChooserComboBox;
     private JProgressBar progressBar;
+    private JLabel preMessageLabel;
+    private JLabel postMessageLabel;
 
     public static void main(String[] args) {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
@@ -210,7 +212,24 @@ public class OpendapAccessPanel extends JPanel {
         final LabelStatusBarItem message = new LabelStatusBarItem("label");
         message.setText("Ready.");
         message.setAlignment(JLabel.LEFT);
-        statusBar.add(message, JideBoxLayout.VARY);
+        statusBar.add(message, JideBoxLayout.FLEXIBLE);
+
+        preMessageLabel = new JLabel();
+        postMessageLabel = new JLabel();
+        final LabelStatusBarItem preMessage = new LabelStatusBarItem() {
+            @Override
+            protected JLabel createLabel() {
+                return preMessageLabel;
+            }
+        };
+        final LabelStatusBarItem postMessage = new LabelStatusBarItem() {
+            @Override
+            protected JLabel createLabel() {
+                return postMessageLabel;
+            }
+        };
+
+        statusBar.add(preMessage, JideBoxLayout.FIX);
 
         ProgressStatusBarItem progressBarItem = new ProgressStatusBarItem();
         progressBarItem.setProgress(0);
@@ -290,9 +309,7 @@ public class OpendapAccessPanel extends JPanel {
 
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
-        final JButton downloadButton = new JButton("Download");
-        JLabel messageLabel = new JLabel();
-        final ProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, messageLabel);
+        final DownloadProgressBarProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel);
         folderChooserComboBox = new FolderChooserExComboBox() {
             @Override
             public PopupPanel createPopupComponent() {
@@ -305,6 +322,7 @@ public class OpendapAccessPanel extends JPanel {
                 return popupComponent;
             }
         };
+        final JButton downloadButton = new JButton("Download");
         downloadButton.addActionListener(new DownloadAction(pm));
         folderChooserComboBox.setEditable(true);
         if (VisatApp.getApp() != null) {
@@ -312,7 +330,6 @@ public class OpendapAccessPanel extends JPanel {
         }
         downloadButtonPanel.add(folderChooserComboBox);
         downloadButtonPanel.add(downloadButton, BorderLayout.EAST);
-        downloadButtonPanel.add(messageLabel, BorderLayout.NORTH);
 
         final JPanel centerRightPane = new JPanel(new BorderLayout());
         centerRightPane.add(filterPanel, BorderLayout.NORTH);
@@ -375,10 +392,37 @@ public class OpendapAccessPanel extends JPanel {
 
     }
 
-    private static class DownloadProgressBarProgressMonitor extends ProgressBarProgressMonitor {
+    public static class DownloadProgressBarProgressMonitor extends ProgressBarProgressMonitor {
 
-        private DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
-            super(progressBar, messageLabel);
+        private JLabel postMessageLabel;
+        private int totalWork;
+        private int currentWork;
+
+        public DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel,
+                                                  JLabel postMessageLabel) {
+            super(progressBar, preMessageLabel);
+            this.postMessageLabel = postMessageLabel;
+        }
+
+        public void setPreMessage(String preMessageText) {
+            setTaskName(preMessageText);
+        }
+
+        public void setPostMessage(String postMessageText) {
+            postMessageLabel.setText(postMessageText);
+        }
+
+        @Override
+        public void beginTask(String name, int totalWork) {
+            super.beginTask(name, totalWork);
+            this.totalWork = totalWork;
+            this.currentWork = 0;
+        }
+
+        @Override
+        public void worked(int work) {
+            super.worked(work);
+            currentWork += work;
         }
 
         @Override
@@ -396,13 +440,21 @@ public class OpendapAccessPanel extends JPanel {
         @Override
         protected void finish() {
         }
+
+        public int getTotalWork() {
+            return totalWork;
+        }
+
+        public int getCurrentWork() {
+            return currentWork;
+        }
     }
 
     private class DownloadAction implements ActionListener {
 
-        private final ProgressMonitor pm;
+        private final DownloadProgressBarProgressMonitor pm;
 
-        public DownloadAction(ProgressMonitor pm) {
+        public DownloadAction(DownloadProgressBarProgressMonitor pm) {
             this.pm = pm;
             pm.worked(0);
         }
@@ -429,7 +481,7 @@ public class OpendapAccessPanel extends JPanel {
             if (dapURIs.size() == 0 && fileURIs.size() == 0) {
                 return;
             }
-            pm.beginTask("Downloading", (int) currentDataSize);
+            pm.beginTask("", (int) currentDataSize);
             final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, pm);
             final File targetDirectory;
             if (folderChooserComboBox.getSelectedItem() == null ||
@@ -452,6 +504,8 @@ public class OpendapAccessPanel extends JPanel {
                 @Override
                 protected void done() {
                     pm.done();
+                    pm.setPreMessage("All downloads completed");
+                    pm.setPostMessage("");
                 }
             };
             swingWorker.execute();

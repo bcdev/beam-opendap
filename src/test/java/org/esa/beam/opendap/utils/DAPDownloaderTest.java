@@ -1,6 +1,6 @@
 package org.esa.beam.opendap.utils;
 
-import com.bc.ceres.core.ProgressMonitor;
+import org.esa.beam.opendap.ui.OpendapAccessPanel;
 import org.esa.beam.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -17,13 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class DAPDownloaderTest {
 
@@ -46,7 +40,10 @@ public class DAPDownloaderTest {
 
     @Test
     public void testDownloadFile() throws Exception {
-        DAPDownloader dapDownloader = new DAPDownloader(new ArrayList<String>(), new ArrayList<String>(), ProgressMonitor.NULL);
+        DAPDownloader dapDownloader = new DAPDownloader(new ArrayList<String>(), new ArrayList<String>(),
+                                                        new OpendapAccessPanel.DownloadProgressBarProgressMonitor(null,
+                                                                                                                  null,
+                                                                                                                  null));
         String fileName = "fileToTextDownload.txt";
         assertFalse(getTestFile(fileName).exists());
         assertEquals(0, dapDownloader.downloadedFiles.size());
@@ -61,7 +58,8 @@ public class DAPDownloaderTest {
 
     @Test
     public void testGetVariableNames() throws Exception {
-        List<String> variableNames = DAPDownloader.getVariableNames("iop_a_total_443[0:1:717][0:1:308],iop_a_ys_443[0:1:717][0:1:308]");
+        List<String> variableNames = DAPDownloader.getVariableNames(
+                "iop_a_total_443[0:1:717][0:1:308],iop_a_ys_443[0:1:717][0:1:308]");
 
         String[] expected = {"iop_a_total_443", "iop_a_ys_443"};
         assertArrayEquals(expected, variableNames.toArray(new String[variableNames.size()]));
@@ -76,7 +74,8 @@ public class DAPDownloaderTest {
         expected = new String[]{"someUnconstrainedVariable"};
         assertArrayEquals(expected, variableNames.toArray(new String[variableNames.size()]));
 
-        variableNames = DAPDownloader.getVariableNames("someUnconstrainedVariable,someConstrainedVariable[0:1:717][0:1:308]");
+        variableNames = DAPDownloader.getVariableNames(
+                "someUnconstrainedVariable,someConstrainedVariable[0:1:717][0:1:308]");
         expected = new String[]{"someUnconstrainedVariable", "someConstrainedVariable"};
         assertArrayEquals(expected, variableNames.toArray(new String[variableNames.size()]));
     }
@@ -170,8 +169,10 @@ public class DAPDownloaderTest {
 
     @Test
     public void testGetConstraintsExpressionForVariable() throws Exception {
-        assertEquals("sst[0:1:10][0:1:10]", DAPDownloader.getConstraintExpression("sst", "sst[0:1:10][0:1:10],wind[0:1:10][0:1:10]"));
-        assertEquals("wind[0:1:10][0:1:10]", DAPDownloader.getConstraintExpression("wind", "sst[0:1:10][0:1:10],wind[0:1:10][0:1:10]"));
+        assertEquals("sst[0:1:10][0:1:10]",
+                     DAPDownloader.getConstraintExpression("sst", "sst[0:1:10][0:1:10],wind[0:1:10][0:1:10]"));
+        assertEquals("wind[0:1:10][0:1:10]",
+                     DAPDownloader.getConstraintExpression("wind", "sst[0:1:10][0:1:10],wind[0:1:10][0:1:10]"));
         try {
             DAPDownloader.getConstraintExpression("pig_density", "sst[0:1:10][0:1:10],wind[0:1:10][0:1:10]");
             fail();
@@ -179,15 +180,25 @@ public class DAPDownloaderTest {
             assertTrue(expected.getMessage().contains("must be included"));
         }
 
-        assertEquals("sst[0:1:10]", DAPDownloader.getConstraintExpression("sst", "sst_flag[0:1:10][0:1:10],wind[0:1:10][0:1:10],sst[0:1:10]"));
-        assertEquals("sst[0:1:10]", DAPDownloader.getConstraintExpression("sst", "flag_sst[0:1:10][0:1:10],wind[0:1:10][0:1:10],sst[0:1:10]"));
+        assertEquals("sst[0:1:10]", DAPDownloader.getConstraintExpression("sst",
+                                                                          "sst_flag[0:1:10][0:1:10],wind[0:1:10][0:1:10],sst[0:1:10]"));
+        assertEquals("sst[0:1:10]", DAPDownloader.getConstraintExpression("sst",
+                                                                          "flag_sst[0:1:10][0:1:10],wind[0:1:10][0:1:10],sst[0:1:10]"));
+    }
+
+    @Test
+    public void testGetDownloadSpeed() {
+        assertEquals(1024.0/60.0, DAPDownloader.getDownloadSpeed(60 * 1000, 1024 * 1024), 1E-4);
     }
 
     @Ignore
     @Test
     public void testActualWriting() throws Exception {
-        final DAPDownloader dapDownloader = new DAPDownloader(null, null, ProgressMonitor.NULL);
-        final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile("http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
+        final DAPDownloader dapDownloader = new DAPDownloader(null, null,
+                                                              new OpendapAccessPanel.DownloadProgressBarProgressMonitor(
+                                                                      null, null, null));
+        final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile(
+                "http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
         dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "", sourceNetcdfFile);
 
         final File testFile = getTestFile("deleteme.nc");
@@ -200,8 +211,11 @@ public class DAPDownloaderTest {
     @Ignore
     @Test
     public void testActualWriting_WithConstraint() throws Exception {
-        final DAPDownloader dapDownloader = new DAPDownloader(null, null, ProgressMonitor.NULL);
-        final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile("http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
+        final DAPDownloader dapDownloader = new DAPDownloader(null, null,
+                                                              new OpendapAccessPanel.DownloadProgressBarProgressMonitor(
+                                                                      null, null, null));
+        final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile(
+                "http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
         dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "COADSX[0:1:4]", sourceNetcdfFile);
 
         final File testFile = getTestFile("deleteme.nc");

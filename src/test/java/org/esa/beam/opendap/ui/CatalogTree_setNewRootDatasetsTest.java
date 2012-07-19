@@ -40,7 +40,7 @@ public class CatalogTree_setNewRootDatasetsTest {
     }
 
     @Test
-    public void testAddingDatasetWithDAPAccessAndOneWithFileAccessOnly_FileAccessOnlyResolvesToNodeWithNoAccess() {
+    public void testAddingDatasetWithDAPAccessAndOneWithFileAccessOnly_FileAccessOnlyResolvesToNodeWithFileAccess() {
         //preparation
         final InvDatasetImpl fileDataset = createDataset(catalog, "second", "file");
         datasets.add(fileDataset);
@@ -54,7 +54,7 @@ public class CatalogTree_setNewRootDatasetsTest {
         assertEquals(true, CatalogTree.isDapNode(root.getChildAt(0)));
         assertEquals(false, CatalogTree.isFileNode(root.getChildAt(0)));
         assertEquals(false, CatalogTree.isDapNode(root.getChildAt(1)));
-        assertEquals(false, CatalogTree.isFileNode(root.getChildAt(1)));
+        assertEquals(true, CatalogTree.isFileNode(root.getChildAt(1)));
     }
 
     @Test

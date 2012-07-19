@@ -46,7 +46,7 @@ public class CatalogTree_appendNodeUnitTest {
     }
 
     @Test
-    public void testThatAppendDatasetWithFileAccessOnlyIsResolvedToNodeWithoutAccess() throws URISyntaxException {
+    public void testThatAppendDatasetWithFileAccessOnlyIsResolvedToNodeWithFileAccess() throws URISyntaxException {
         // preparation
         final String serviceName = "FILE";
         final InvDatasetImpl dapDataset = createDataset(new String[]{serviceName});
@@ -55,7 +55,7 @@ public class CatalogTree_appendNodeUnitTest {
         new CatalogTree(null).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
-        testThatChildIsNeitherDapNodeNorFileNode(parentNode);
+        testThatChildIsNodeWithFileAccess(parentNode);
     }
 
     @Test
@@ -96,11 +96,11 @@ public class CatalogTree_appendNodeUnitTest {
         assertEquals("http://a.b", catalogNode.getCatalogUri());
     }
 
-    private void testThatChildIsNeitherDapNodeNorFileNode(DefaultMutableTreeNode parentNode) {
+    private void testThatChildIsNodeWithFileAccess(DefaultMutableTreeNode parentNode) {
         assertEquals(1, parentNode.getChildCount());
         assertEquals(true, parentNode.getChildAt(0).isLeaf());
         assertEquals(false, CatalogTree.isDapNode(parentNode.getChildAt(0)));
-        assertEquals(false, CatalogTree.isFileNode(parentNode.getChildAt(0)));
+        assertEquals(true, CatalogTree.isFileNode(parentNode.getChildAt(0)));
     }
 
     private void testThatChildIsOnlyDapNodeWithoutFileAccess(DefaultMutableTreeNode parentNode) {

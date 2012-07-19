@@ -1,7 +1,7 @@
 package org.esa.beam.opendap.utils;
 
-import com.bc.ceres.core.ProgressMonitor;
 import com.bc.io.FileDownloader;
+import org.esa.beam.opendap.ui.OpendapAccessPanel;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 import ucar.ma2.Array;
@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,11 +33,13 @@ public class DAPDownloader {
 
     final List<String> dapUris;
     final List<String> fileURIs;
-    private final ProgressMonitor pm;
+    private final OpendapAccessPanel.DownloadProgressBarProgressMonitor pm;
     final Set<File> downloadedFiles;
     private NetCDFFileWriterProgressListener progressListener;
+    private long startTime;
 
-    public DAPDownloader(List<String> dapUris, List<String> fileURIs, ProgressMonitor pm) {
+    public DAPDownloader(List<String> dapUris, List<String> fileURIs,
+                         OpendapAccessPanel.DownloadProgressBarProgressMonitor pm) {
         this.dapUris = dapUris;
         this.fileURIs = fileURIs;
         this.pm = pm;
@@ -44,6 +48,8 @@ public class DAPDownloader {
 
     public void saveProducts(File targetDir) {
         if (targetDir != null && targetDir.isDirectory()) {
+            GregorianCalendar gc = new GregorianCalendar();
+            startTime = gc.getTimeInMillis();
             downloadFilesWithDapAccess(targetDir);
             downloadFilesWithFileAccess(targetDir);
         } else {
@@ -77,19 +83,23 @@ public class DAPDownloader {
         DODSNetcdfFile netcdfFile = new DODSNetcdfFile(dapURI);
 
         String[] uriComponents = dapURI.split("\\?");
-        String fileName = dapURI.substring(uriComponents[0].lastIndexOf("/", uriComponents[0].length() - 1));
         String constraintExpression = "";
+        String fileName = dapURI.substring(uriComponents[0].lastIndexOf("/", uriComponents[0].length() - 1));
         if (uriComponents.length > 1) {
             constraintExpression = uriComponents[1];
         }
         writeNetcdfFile(targetDir, fileName, constraintExpression, netcdfFile);
     }
 
-    void writeNetcdfFile(File targetDir, String fileName, String constraintExpression, DODSNetcdfFile sourceNetcdfFile) throws IOException {
+    void writeNetcdfFile(File targetDir, String fileName, String constraintExpression,
+                         DODSNetcdfFile sourceNetcdfFile) throws IOException {
         final File file = new File(targetDir, fileName);
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
+            updateProgressBar(fileName, 0);
             FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
-            pm.worked((int) (file.length() / (1024 * 1024)) - progressListener.amount);
+//            final int work = (int) (file.length() / (1024 * 1024)) - progressListener.amount;
+            final int work = (int) file.length() - progressListener.amount;
+            updateProgressBar(fileName, work);
             downloadedFiles.add(file);
             return;
         }
@@ -118,11 +128,13 @@ public class DAPDownloader {
         final NetcdfFileWriteable targetNetCDF = NetcdfFileWriteable.createNew(file.getAbsolutePath());
         for (Dimension filteredDimension : filteredDimensions) {
             targetNetCDF.addDimension(filteredDimension.getName(), filteredDimension.getLength(),
-                                      filteredDimension.isShared(), filteredDimension.isUnlimited(), filteredDimension.isVariableLength());
+                                      filteredDimension.isShared(), filteredDimension.isUnlimited(),
+                                      filteredDimension.isVariableLength());
         }
         for (String filteredVariable : filteredVariables) {
             final Variable variable = sourceNetcdfFile.findVariable(NetcdfFile.escapeName(filteredVariable));
-            final Variable targetVariable = targetNetCDF.addVariable(variable.getName(), variable.getDataType(), variable.getDimensions());
+            final Variable targetVariable = targetNetCDF.addVariable(variable.getName(), variable.getDataType(),
+                                                                     variable.getDimensions());
             for (Attribute attribute : variable.getAttributes()) {
                 targetVariable.addAttribute(attribute);
             }
@@ -136,7 +148,8 @@ public class DAPDownloader {
             final Variable sourceVariable = sourceNetcdfFile.findVariable(NetcdfFile.escapeName(filteredVariable));
             String ceForVariable = getConstraintExpression(filteredVariable, constraintExpression);
             final Array values = sourceNetcdfFile.readWithCE(sourceVariable, ceForVariable);
-            final int[] origin = getOrigin(filteredVariable, constraintExpression, sourceVariable.getDimensions().size());
+            final int[] origin = getOrigin(filteredVariable, constraintExpression,
+                                           sourceVariable.getDimensions().size());
             try {
                 targetNetCDF.write(NetcdfFile.escapeName(filteredVariable), origin, values);
             } catch (InvalidRangeException e) {
@@ -146,6 +159,27 @@ public class DAPDownloader {
         }
         targetNetCDF.close();
         downloadedFiles.add(file);
+    }
+
+    private void updateProgressBar(String fileName, int work) {
+        int workInMB = work  / (1024 * 1024);
+        pm.worked(workInMB);
+        StringBuilder preMessageBuilder = new StringBuilder(fileName.substring(0, 15)).append("...");
+        if (pm.getCurrentWork() != 0) {
+            final long currentTime = new GregorianCalendar().getTimeInMillis();
+            final long durationInMillis = currentTime - startTime;
+            DecimalFormat format = new DecimalFormat("0.00");
+            final String speedString = format.format(getDownloadSpeed(durationInMillis, pm.getCurrentWork()*1024*1024));
+            preMessageBuilder.append(" @ ").append(speedString).append(" kB/s");
+            final double percentage = ((double) pm.getCurrentWork() / pm.getTotalWork()) * 100.0;
+            pm.setPostMessage(
+                    pm.getCurrentWork() + "MB/" + pm.getTotalWork() + "MB (" + format.format(percentage) + "%)");
+        }
+        pm.setPreMessage("Downloading " + preMessageBuilder.toString());
+    }
+
+    static double getDownloadSpeed(long durationInMillis, int byteCount) {
+        return (byteCount / 1024.0) / (durationInMillis / 1000.0);
     }
 
     private List<FileWriter.FileWriterProgressListener> createProgressListeners() {
@@ -274,9 +308,9 @@ public class DAPDownloader {
         @Override
         public void writeProgress(FileWriter.FileWriterProgressEvent event) {
             if (event.getBytesWritten() != 0) {
-                int workedAmount = (int) (event.getBytesWritten() / (1024 * 1024));
+                int workedAmount = (int) event.getBytesWritten();
                 amount += workedAmount;
-                pm.worked(workedAmount);
+                updateProgressBar("", workedAmount);
             }
         }
 
