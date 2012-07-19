@@ -38,14 +38,6 @@ public class OpendapLeaf extends OpendapNode {
     private double fileSize;
     private Set<DAPVariable> variables;
 
-    public double getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(double fileSize) {
-        this.fileSize = fileSize;
-    }
-
     public OpendapLeaf(String name) {
         this(name, null);
     }
@@ -97,6 +89,14 @@ public class OpendapLeaf extends OpendapNode {
 
     public void setFileAccess(boolean fileAccess) {
         this.fileAccess = fileAccess;
+    }
+
+    public double getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(double fileSize) {
+        this.fileSize = fileSize;
     }
 
     public DAPVariable[] getDAPVariables(){

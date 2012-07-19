@@ -47,6 +47,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -146,13 +147,15 @@ public class OpendapAccessPanel extends JPanel {
 
             @Override
             public void leafSelectionChanged(boolean isSelected, OpendapLeaf dapObject) {
-                double dataSize = OpendapUtils.getDataSize(dapObject);
+                double dataSize = dapObject.getFileSize();
                 currentDataSize = isSelected ? currentDataSize + dataSize : currentDataSize - dataSize;
                 if (currentDataSize <= 0) {
                     updateStatusBar("Ready.");
                 } else {
-                    DecimalFormat decimalFormat = new DecimalFormat("0.00");
-                    updateStatusBar("Currently selected files are " + decimalFormat.format(currentDataSize) + " MB in size.");
+                    DecimalFormatSymbols formatSymbols = DecimalFormatSymbols.getInstance();
+                    formatSymbols.setDecimalSeparator('.');
+                    DecimalFormat decimalFormat = new DecimalFormat("0.00", formatSymbols);
+                    updateStatusBar("Total size of currently selected files: " + decimalFormat.format(currentDataSize) + " MB");
                 }
             }
 
@@ -406,7 +409,7 @@ public class OpendapAccessPanel extends JPanel {
                 final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
                 if (CatalogTree.isDapNode(treeNode)) {
                     final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
-                    datasize += OpendapUtils.getDataSize(leaf);
+                    datasize += leaf.getFileSize();
                     if (leaf.isDapAccess()) {
                         dapURIs.add(leaf.getDapUri());
                     } else {
