@@ -239,7 +239,7 @@ public class OpendapAccessPanel extends JPanel {
         final JButton downloadButton = new JButton("Download");
         final JProgressBar progressBar = new JProgressBar();
         JLabel messageLabel = new JLabel();
-        final ProgressMonitor pm = new MyProgressBarProgressMonitor(progressBar, messageLabel);
+        final ProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, messageLabel);
         final FolderChooserExComboBox folderChooserComboBox = new FolderChooserExComboBox() {
             @Override
             public PopupPanel createPopupComponent() {
@@ -374,9 +374,9 @@ public class OpendapAccessPanel extends JPanel {
 
     }
 
-    private static class MyProgressBarProgressMonitor extends ProgressBarProgressMonitor {
+    private static class DownloadProgressBarProgressMonitor extends ProgressBarProgressMonitor {
 
-        private MyProgressBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
+        private DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
             super(progressBar, messageLabel);
         }
 
