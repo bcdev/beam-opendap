@@ -5,6 +5,7 @@ import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.combobox.FolderChooserExComboBox;
 import com.jidesoft.combobox.PopupPanel;
 import com.jidesoft.status.LabelStatusBarItem;
+import com.jidesoft.status.ProgressStatusBarItem;
 import com.jidesoft.status.StatusBar;
 import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.swing.JideBoxLayout;
@@ -79,6 +80,7 @@ public class OpendapAccessPanel extends JPanel {
 
     private final PropertyMap propertyMap;
     private FolderChooserExComboBox folderChooserComboBox;
+    private JProgressBar progressBar;
 
     public static void main(String[] args) {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
@@ -148,7 +150,7 @@ public class OpendapAccessPanel extends JPanel {
             @Override
             public void leafSelectionChanged(boolean isSelected, OpendapLeaf dapObject) {
                 double dataSize = dapObject.getFileSize();
-                currentDataSize = isSelected ? currentDataSize + dataSize : currentDataSize - dataSize;
+                currentDataSize += isSelected ? dataSize : -dataSize;
                 if (currentDataSize <= 0) {
                     updateStatusBar("Ready.");
                 } else {
@@ -204,9 +206,14 @@ public class OpendapAccessPanel extends JPanel {
         statusBar = new StatusBar();
         final LabelStatusBarItem message = new LabelStatusBarItem("label");
         message.setText("Ready.");
-        message.setPreferredWidth(600);
         message.setAlignment(JLabel.LEFT);
-        statusBar.add(message, JideBoxLayout.FLEXIBLE);
+        statusBar.add(message, JideBoxLayout.VARY);
+
+        ProgressStatusBarItem progressBarItem = new ProgressStatusBarItem();
+        progressBarItem.setProgress(0);
+        progressBar = progressBarItem.getProgressBar();
+
+        statusBar.add(progressBarItem, JideBoxLayout.FIX);
     }
 
     private void updateStatusBar(String message) {
@@ -279,7 +286,6 @@ public class OpendapAccessPanel extends JPanel {
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
         final JButton downloadButton = new JButton("Download");
-        final JProgressBar progressBar = new JProgressBar();
         JLabel messageLabel = new JLabel();
         final ProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, messageLabel);
         folderChooserComboBox = new FolderChooserExComboBox() {
@@ -300,7 +306,6 @@ public class OpendapAccessPanel extends JPanel {
             downloadButtonPanel.add(openInVisat, BorderLayout.NORTH);
         }
         downloadButtonPanel.add(folderChooserComboBox);
-        downloadButtonPanel.add(progressBar, BorderLayout.SOUTH);
         downloadButtonPanel.add(downloadButton, BorderLayout.EAST);
         downloadButtonPanel.add(messageLabel, BorderLayout.NORTH);
 
@@ -394,6 +399,7 @@ public class OpendapAccessPanel extends JPanel {
 
         public DownloadAction(ProgressMonitor pm) {
             this.pm = pm;
+            pm.worked(0);
         }
 
         @Override
@@ -404,12 +410,10 @@ public class OpendapAccessPanel extends JPanel {
             }
             List<String> dapURIs = new ArrayList<String>();
             List<String> fileURIs = new ArrayList<String>();
-            int datasize = 0;
             for (TreePath selectionPath : selectionPaths) {
                 final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
                 if (CatalogTree.isDapNode(treeNode)) {
                     final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
-                    datasize += leaf.getFileSize();
                     if (leaf.isDapAccess()) {
                         dapURIs.add(leaf.getDapUri());
                     } else {
@@ -420,7 +424,7 @@ public class OpendapAccessPanel extends JPanel {
             if (dapURIs.size() == 0) {
                 return;
             }
-            pm.beginTask("Downloading", datasize);
+            pm.beginTask("Downloading", (int) currentDataSize);
             final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, pm);
             final File targetDirectory;
             if (folderChooserComboBox.getSelectedItem() == null ||

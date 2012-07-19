@@ -33,6 +33,7 @@ public class DAPDownloader {
     final List<String> fileURIs;
     private final ProgressMonitor pm;
     final Set<File> downloadedFiles;
+    private NetCDFFileWriterProgressListener progressListener;
 
     public DAPDownloader(List<String> dapUris, List<String> fileURIs, ProgressMonitor pm) {
         this.dapUris = dapUris;
@@ -87,30 +88,8 @@ public class DAPDownloader {
     void writeNetcdfFile(File targetDir, String fileName, String constraintExpression, DODSNetcdfFile sourceNetcdfFile) throws IOException {
         final File file = new File(targetDir, fileName);
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
-            List<FileWriter.FileWriterProgressListener> progressListeners = null;
-            boolean fileLongEnoughForMonitoring = file.length() > 50 * 1024 * 1024;
-            if (fileLongEnoughForMonitoring) {
-                progressListeners = new ArrayList<FileWriter.FileWriterProgressListener>();
-                progressListeners.add(new FileWriter.FileWriterProgressListener() {
-                    @Override
-                    public void writeProgress(FileWriter.FileWriterProgressEvent event) {
-                        if (event.getBytesWritten() != 0) {
-                            pm.worked((int) (event.getBytesWritten() / (1024 * 1024)));
-                            System.out.println("DAPDownloader.writeProgress");
-                        }
-                    }
-
-                    @Override
-                    public void writeStatus(FileWriter.FileWriterProgressEvent event) {
-                        System.out.println("event.getStatus() = " + event.getStatus());
-                    }
-                });
-            }
-            FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), false, false, progressListeners);
-            if (!fileLongEnoughForMonitoring) {
-                pm.worked((int) (file.length() / (1024 * 1024)));
-                System.out.println("DAPDownloader.writeNetcdfFile");
-            }
+            FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), false, false, createProgressListeners());
+            pm.worked((int) (file.length() / (1024 * 1024)) - progressListener.amount);
             downloadedFiles.add(file);
             return;
         }
@@ -167,6 +146,13 @@ public class DAPDownloader {
         }
         targetNetCDF.close();
         downloadedFiles.add(file);
+    }
+
+    private List<FileWriter.FileWriterProgressListener> createProgressListeners() {
+        List<FileWriter.FileWriterProgressListener> progressListeners = new ArrayList<FileWriter.FileWriterProgressListener>();
+        progressListener = new NetCDFFileWriterProgressListener();
+        progressListeners.add(progressListener);
+        return progressListeners;
     }
 
     static String getConstraintExpression(String sourceVariable, String constraintExpression) {
@@ -281,4 +267,21 @@ public class DAPDownloader {
         downloadedFiles.add(file);
     }
 
+    private class NetCDFFileWriterProgressListener implements FileWriter.FileWriterProgressListener {
+
+        int amount = 0;
+
+        @Override
+        public void writeProgress(FileWriter.FileWriterProgressEvent event) {
+            if (event.getBytesWritten() != 0) {
+                int workedAmount = (int) (event.getBytesWritten() / (1024 * 1024));
+                amount += workedAmount;
+                pm.worked(workedAmount);
+            }
+        }
+
+        @Override
+        public void writeStatus(FileWriter.FileWriterProgressEvent event) {
+        }
+    }
 }
