@@ -35,7 +35,16 @@ public class OpendapLeaf extends OpendapNode {
     private boolean fileAccess;
     private String dapUri;
     private String fileUri;
+    private double fileSize;
     private Set<DAPVariable> variables;
+
+    public double getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(double fileSize) {
+        this.fileSize = fileSize;
+    }
 
     public OpendapLeaf(String name) {
         this(name, null);

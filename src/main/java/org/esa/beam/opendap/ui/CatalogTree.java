@@ -12,6 +12,7 @@ import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvCatalogImpl;
 import thredds.catalog.InvCatalogRef;
 import thredds.catalog.InvDataset;
+import thredds.catalog.InvDatasetImpl;
 import thredds.catalog.ServiceType;
 
 import javax.swing.ImageIcon;
@@ -35,6 +36,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -72,19 +74,29 @@ class CatalogTree {
         final ImageIcon dapIcon = UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/DRsProduct16.png");
         final ImageIcon fileIcon = UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/FRsProduct16.png");
         final ImageIcon standardIcon = UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/NoAccess16.png");
+        jTree.setToolTipText("");
         jTree.setCellRenderer(new DefaultTreeCellRenderer() {
 
             @Override
             public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded, boolean leaf, int row, boolean hasFocus) {
                 if (isDapNode(value)) {
                     setLeafIcon(dapIcon);
+                    setToolTip((DefaultMutableTreeNode) value);
                 } else if (isFileNode(value)) {
                     setLeafIcon(fileIcon);
+                    setToolTip((DefaultMutableTreeNode) value);
                 } else {
                     setLeafIcon(standardIcon);
+                    setToolTipText("");
                 }
                 super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
                 return this;
+            }
+
+            private void setToolTip(DefaultMutableTreeNode value) {
+                DecimalFormat decimalFormat = new DecimalFormat("0.00");
+                final double fileSize = ((OpendapLeaf)value.getUserObject()).getFileSize();
+                setToolTipText(decimalFormat.format(fileSize) + " MB");
             }
         });
     }
@@ -242,6 +254,8 @@ class CatalogTree {
 
     void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
         final OpendapLeaf leaf = new OpendapLeaf(dataset.getName(), dataset);
+        final double fileSize = ((InvDatasetImpl) leaf.getDataset()).getLocalMetadata().getDataSize() / (1024 * 1024);
+        leaf.setFileSize(fileSize);
         final InvAccess dapAccess = dataset.getAccess(ServiceType.OPENDAP);
         if (dapAccess != null) {
             leaf.setDapAccess(true);
