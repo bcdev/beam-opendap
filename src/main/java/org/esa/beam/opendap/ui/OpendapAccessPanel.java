@@ -176,6 +176,7 @@ public class OpendapAccessPanel extends JPanel {
         useDatasetNameFilter = new JCheckBox("Use dataset name filter");
         useTimeRangeFilter = new JCheckBox("Use time range filter");
         useRegionFilter = new JCheckBox("Use region filter");
+        useRegionFilter.setEnabled(false);
         useVariableFilter = new JCheckBox("Use variable name filter");
 
         DefaultFilterChangeListener filterChangeListener = new DefaultFilterChangeListener();
@@ -183,7 +184,7 @@ public class OpendapAccessPanel extends JPanel {
         datasetNameFilter.addFilterChangeListener(filterChangeListener);
         timeRangeFilter = new TimeRangeFilter(useTimeRangeFilter);
         timeRangeFilter.addFilterChangeListener(filterChangeListener);
-        regionFilter = new RegionFilter();
+        regionFilter = new RegionFilter(useRegionFilter);
         regionFilter.addFilterChangeListener(filterChangeListener);
         variableFilter = new VariableFilter(useVariableFilter, catalogTree);
         variableFilter.addFilterChangeListener(filterChangeListener);
@@ -193,6 +194,9 @@ public class OpendapAccessPanel extends JPanel {
             public void leafAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
                 if (hasNestedDatasets) {
                     return;
+                }
+                if (leaf.getDataset().getGeospatialCoverage() != null) {
+                    useRegionFilter.setEnabled(true);
                 }
                 filterLeaf(leaf);
             }
