@@ -197,8 +197,6 @@ public class OpendapAccessPanel extends JPanel {
                 if (leaf.getDataset().getGeospatialCoverage() != null) {
                     useRegionFilter.setEnabled(true);
                 }
-                useDatasetNameFilter.setEnabled(true);
-                useTimeRangeFilter.setEnabled(true);
                 filterLeaf(leaf);
             }
 
@@ -221,9 +219,6 @@ public class OpendapAccessPanel extends JPanel {
         statusBar.add(progressBarItem, JideBoxLayout.FIX);
 
         useRegionFilter.setEnabled(false);
-        useDatasetNameFilter.setEnabled(false);
-        useTimeRangeFilter.setEnabled(false);
-        useVariableFilter.setEnabled(false);
     }
 
     private void updateStatusBar(String message) {
