@@ -231,12 +231,6 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         private Set<ListDataListener> listeners = new HashSet<ListDataListener>();
 
         void addVariables(DAPVariable[] dapVariables) {
-            for (DAPVariable dapVariable : dapVariables) {
-                if (dapVariable.getName().startsWith("gauge_na")) {
-                    System.out.println("VariableFilter$FilterListModel.addVariables");
-                }
-            }
-
             allVariables.addAll(Arrays.asList(dapVariables));
             for (ListDataListener listener : listeners) {
                 listener.contentsChanged(new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize() - 1));
