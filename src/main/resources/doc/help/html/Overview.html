@@ -1,6 +1,6 @@
-<html>
+<html xmlns="http://www.w3.org/1999/html">
 <head>
-    <title>BEAM Data Processors - MERIS Case-2-Water</title>
+    <title>BEAM OPeNDAP client</title>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -9,62 +9,131 @@
 <table class="header">
     <tr class="header">
         <td class="header">&nbsp;
-            MERIS Case-2-Water Overview
+            OPeNDAP client overview
         </td>
         <td class="header" align="right"><img src="../images/MerisC2RHeader.gif" border=0></td>
     </tr>
 </table>
 
 <p>
-    The processor consists of three different algorithms which have been developed under different contracts.
+    The BEAM OPeNDAP client allows you to access an OPeNDAP server and download files using the data access protocol
+    (DAP).
+    The client offers the possibility to filter the displayed catalog entries by various characteristics.
 </p>
 
-<h4>Regional Algorithm</h4>
+
+<div class="image">
+    <img src="images/opendapclient.png" alt="opendap_client">
+</div>
+
+<h3>Access to servers</h3>
 
 <p>
-    The Regional algorithm of this processor has been developed as a joint effort between GKSS Research Centre,
-    Institute for Coastal Research, and Brockmann Consult, under contract of the
-    European Space Agency ESA. Co-investigators in form of sub-contractors are the
-    Norwegian Institute for Water Research (NIVA) and the Institute of
-    Ocean Sciences (IOS), BC, Canada.<br>
+    You can enter the URL of an OPeNDAP server in the field at the top (please ensure the URL starts with "http://" and
+    ends
+    with "catalog.xml").
+    On either clicking "Return" or the refresh button at the left, the catalog content will be
+    made accessible in tree structure.
+    You can enter a new catalog URL at any time. VISAT will remember previously entered
+    URLs.
 </p>
 
-
-<h4>General</h4>
+<h3>Navigating through the catalog tree</h3>
 
 <p>
-    The algorithms that relate the radiances observed by MERIS to first atmospherically corrected
-    reflectances and then to water quality constituents were developed by Roland Doerffer (GKSS).
-    The algorithms are described in:
-</p>
-<ul>
-    <li>ATBD for atmospheric correction</li>
-    <li>ATBD for bio-optical modules</li>
-</ul>
-You can download these documents from the Lakes Wiki at
-<a href="http://www.brockmann-consult.de/beam-wiki/display/LAKES/Home">
-    http://www.brockmann-consult.de/beam-wiki/display/LAKES/Home</a>
-
-<p>If you publish results derived with the processors please use this reference:<br>
-    Doerffer R. and H. Schiller (2008): MERIS Regional Coastal and Lake Case 2 Water Project - Atmospheric Correction
-    ATBD, <br>
-    GKSS Research Center 21502 Geesthacht Version 1.0 18. May 2008
+    The tree structure on the right displays the contents of the chosen server.
+    You can open and close folders.
+    Files which can be accessed via DAP are displayed as <img src="images/icons/DRsProduct16.png"> .
+    When you select a node, information about it is displayed in the info boxes below the tree.<br>
+    For files accessible via DAP, their DDS and DAS can be viewed (for more information about DDS and DAS please refer
+    to
+    <a href="http://www.opendap.org/pdf/dap_2_data_model.pdf">http://www.opendap.org/pdf/dap_2_data_model.pdf</a> ).<br>
+    You can select one or more files in the catalog tree by clicking on them and pressing "Shift" or "Ctrl" at the same
+    time.
 </p>
 
-<br>
-If you have any questions or comments about the processor please contact the
-project Roland Doerffer (<a href="mailto:roland.doerffer@hzg.de">roland.doerffer@hzg.de</a>) for the scientific part or
-Marco Peters (<a href="mailto:marco.peters@brockmann-consult.de">marco.peters@brockmann-consult.de</a>)for the technical
-part.
+<h3>Using the filters</h3>
 
-<p><b>Help Contents</b></p>
+<p>
+    With the filters, you can restrict the displayed files.
+    A filter can be set after selecting the respective check box at the upper left.
+    To apply the filter to the catalog, you must click the apply button.
+    The filter will become inactive after deselecting the check box.<br>
+    If you activate the check box, the previously defined filter will become active again.
+    You can combine multiple filters to restrict your search for files.<br>
+    The region filter and the variable filter both need information about the content of the catalog before they can be
+    applied.
+    You first need to browse through the folder structure to gather this information.
+</p>
+
+<h4>Using the dataset name filter</h4>
+
+<p>
+    With this filter, you can search for whole file names or parts appearing in a file name.
+    You can use wildcards:
 <ul>
-
-    <li><a href="ProcessorDescription.html">Processor Description</a></li>
-    <li><a href="RegionalBioOpticalModelSpecification.html">Regional Bio-Optical Model Specification </a></li>
-    <li><a href="AtmosphericCorrectionSpecification.html">Atmospheric Correction Specification </a></li>
-
+    <li>* stands for any combination of signs</li>
+    <li>+ stands for the last entered sign, appearing at least one time</li>
+    <li>? stands for the last entered sign, appearing either once or not at all</li>
 </ul>
+
+For example, if you enter *2007* in the text field, the filter will filter out all files which do not have "2007" in
+their file name.
+If you enter *b+*, it will filter out all files which do not have a "b" in their file name.
+</p>
+
+<h4>Using the time range filter</h4>
+
+<p>
+    This filter enables you to make a temporal restriction about the given files.
+    The filtering is performed over the file name, so you need to know in which format the date is given in the names of
+    the files over which you want to perform a filtering.<br>
+    You can alter the date pattern, which says of which contents the date consists and in which order they appear in the
+    file name.
+    With the format pattern, you can specify where in the file name the date pattern is to be expected and how often it
+    occurs.<br>
+
+    You can set a start and end time for your filtering.
+    Setting only a start time will filter out all files before the given time, setting only an end time will filter out
+    all files after the set time, and setting both start and end time will filter out all files outside of the set
+    temporal range.<br>
+
+    Files of which no temporal information could be extracted will not be filtered out.
+</p>
+
+<h4>Using the region filter</h4>
+
+<p>
+    The region filter allows you to define a region of interest.
+    You can set this region by either changing the coordinate values in the text fields or dragging and resizing
+    the rectangle on the world map.
+    The filter will remove all files from the selection which are outside of the specified rectangle.<br>
+    The filter is only applicable to files providing information about their geospatial extent in their metadata.
+    Its checkbox can only be selected when such files are available in one of the folders of the catalog tree which has
+    already been viewed by the user.<br>
+    When a file's metadata has no information about its geospatial extent, it will not be affected by the filter.
+</p>
+
+<h4>Using the variable filter</h4>
+
+<p>
+    This filter allows you to filter over the variables in the given files.
+    Initially, this filter will have no information about these variables.
+    When you browse through the folder structure, the folder will start scanning the opened folders for variables.
+    After it has finished scanning, it will be available.<br>
+    In the filter, you can check and uncheck the variables you are interested in.
+    When applied, the filter will keep all files which contain at least one of the selected variables.
+</p>
+
+<h4>Downloading files</h4>
+
+<p>
+    You can download the files selected in the tree by clicking the button titled "Download" in the lower right.
+    When the client is run in VISAT, you can specify to open the products after download has completed.
+    After you have set the target directory, the status bar will inform you about the progress of the download.
+</p>
+
+
 <br>
 <hr>
 </body>
