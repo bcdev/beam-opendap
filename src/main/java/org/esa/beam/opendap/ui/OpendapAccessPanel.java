@@ -307,7 +307,7 @@ public class OpendapAccessPanel extends JPanel {
         JTextArea textArea = textAreas.get(componentIndex);
         if (response.length() > 100000) {
             StringBuilder responseBuilder = new StringBuilder(response.substring(0, 10000));
-            responseBuilder.append("\n"+"Cut remaining file content");
+            responseBuilder.append("\n" + "Cut remaining file content");
             response = responseBuilder.toString();
         }
         textArea.setText(response);

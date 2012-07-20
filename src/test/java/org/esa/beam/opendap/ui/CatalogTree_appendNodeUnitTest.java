@@ -40,7 +40,7 @@ public class CatalogTree_appendNodeUnitTest {
         final InvDatasetImpl dapDataset = createDataset(new String[]{serviceType});
 
         // execution
-        new CatalogTree(null, new DefaultAppContext("")).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
+        new CatalogTree(null, new DefaultAppContext("")).appendLeafNode(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
         testThatChildIsOnlyDapNodeWithoutFileAccess(parentNode);
@@ -53,7 +53,7 @@ public class CatalogTree_appendNodeUnitTest {
         final InvDatasetImpl dapDataset = createDataset(new String[]{serviceName});
 
         // execution
-        new CatalogTree(null, new DefaultAppContext("")).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
+        new CatalogTree(null, new DefaultAppContext("")).appendLeafNode(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
         testThatChildIsNodeWithFileAccess(parentNode);
@@ -67,7 +67,7 @@ public class CatalogTree_appendNodeUnitTest {
         final InvDatasetImpl dapDataset = createDataset(new String[]{fileServiceName, dapServiceName});
 
         // execution
-        new CatalogTree(null, new DefaultAppContext("")).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
+        new CatalogTree(null, new DefaultAppContext("")).appendLeafNode(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
         testThatChildIsDapNodeWhichHasFileAccessToo(parentNode);
@@ -81,7 +81,7 @@ public class CatalogTree_appendNodeUnitTest {
         catalogReference.setCatalog(new InvCatalogImpl("whatever", "1.0", whatever));
 
         //execution
-        CatalogTree.appendCatalogNodeToParent(parentNode, getDefaultTreeModel(), catalogReference);
+        CatalogTree.appendCatalogNode(parentNode, getDefaultTreeModel(), catalogReference);
 
         //verification
         assertEquals(1, parentNode.getChildCount());

@@ -225,14 +225,14 @@ class CatalogTree {
     private void appendToNode(JTree jTree, InvDataset dataset, MutableTreeNode parentNode) {
         final DefaultTreeModel treeModel = (DefaultTreeModel) jTree.getModel();
         if (dataset instanceof InvCatalogRef) {
-            appendCatalogNodeToParent(parentNode, treeModel, (InvCatalogRef) dataset);
+            appendCatalogNode(parentNode, treeModel, (InvCatalogRef) dataset);
         } else {
-            appendDataNodeToParent(parentNode, treeModel, dataset);
+            appendLeafNode(parentNode, treeModel, dataset);
         }
     }
 
-    static void appendCatalogNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
-        final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName() + "/");
+    static void appendCatalogNode(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvCatalogRef catalogRef) {
+        final DefaultMutableTreeNode catalogNode = new DefaultMutableTreeNode(catalogRef.getName());
         final String catalogPath = catalogRef.getURI().toASCIIString();
         final CatalogNode opendapNode = new CatalogNode(catalogPath, catalogRef);
         opendapNode.setCatalogUri(catalogPath);
@@ -240,7 +240,7 @@ class CatalogTree {
         treeModel.insertNodeInto(catalogNode, parentNode, parentNode.getChildCount());
     }
 
-    void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
+    void appendLeafNode(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
         final OpendapLeaf leaf = new OpendapLeaf(dataset.getName(), dataset);
         final int fileSize = OpendapUtils.getDataSizeInBytes(leaf);
         leaf.setFileSize(fileSize);
