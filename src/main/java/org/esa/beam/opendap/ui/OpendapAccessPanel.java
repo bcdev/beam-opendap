@@ -90,6 +90,7 @@ public class OpendapAccessPanel extends JPanel {
     private JLabel preMessageLabel;
     private JLabel postMessageLabel;
     private Map<Integer,JTextArea> textAreas;
+    private JButton downloadButton;
 
     public static void main(String[] args) {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
@@ -188,7 +189,9 @@ public class OpendapAccessPanel extends JPanel {
                 currentDataSize += isSelected ? dataSize : -dataSize;
                 if (currentDataSize <= 0) {
                     updateStatusBar("Ready.");
+                    downloadButton.setEnabled(false);
                 } else {
+                    downloadButton.setEnabled(true);
                     double dataSizeInMB = currentDataSize / (1024.0 * 1024.0);
                     updateStatusBar(
                             "Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
@@ -384,7 +387,8 @@ public class OpendapAccessPanel extends JPanel {
                 return popupComponent;
             }
         };
-        final JButton downloadButton = new JButton("Download");
+        downloadButton = new JButton("Download");
+        downloadButton.setEnabled(false);
         downloadButton.addActionListener(new DownloadAction(pm));
         folderChooserComboBox.setEditable(true);
         if (VisatApp.getApp() != null) {
