@@ -78,14 +78,15 @@ public class DAPDownloader {
     }
 
     private void downloadDapFile(File targetDir, String dapURI) throws IOException, InvalidRangeException {
-        DODSNetcdfFile netcdfFile = new DODSNetcdfFile(dapURI);
-
         String[] uriComponents = dapURI.split("\\?");
         String constraintExpression = "";
         String fileName = dapURI.substring(uriComponents[0].lastIndexOf("/") + 1);
         if (uriComponents.length > 1) {
             constraintExpression = uriComponents[1];
         }
+
+        updateProgressBar(fileName, 0);
+        DODSNetcdfFile netcdfFile = new DODSNetcdfFile(dapURI);
         writeNetcdfFile(targetDir, fileName, constraintExpression, netcdfFile);
     }
 
@@ -93,7 +94,6 @@ public class DAPDownloader {
                          DODSNetcdfFile sourceNetcdfFile) throws IOException {
         final File file = new File(targetDir, fileName);
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
-            updateProgressBar(fileName, 0);
             FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
             final int work = (int) file.length() - progressListener.amount;
             updateProgressBar(fileName, work);
@@ -162,18 +162,24 @@ public class DAPDownloader {
         pm.worked(work);
         StringBuilder preMessageBuilder = new StringBuilder(fileName);
         int currentWork = pm.getCurrentWork();
+        int fileCount = fileURIs.size() + dapUris.size();
+        preMessageBuilder.append(" (")
+                .append(downloadedFiles.size() + 1)
+                .append("/")
+                .append(fileCount)
+                .append(")");
         if (currentWork != 0) {
             final long currentTime = new GregorianCalendar().getTimeInMillis();
             final long durationInMillis = currentTime - startTime;
             double downloadSpeed = getDownloadSpeed(durationInMillis, currentWork);
             String speedString = OpendapUtils.format(downloadSpeed);
             preMessageBuilder.append(" @ ").append(speedString).append(" kB/s");
-            int totalWork = pm.getTotalWork();
-            final double percentage = ((double) currentWork / totalWork) * 100.0;
-            String workDone = OpendapUtils.format(currentWork / (1024.0 * 1024.0));
-            String totalWorkString = OpendapUtils.format(totalWork / (1024.0 * 1024.0));
-            pm.setPostMessage(workDone + " MB/" + totalWorkString + " MB (" + OpendapUtils.format(percentage) + "%)");
         }
+        int totalWork = pm.getTotalWork();
+        final double percentage = ((double) currentWork / totalWork) * 100.0;
+        String workDone = OpendapUtils.format(currentWork / (1024.0 * 1024.0));
+        String totalWorkString = OpendapUtils.format(totalWork / (1024.0 * 1024.0));
+        pm.setPostMessage(workDone + " MB/" + totalWorkString + " MB (" + OpendapUtils.format(percentage) + "%)");
         String preMessageString = preMessageBuilder.toString();
         pm.setTooltip("Downloading " + preMessageBuilder.toString());
         pm.setPreMessage("Downloading " + preMessageString.replace(fileName, fileName.substring(0, 15) + "..."));
