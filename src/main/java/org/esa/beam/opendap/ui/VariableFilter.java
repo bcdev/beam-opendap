@@ -1,7 +1,6 @@
 package org.esa.beam.opendap.ui;
 
 import com.bc.ceres.core.ProgressBarProgressMonitor;
-import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.list.CheckBoxListSelectionModelWithWrapper;
 import com.jidesoft.list.FilterableCheckBoxList;
 import com.jidesoft.list.QuickListFilterField;
@@ -54,9 +53,10 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
     private List<FilterChangeListener> listeners;
     private final HashSet<VariableFilterPreparator> filterPreparators = new HashSet<VariableFilterPreparator>();
     private final List<VariableFilterPreparator> filterPreparatorsInWait = new ArrayList<VariableFilterPreparator>();
-    private ProgressMonitor pm;
+    private LabelledProgressBarPM pm;
     private JProgressBar progressBar;
     private JLabel statusLabel;
+    private JLabel percentageLabel;
     private int totalWork;
     private int worked;
 
@@ -145,9 +145,10 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
 
         JScrollPane scrollPane = new JScrollPane(checkBoxList);
         scrollPane.setPreferredSize(new Dimension(250, 100));
-        GridBagUtils.addToPanel(panel, progressBar, gbc, "insets.top=5, gridx=0, gridy=0, gridwidth=2, anchor=WEST, fill=HORIZONTAL, weightx=1.0");
-        GridBagUtils.addToPanel(panel, statusLabel, gbc, "gridx=2, anchor=EAST, gridwidth=1, fill=NONE, weightx=0.0");
-        GridBagUtils.addToPanel(panel, field, gbc, "gridx=0, gridy=1, anchor=WEST, gridwidth=3, fill=HORIZONTAL, weightx=1.0");
+        GridBagUtils.addToPanel(panel, statusLabel, gbc, "insets.top=5, anchor=WEST");
+        GridBagUtils.addToPanel(panel, progressBar, gbc, "gridx=1,fill=HORIZONTAL, weightx=1.0");
+        GridBagUtils.addToPanel(panel, percentageLabel, gbc, "insets.left=5, gridx=2, fill=NONE, weightx=0.0");
+        GridBagUtils.addToPanel(panel, field, gbc, "insets.left=0, gridx=0, gridy=1, gridwidth=3, fill=HORIZONTAL, weightx=1.0");
         GridBagUtils.addToPanel(panel, scrollPane, gbc, "gridy=2");
         GridBagUtils.addToPanel(panel, selectAllButton, gbc, "insets.right=5, gridy=3, gridwidth=1, fill=NONE, weightx=0");
         GridBagUtils.addToPanel(panel, selectNoneButton, gbc, "gridx=1");
@@ -162,8 +163,9 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         field = new QuickListFilterField(listModel);
         checkBoxList = new FilterableCheckBoxList(field.getDisplayListModel());
         progressBar = new JProgressBar();
-        statusLabel = new JLabel();
-        pm = new VariableFilterProgressBarProgressMonitor(progressBar, statusLabel);
+        statusLabel = new JLabel("");
+        percentageLabel = new JLabel("");
+        pm = new VariableFilterProgressBarProgressMonitor(progressBar, statusLabel, percentageLabel);
     }
 
     @Override
@@ -281,7 +283,8 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
 
     @Override
     public void catalogElementsInsertionFinished() {
-        pm.setTaskName("");
+        pm.setPreMessage("Scanning variables... ");
+        pm.setPostMessage("");
         pm.beginTask("", totalWork);
         pm.worked(worked);
     }
@@ -338,12 +341,16 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
     private void setProgressComponentsVisible(boolean visible) {
         progressBar.setVisible(visible);
         statusLabel.setVisible(visible);
+        percentageLabel.setVisible(visible);
     }
 
-    private static class VariableFilterProgressBarProgressMonitor extends ProgressBarProgressMonitor {
+    private static class VariableFilterProgressBarProgressMonitor extends ProgressBarProgressMonitor implements LabelledProgressBarPM {
 
-        public VariableFilterProgressBarProgressMonitor(JProgressBar progressBar, JLabel messageLabel) {
-            super(progressBar, messageLabel);
+        private final JLabel preMessageLabel;
+
+        public VariableFilterProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel, JLabel postMessageLabel) {
+            super(progressBar, postMessageLabel);
+            this.preMessageLabel = preMessageLabel;
         }
 
         @Override
@@ -360,6 +367,26 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
 
         @Override
         protected void finish() {
+        }
+
+        @Override
+        public void setPreMessage(String preMessageText) {
+            preMessageLabel.setText(preMessageText);
+        }
+
+        @Override
+        public void setPostMessage(String postMessageText) {
+            setTaskName(postMessageText);
+        }
+
+        @Override
+        public int getTotalWork() {
+            throw new IllegalStateException("not implemented");
+        }
+
+        @Override
+        public int getCurrentWork() {
+            throw new IllegalStateException("not implemented");
         }
     }
 
