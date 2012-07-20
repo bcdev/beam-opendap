@@ -65,6 +65,7 @@ class CatalogTree {
         appendToNode(jTree, rootDatasets, rootNode, true);
         fireCatalogElementsInsertionFinished();
         expandPath(rootNode);
+        leafToParentNode.clear();
     }
 
     static void addCellRenderer(final JTree jTree) {

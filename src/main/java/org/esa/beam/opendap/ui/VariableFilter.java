@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.ExecutionException;
 
 public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeListener {
 
@@ -227,6 +226,13 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         listModel.variableToSelected.put(dapVariable, selected);
     }
 
+    public void stopFiltering() {
+        filterPreparators.clear();
+        filterPreparatorsInWait.clear();
+        listModel.allVariables.clear();
+        listModel.variableToSelected.clear();
+    }
+
     private static class FilterListModel implements ListModel {
 
         private SortedSet<DAPVariable> allVariables = new TreeSet<DAPVariable>();
@@ -264,10 +270,6 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
     @Override
     public void leafAdded(OpendapLeaf leaf, boolean hasNestedDatasets) {
         VariableFilterPreparator filterPreparator = new VariableFilterPreparator(leaf);
-
-        if (totalWork > 0) {
-//            setProgressComponentsVisible(true);
-        }
 
         if (filterPreparators.size() <= MAX_THREAD_COUNT) {
             filterPreparators.add(filterPreparator);
@@ -311,7 +313,8 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
                 DAPVariable[] dapVariables = get();
                 listModel.addVariables(dapVariables);
             } catch (Exception e) {
-                BeamLogManager.getSystemLogger().warning("Stopping to scan for variables due to exception: " + e.getMessage());
+                BeamLogManager.getSystemLogger().warning(
+                        "Stopping to scan for variables due to exception: " + e.getMessage());
             } finally {
                 filterPreparators.remove(this);
                 pm.worked(1);
@@ -327,7 +330,6 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
                     updateUI(true, true, true);
                     filterCheckBox.setEnabled(true);
                     pm.done();
-//                    setProgressComponentsVisible(false);
                     worked = 0;
                     totalWork = 0;
                 }

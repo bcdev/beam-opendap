@@ -467,6 +467,7 @@ public class OpendapAccessPanel extends JPanel {
         }
 
         catalogTree.setNewRootDatasets(datasets);
+        variableFilter.stopFiltering();
         return true;
     }
 
