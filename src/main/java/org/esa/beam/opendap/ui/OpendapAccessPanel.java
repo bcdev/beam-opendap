@@ -148,12 +148,13 @@ public class OpendapAccessPanel extends JPanel {
 
             @Override
             public void leafSelectionChanged(boolean isSelected, OpendapLeaf dapObject) {
-                double dataSize = dapObject.getFileSize();
+                int dataSize = dapObject.getFileSize();
                 currentDataSize += isSelected ? dataSize : -dataSize;
                 if (currentDataSize <= 0) {
                     updateStatusBar("Ready.");
                 } else {
-                    updateStatusBar("Total size of currently selected files: " + OpendapUtils.format(currentDataSize) + " MB");
+                    double dataSizeInMB = currentDataSize / (1024.0 * 1024.0);
+                    updateStatusBar("Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
                 }
             }
 

@@ -35,7 +35,7 @@ public class OpendapLeaf extends OpendapNode {
     private boolean fileAccess;
     private String dapUri;
     private String fileUri;
-    private double fileSize;
+    private int fileSize;
     private Set<DAPVariable> variables;
 
     public OpendapLeaf(String name) {
@@ -91,11 +91,11 @@ public class OpendapLeaf extends OpendapNode {
         this.fileAccess = fileAccess;
     }
 
-    public double getFileSize() {
+    public int getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(double fileSize) {
+    public void setFileSize(int fileSize) {
         this.fileSize = fileSize;
     }
 

@@ -160,19 +160,20 @@ public class DAPDownloader {
     }
 
     private void updateProgressBar(String fileName, int work) {
-        int workInMB = work  / (1024 * 1024);
-        pm.worked(workInMB);
+        pm.worked(work);
         StringBuilder preMessageBuilder = new StringBuilder(fileName.substring(0, 15)).append("...");
         int currentWork = pm.getCurrentWork();
         if (currentWork != 0) {
             final long currentTime = new GregorianCalendar().getTimeInMillis();
             final long durationInMillis = currentTime - startTime;
-            double downloadSpeed = getDownloadSpeed(durationInMillis, currentWork * 1024 * 1024);
+            double downloadSpeed = getDownloadSpeed(durationInMillis, currentWork);
             String speedString = OpendapUtils.format(downloadSpeed);
             preMessageBuilder.append(" @ ").append(speedString).append(" kB/s");
             int totalWork = pm.getTotalWork();
             final double percentage = ((double) currentWork / totalWork) * 100.0;
-            pm.setPostMessage(currentWork + "MB/" + totalWork + "MB (" + OpendapUtils.format(percentage) + "%)");
+            String workDone = OpendapUtils.format(currentWork / (1024.0 * 1024.0));
+            String totalWorkString = OpendapUtils.format(totalWork / (1024.0 * 1024.0));
+            pm.setPostMessage(workDone + " MB/" + totalWorkString + " MB (" + OpendapUtils.format(percentage) + "%)");
         }
         pm.setPreMessage("Downloading " + preMessageBuilder.toString());
     }
