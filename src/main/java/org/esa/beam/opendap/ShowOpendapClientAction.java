@@ -12,7 +12,7 @@ public class ShowOpendapClientAction extends AbstractVisatAction {
     @Override
     public void actionPerformed(CommandEvent event) {
         super.actionPerformed(event);
-        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel(getAppContext().getPreferences());
+        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel(getAppContext().getPreferences(), event.getCommand().getHelpId());
         final JDialog jDialog = new JDialog(getAppContext().getApplicationWindow(), "OPeNDAP Access");
         jDialog.setContentPane(opendapAccessPanel);
         jDialog.pack();

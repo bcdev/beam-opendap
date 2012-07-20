@@ -26,25 +26,6 @@
         <module>beam-visat-rcp</module>
     </dependency>
 
-    <!--<extension point="beam-ui:toolViews">-->
-        <!--<toolView>-->
-            <!--<id>timeSeriesPlayerToolView</id>-->
-            <!--<class>org.esa.beam.timeseries.ui.player.TimeSeriesPlayerToolView</class>-->
-            <!--<title>Time Series Player</title>-->
-            <!--<tabTitle>Time Series</tabTitle>-->
-            <!--<mnemonic>T</mnemonic>-->
-            <!--<description>Time Series Player</description>-->
-            <!--<accelerator>ctrl alt T</accelerator>-->
-            <!--<smallIcon>/org/esa/beam/timeseries/ui/icons/timeseries-player16.png</smallIcon>-->
-            <!--<largeIcon>/org/esa/beam/timeseries/ui/icons/timeseries-player24.png</largeIcon>-->
-            <!--<initState>FLOATING</initState>-->
-            <!--<initSide>EAST</initSide>-->
-            <!--<initIndex>3</initIndex>-->
-            <!--<toolBarId>TimeSeriesTool</toolBarId>-->
-            <!--<helpId>timeSeriesPlayer</helpId>-->
-        <!--</toolView>-->
-    <!--</extension>-->
-
     <extension point="beam-ui:actions">
         <action>
             <id>showOpendapClientAction</id>
@@ -54,17 +35,17 @@
             <smallIcon>icons/RsProduct16.gif</smallIcon>
             <largeIcon>icons/RsProduct24.gif</largeIcon>
             <shortDescr>Download products from OPeNDAP servers</shortDescr>
-            <!--<helpId>showOpendapClientAction</helpId>-->
+            <helpId>opendap-client</helpId>
             <placeAfter>reopen</placeAfter>
             <placeBefore>productGrabber</placeBefore>
         </action>
     </extension>
 
-    <!--<extension point="beam-ui:helpSets">-->
-        <!--<helpSet>-->
-            <!--<parent>beam-help</parent>-->
-            <!--<path>doc/help/opendap-client.hs</path>-->
-        <!--</helpSet>-->
-    <!--</extension>-->
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/opendap-client.hs</path>
+        </helpSet>
+    </extension>
 
 </module>

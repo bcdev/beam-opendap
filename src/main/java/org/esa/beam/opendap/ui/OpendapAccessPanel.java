@@ -9,6 +9,7 @@ import com.jidesoft.status.StatusBar;
 import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.utils.Lm;
+import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.DAPDownloader;
 import org.esa.beam.opendap.utils.OpendapUtils;
@@ -44,6 +45,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -85,6 +88,7 @@ public class OpendapAccessPanel extends JPanel {
 
     private double currentDataSize = 0.0;
     private final PropertyMap propertyMap;
+    private final String helpId;
     private FolderChooserExComboBox folderChooserComboBox;
     private JProgressBar progressBar;
     private JLabel preMessageLabel;
@@ -100,7 +104,7 @@ public class OpendapAccessPanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel(new PropertyMap());
+        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel(new PropertyMap(), "");
         final JFrame mainFrame = new JFrame("OPeNDAP Access");
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainFrame.setContentPane(opendapAccessPanel);
@@ -110,9 +114,10 @@ public class OpendapAccessPanel extends JPanel {
         mainFrame.setVisible(true);
     }
 
-    public OpendapAccessPanel(PropertyMap propertyMap) {
+    public OpendapAccessPanel(PropertyMap propertyMap, String helpId) {
         super();
         this.propertyMap = propertyMap;
+        this.helpId = helpId;
         initComponents();
         initContentPane();
     }
@@ -341,10 +346,24 @@ public class OpendapAccessPanel extends JPanel {
     }
 
     private void initContentPane() {
-        final JPanel urlPanel = new JPanel(new BorderLayout(4, 4));
-        urlPanel.add(new JLabel("Root URL"), BorderLayout.NORTH);
-        urlPanel.add(urlField);
-        urlPanel.add(refreshButton, BorderLayout.EAST);
+        GridBagLayout layout = new GridBagLayout();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets.right = 5;
+        final JPanel urlPanel = new JPanel(layout);
+        urlPanel.add(new JLabel("Root URL:"), gbc);
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        urlPanel.add(urlField, gbc);
+        gbc.gridx = 2;
+        gbc.weightx = 0.0;
+        gbc.fill = GridBagConstraints.NONE;
+        urlPanel.add(refreshButton, gbc);
+        gbc.gridx = 3;
+        gbc.insets.right = 0;
+        JButton help = new JButton("Help");
+        HelpSys.enableHelpOnButton(help, helpId);
+        urlPanel.add(help, gbc);
 
 //        final JScrollPane dapResponse = new JScrollPane(metaInfoArea);
 
