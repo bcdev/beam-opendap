@@ -245,6 +245,10 @@ public class DAPDownloaderTest {
         }
 
         @Override
+        public void setTooltip(String tooltip) {
+        }
+
+        @Override
         public void beginTask(String taskName, int totalWork) {
         }
 

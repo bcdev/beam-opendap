@@ -82,7 +82,7 @@ public class DAPDownloader {
 
         String[] uriComponents = dapURI.split("\\?");
         String constraintExpression = "";
-        String fileName = dapURI.substring(uriComponents[0].lastIndexOf("/", uriComponents[0].length() - 1));
+        String fileName = dapURI.substring(uriComponents[0].lastIndexOf("/") + 1);
         if (uriComponents.length > 1) {
             constraintExpression = uriComponents[1];
         }
@@ -95,7 +95,6 @@ public class DAPDownloader {
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
             updateProgressBar(fileName, 0);
             FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
-//            final int work = (int) (file.length() / (1024 * 1024)) - progressListener.amount;
             final int work = (int) file.length() - progressListener.amount;
             updateProgressBar(fileName, work);
             downloadedFiles.add(file);
@@ -161,7 +160,7 @@ public class DAPDownloader {
 
     private void updateProgressBar(String fileName, int work) {
         pm.worked(work);
-        StringBuilder preMessageBuilder = new StringBuilder(fileName.substring(0, 15)).append("...");
+        StringBuilder preMessageBuilder = new StringBuilder(fileName);
         int currentWork = pm.getCurrentWork();
         if (currentWork != 0) {
             final long currentTime = new GregorianCalendar().getTimeInMillis();
@@ -175,7 +174,9 @@ public class DAPDownloader {
             String totalWorkString = OpendapUtils.format(totalWork / (1024.0 * 1024.0));
             pm.setPostMessage(workDone + " MB/" + totalWorkString + " MB (" + OpendapUtils.format(percentage) + "%)");
         }
-        pm.setPreMessage("Downloading " + preMessageBuilder.toString());
+        String preMessageString = preMessageBuilder.toString();
+        pm.setTooltip("Downloading " + preMessageBuilder.toString());
+        pm.setPreMessage("Downloading " + preMessageString.replace(fileName, fileName.substring(0, 15) + "..."));
     }
 
     static double getDownloadSpeed(long durationInMillis, int byteCount) {

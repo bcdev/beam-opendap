@@ -32,4 +32,6 @@ public interface LabelledProgressBarPM extends ProgressMonitor {
     int getTotalWork();
 
     int getCurrentWork();
+
+    void setTooltip(String tooltip);
 }

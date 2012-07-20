@@ -151,6 +151,8 @@ class CatalogTree {
         jTree.addTreeSelectionListener(new TreeSelectionListener() {
             @Override
             public void valueChanged(TreeSelectionEvent e) {
+
+
                 final TreePath[] paths = e.getPaths();
                 for (TreePath path : paths) {
                     final DefaultMutableTreeNode lastPathComponent = (DefaultMutableTreeNode) path.getLastPathComponent();
@@ -362,6 +364,14 @@ class CatalogTree {
 
     void addCatalogTreeListener(CatalogTreeListener listener) {
         catalogTreeListeners.add(listener);
+    }
+
+    OpendapLeaf getSelectedLeaf() {
+        if(jTree.isSelectionEmpty()) {
+            return null;
+        }
+        DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode) jTree.getAnchorSelectionPath().getLastPathComponent();
+        return (OpendapLeaf)selectedNode.getUserObject();
     }
 
     static interface LeafSelectionListener {

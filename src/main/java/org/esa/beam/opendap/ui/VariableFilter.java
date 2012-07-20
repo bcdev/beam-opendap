@@ -137,7 +137,7 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         selectAllButton.setFont(font);
         selectNoneButton.setFont(font);
         field.setHintText("Type here to filter variables");
-        setProgressComponentsVisible(false);
+        progressBar.setVisible(false);
     }
 
     private void addComponents(JPanel panel) {
@@ -265,7 +265,7 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         VariableFilterPreparator filterPreparator = new VariableFilterPreparator(leaf);
 
         if (totalWork > 0) {
-            setProgressComponentsVisible(true);
+//            setProgressComponentsVisible(true);
         }
 
         if (filterPreparators.size() <= MAX_THREAD_COUNT) {
@@ -330,7 +330,7 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
                     updateUI(true, true, true);
                     filterCheckBox.setEnabled(true);
                     pm.done();
-                    setProgressComponentsVisible(false);
+//                    setProgressComponentsVisible(false);
                     worked = 0;
                     totalWork = 0;
                 }
@@ -338,19 +338,17 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         }
     }
 
-    private void setProgressComponentsVisible(boolean visible) {
-        progressBar.setVisible(visible);
-        statusLabel.setVisible(visible);
-        percentageLabel.setVisible(visible);
-    }
-
     private static class VariableFilterProgressBarProgressMonitor extends ProgressBarProgressMonitor implements LabelledProgressBarPM {
 
+        private final JProgressBar progressBar;
         private final JLabel preMessageLabel;
+        private final JLabel postMessageLabel;
 
         public VariableFilterProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel, JLabel postMessageLabel) {
             super(progressBar, postMessageLabel);
+            this.progressBar = progressBar;
             this.preMessageLabel = preMessageLabel;
+            this.postMessageLabel = postMessageLabel;
         }
 
         @Override
@@ -358,7 +356,10 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         }
 
         @Override
-        protected void setVisibility(boolean visible) {
+        public void setVisibility(boolean visible) {
+            progressBar.setVisible(visible);
+            preMessageLabel.setVisible(visible);
+            postMessageLabel.setVisible(visible);
         }
 
         @Override
@@ -387,6 +388,10 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         @Override
         public int getCurrentWork() {
             throw new IllegalStateException("not implemented");
+        }
+
+        @Override
+        public void setTooltip(String tooltip) {
         }
     }
 

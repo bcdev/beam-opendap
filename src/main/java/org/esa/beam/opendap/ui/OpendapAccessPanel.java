@@ -32,11 +32,14 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.BorderLayout;
@@ -46,40 +49,47 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OpendapAccessPanel extends JPanel {
 
     private static final String PROPERTY_KEY_SERVER_URLS = "opendap.server.urls";
+    private final static int DDS_AREA_INDEX = 0;
+    private final static int DAS_AREA_INDEX = 1;
+    private static final Integer GENERAL_AREA_INDEX = 2;
 
     private JComboBox urlField;
     private JButton refreshButton;
     private CatalogTree catalogTree;
-    private JTextArea dapResponseArea;
 
+    private JTabbedPane metaInfoArea;
     private JCheckBox useDatasetNameFilter;
+
     private FilterComponent datasetNameFilter;
-
     private JCheckBox useTimeRangeFilter;
+
     private FilterComponent timeRangeFilter;
-
     private JCheckBox useRegionFilter;
-    private FilterComponent regionFilter;
 
+    private FilterComponent regionFilter;
     private JCheckBox useVariableFilter;
+
     private VariableFilter variableFilter;
 
     private JCheckBox openInVisat;
-
     private StatusBar statusBar;
-    private double currentDataSize = 0.0;
 
+    private double currentDataSize = 0.0;
     private final PropertyMap propertyMap;
     private FolderChooserExComboBox folderChooserComboBox;
     private JProgressBar progressBar;
     private JLabel preMessageLabel;
     private JLabel postMessageLabel;
+    private Map<Integer,JTextArea> textAreas;
 
     public static void main(String[] args) {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
@@ -133,17 +143,43 @@ public class OpendapAccessPanel extends JPanel {
                 }
             }
         });
-        dapResponseArea = new JTextArea(10, 40);
+        metaInfoArea = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        JTextArea ddsArea = new JTextArea(10, 40);
+        JTextArea dasArea = new JTextArea(10, 40);
+        JTextArea generalArea = new JTextArea(10, 40);
+
+        ddsArea.setEditable(false);
+        dasArea.setEditable(false);
+        generalArea.setEditable(false);
+
+        textAreas = new HashMap<Integer, JTextArea>();
+        textAreas.put(DAS_AREA_INDEX, dasArea);
+        textAreas.put(DDS_AREA_INDEX, ddsArea);
+        textAreas.put(GENERAL_AREA_INDEX, generalArea);
+
+        metaInfoArea.addTab("DDS", new JScrollPane(ddsArea));
+        metaInfoArea.addTab("DAS", new JScrollPane(dasArea));
+        metaInfoArea.addTab("General Info", new JScrollPane(generalArea));
+
+        metaInfoArea.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (catalogTree.getSelectedLeaf() != null) {
+                    setMetadataText(metaInfoArea.getSelectedIndex(), catalogTree.getSelectedLeaf());
+                }
+            }
+        });
+
         catalogTree = new CatalogTree(new CatalogTree.LeafSelectionListener() {
 
             @Override
             public void dapLeafSelected(OpendapLeaf leaf) {
-                setResponseAreaText(leaf.getDdsUri());
+                setMetadataText(metaInfoArea.getSelectedIndex(), leaf);
             }
 
             @Override
             public void fileLeafSelected(OpendapLeaf leaf) {
-                setResponseAreaText(leaf.getFileUri());
+                setMetadataText(metaInfoArea.getSelectedIndex(), leaf);
             }
 
             @Override
@@ -154,21 +190,10 @@ public class OpendapAccessPanel extends JPanel {
                     updateStatusBar("Ready.");
                 } else {
                     double dataSizeInMB = currentDataSize / (1024.0 * 1024.0);
-                    updateStatusBar("Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
+                    updateStatusBar(
+                            "Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
                 }
             }
-
-            private void setResponseAreaText(String uri) {
-                String response = null;
-                try {
-                    response = OpendapUtils.getResponse(uri);
-                } catch (Exception e) {
-                    // todo - exception handling
-                    e.printStackTrace();
-                }
-                dapResponseArea.setText(response);
-            }
-
         });
         useDatasetNameFilter = new JCheckBox("Use dataset name filter");
         useTimeRangeFilter = new JCheckBox("Use time range filter");
@@ -237,6 +262,45 @@ public class OpendapAccessPanel extends JPanel {
         useRegionFilter.setEnabled(false);
     }
 
+
+    private void setMetadataText(int componentIndex, OpendapLeaf leaf) {
+        String text = null;
+        try {
+            if (leaf.isDapAccess()) {
+                if (metaInfoArea.getSelectedIndex() == DDS_AREA_INDEX) {
+                    text = OpendapUtils.getResponse(leaf.getDdsUri());
+                } else if (metaInfoArea.getSelectedIndex() == DAS_AREA_INDEX) {
+                    text = OpendapUtils.getResponse(leaf.getDasUri());
+                } else {
+                    text = OpendapUtils.getResponse(leaf.getDdsUri());
+                }
+            } else if (leaf.isFileAccess()) {
+                if (metaInfoArea.getSelectedIndex() == DDS_AREA_INDEX) {
+                    text = "No DDS information for file '" + leaf.getName() + "'.";
+                } else if (metaInfoArea.getSelectedIndex() == DAS_AREA_INDEX) {
+                    text = "No DAS information for file '" + leaf.getName() + "'.";
+                } else {
+                    text = OpendapUtils.getResponse(leaf.getFileUri());
+                }
+            }
+        } catch (IOException e) {
+            // todo handle Exceptions
+        }
+
+        setResponseText(componentIndex, text);
+    }
+
+    private void setResponseText(int componentIndex, String response) {
+        JTextArea textArea = textAreas.get(componentIndex);
+        if (response.length() > 100000) {
+            StringBuilder responseBuilder = new StringBuilder(response.substring(0, 10000));
+            responseBuilder.append("\n"+"Cut remaining file content");
+            response = responseBuilder.toString();
+        }
+        textArea.setText(response);
+        textArea.setCaretPosition(0);
+    }
+
     private void updateStatusBar(String message) {
         LabelStatusBarItem messageItem = (LabelStatusBarItem) statusBar.getItemByName("label");
         messageItem.setText(message);
@@ -279,12 +343,12 @@ public class OpendapAccessPanel extends JPanel {
         urlPanel.add(urlField);
         urlPanel.add(refreshButton, BorderLayout.EAST);
 
-        final JScrollPane dapResponse = new JScrollPane(dapResponseArea);
+//        final JScrollPane dapResponse = new JScrollPane(metaInfoArea);
 
         final JPanel variableInfo = new JPanel(new BorderLayout(5, 5));
         variableInfo.setBorder(new EmptyBorder(10, 0, 0, 0));
-        variableInfo.add(new JLabel("  Variable Info:"), BorderLayout.NORTH);
-        variableInfo.add(dapResponse, BorderLayout.CENTER);
+        variableInfo.add(metaInfoArea, BorderLayout.CENTER);
+//        variableInfo.add(dapResponse, BorderLayout.CENTER);
 
         final JScrollPane openDapTree = new JScrollPane(catalogTree.getComponent());
         openDapTree.setPreferredSize(new Dimension(400, 500));
@@ -307,6 +371,7 @@ public class OpendapAccessPanel extends JPanel {
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
         final LabelledProgressBarPM pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel);
+        progressBar.setVisible(false);
         folderChooserComboBox = new FolderChooserExComboBox() {
             @Override
             public PopupPanel createPopupComponent() {
@@ -393,14 +458,15 @@ public class OpendapAccessPanel extends JPanel {
                                                                                               LabelledProgressBarPM {
 
         private final JProgressBar progressBar;
+        private final JLabel preMessageLabel;
         private JLabel postMessageLabel;
         private int totalWork;
         private int currentWork;
 
-        public DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel,
-                                                  JLabel postMessageLabel) {
+        public DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel, JLabel postMessageLabel) {
             super(progressBar, preMessageLabel);
             this.progressBar = progressBar;
+            this.preMessageLabel = preMessageLabel;
             this.postMessageLabel = postMessageLabel;
         }
 
@@ -412,6 +478,13 @@ public class OpendapAccessPanel extends JPanel {
         @Override
         public void setPostMessage(String postMessageText) {
             postMessageLabel.setText(postMessageText);
+        }
+
+        @Override
+        public void setTooltip(String tooltip) {
+            preMessageLabel.setToolTipText(tooltip);
+            postMessageLabel.setToolTipText(tooltip);
+            progressBar.setToolTipText(tooltip);
         }
 
         @Override
@@ -477,7 +550,7 @@ public class OpendapAccessPanel extends JPanel {
                     final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
                     if (leaf.isDapAccess()) {
                         dapURIs.add(leaf.getDapUri());
-                    } else if (leaf.isFileAccess()){
+                    } else if (leaf.isFileAccess()) {
                         fileURIs.add(leaf.getFileUri());
                     }
                 }
@@ -485,6 +558,7 @@ public class OpendapAccessPanel extends JPanel {
             if (dapURIs.size() == 0 && fileURIs.size() == 0) {
                 return;
             }
+            progressBar.setVisible(true);
             pm.beginTask("", (int) currentDataSize);
             pm.worked(0);
             final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, pm);
