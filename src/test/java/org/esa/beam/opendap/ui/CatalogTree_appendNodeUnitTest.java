@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.opendap.CatalogNode;
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +40,7 @@ public class CatalogTree_appendNodeUnitTest {
         final InvDatasetImpl dapDataset = createDataset(new String[]{serviceType});
 
         // execution
-        new CatalogTree(null).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
+        new CatalogTree(null, new DefaultAppContext("")).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
         testThatChildIsOnlyDapNodeWithoutFileAccess(parentNode);
@@ -52,7 +53,7 @@ public class CatalogTree_appendNodeUnitTest {
         final InvDatasetImpl dapDataset = createDataset(new String[]{serviceName});
 
         // execution
-        new CatalogTree(null).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
+        new CatalogTree(null, new DefaultAppContext("")).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
         testThatChildIsNodeWithFileAccess(parentNode);
@@ -66,7 +67,7 @@ public class CatalogTree_appendNodeUnitTest {
         final InvDatasetImpl dapDataset = createDataset(new String[]{fileServiceName, dapServiceName});
 
         // execution
-        new CatalogTree(null).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
+        new CatalogTree(null, new DefaultAppContext("")).appendDataNodeToParent(parentNode, getDefaultTreeModel(), dapDataset);
 
         // verification
         testThatChildIsDapNodeWhichHasFileAccessToo(parentNode);

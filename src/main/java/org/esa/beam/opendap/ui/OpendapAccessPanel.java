@@ -9,12 +9,15 @@ import com.jidesoft.status.StatusBar;
 import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.utils.Lm;
+import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.framework.help.HelpSys;
+import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.DAPDownloader;
 import org.esa.beam.opendap.utils.OpendapUtils;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.StringUtils;
+import org.esa.beam.util.logging.BeamLogManager;
 import org.esa.beam.visat.VisatApp;
 import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
@@ -95,6 +98,7 @@ public class OpendapAccessPanel extends JPanel {
     private JLabel postMessageLabel;
     private Map<Integer,JTextArea> textAreas;
     private JButton downloadButton;
+    private AppContext appContext;
 
     public static void main(String[] args) {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
@@ -104,7 +108,7 @@ public class OpendapAccessPanel extends JPanel {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel(new PropertyMap(), "");
+        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel(new DefaultAppContext(""), "");
         final JFrame mainFrame = new JFrame("OPeNDAP Access");
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainFrame.setContentPane(opendapAccessPanel);
@@ -114,10 +118,11 @@ public class OpendapAccessPanel extends JPanel {
         mainFrame.setVisible(true);
     }
 
-    public OpendapAccessPanel(PropertyMap propertyMap, String helpId) {
+    public OpendapAccessPanel(AppContext appContext, String helpId) {
         super();
-        this.propertyMap = propertyMap;
+        this.propertyMap = appContext.getPreferences();
         this.helpId = helpId;
+        this.appContext = appContext;
         initComponents();
         initContentPane();
     }
@@ -202,7 +207,7 @@ public class OpendapAccessPanel extends JPanel {
                             "Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
                 }
             }
-        });
+        }, appContext);
         useDatasetNameFilter = new JCheckBox("Use dataset name filter");
         useTimeRangeFilter = new JCheckBox("Use time range filter");
         useRegionFilter = new JCheckBox("Use region filter");
@@ -292,7 +297,7 @@ public class OpendapAccessPanel extends JPanel {
                 }
             }
         } catch (IOException e) {
-            // todo handle Exceptions
+            BeamLogManager.getSystemLogger().warning("Unable to retrieve meta information for file '" + leaf.getName() + "'.");
         }
 
         setResponseText(componentIndex, text);
@@ -595,10 +600,17 @@ public class OpendapAccessPanel extends JPanel {
             SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
 
                 @Override
-                protected Void doInBackground() throws Exception {
-                    downloader.saveProducts(targetDirectory);
+                protected Void doInBackground() {
+                    try {
+                        downloader.saveProducts(targetDirectory);
+                    } catch (IOException e1) {
+                        appContext.handleError("Unable to perform download. Reason: " + e1.getMessage(), e);
+                    }
                     if (openInVisat.isSelected()) {
-                        downloader.openProducts(VisatApp.getApp());
+                        File[] downloadedFiles = downloader.getDownloadedFiles();
+                        for (File file : downloadedFiles) {
+                            VisatApp.getApp().openProduct(file);
+                        }
                     }
                     return null;
                 }

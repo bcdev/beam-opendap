@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.Before;
 import org.junit.Test;
@@ -22,7 +23,7 @@ public class CatalogTree_insertCatalogElementsTest {
 
     @Before
     public void setUp() throws Exception {
-        catalogTree = new CatalogTree(null);
+        catalogTree = new CatalogTree(null, new DefaultAppContext(""));
         parentNode = (DefaultMutableTreeNode) ((JTree) catalogTree.getComponent()).getModel().getRoot();
     }
 

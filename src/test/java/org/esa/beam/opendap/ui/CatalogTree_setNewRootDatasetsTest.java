@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.junit.*;
 import thredds.catalog.*;
 import ucar.nc2.constants.FeatureType;
@@ -23,7 +24,7 @@ public class CatalogTree_setNewRootDatasetsTest {
         catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         InvDatasetImpl dapDataset = createDataset(catalog, "first", "OPENDAP");
         datasets.add(dapDataset);
-        catalogTree = new CatalogTree(null);
+        catalogTree = new CatalogTree(null, new DefaultAppContext(""));
     }
 
     @Test

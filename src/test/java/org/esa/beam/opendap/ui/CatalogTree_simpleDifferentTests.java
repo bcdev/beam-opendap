@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.Test;
 import thredds.catalog.InvAccessImpl;
@@ -31,7 +32,7 @@ public class CatalogTree_simpleDifferentTests {
 
     @Test
     public void testThatGetComponentGetsAWellDefinedJTreeComponent() {
-        final CatalogTree catalogTree = new CatalogTree(null);
+        final CatalogTree catalogTree = new CatalogTree(null, new DefaultAppContext(""));
         final Component component = catalogTree.getComponent();
 
         assertNotNull(component);
@@ -140,7 +141,7 @@ public class CatalogTree_simpleDifferentTests {
 
     @Test
     public void testGetLeaves() throws Exception {
-        final CatalogTree catalogTree = new CatalogTree(null);
+        final CatalogTree catalogTree = new CatalogTree(null, new DefaultAppContext(""));
         List<InvDataset> datasets = new ArrayList<InvDataset>();
         InvCatalog catalog = new InvCatalogImpl("catalogName", "1.0", new URI("http://x.y"));
         final InvDataset rootDataset = createDataset(catalog, "first", "OPENDAP");

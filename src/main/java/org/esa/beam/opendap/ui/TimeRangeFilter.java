@@ -6,6 +6,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.PatternProvider;
 import org.esa.beam.opendap.utils.TimeStampExtractor;
+import org.esa.beam.util.logging.BeamLogManager;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -261,10 +262,11 @@ public class TimeRangeFilter implements FilterComponent {
             if (startDate.after(endDate)) {
                 if (e.getSource().equals(startTimePicker)) {
                     startTimePicker.setDate(endDate);
+                    BeamLogManager.getSystemLogger().info("Start date after end date: Set start date to end date.");
                 } else if (e.getSource().equals(stopTimePicker)) {
                     stopTimePicker.setDate(startDate);
+                    BeamLogManager.getSystemLogger().info("Start date after end date: Set end date to start date.");
                 }
-                // todo - log warning
             }
         }
     }

@@ -8,6 +8,7 @@ import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.opendap.DAPVariable;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.VariableCollector;
+import org.esa.beam.util.logging.BeamLogManager;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -309,12 +310,8 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
             try {
                 DAPVariable[] dapVariables = get();
                 listModel.addVariables(dapVariables);
-            } catch (InterruptedException e) {
-                // todo - implement
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                // todo - implement
-                e.printStackTrace();
+            } catch (Exception e) {
+                BeamLogManager.getSystemLogger().warning("Stopping to scan for variables due to exception: " + e.getMessage());
             } finally {
                 filterPreparators.remove(this);
                 pm.worked(1);

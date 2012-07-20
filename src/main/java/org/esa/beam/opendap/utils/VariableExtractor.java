@@ -8,6 +8,7 @@ import opendap.dap.DDS;
 import opendap.dap.DGrid;
 import org.esa.beam.opendap.DAPVariable;
 import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.util.logging.BeamLogManager;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,7 +45,8 @@ public class VariableExtractor {
             dConnect2 = new DConnect2(stream);
             dds = dConnect2.getDDS();
         } catch (Exception e) {
-            // todo - handle exception
+            BeamLogManager.getSystemLogger().warning("Unable to retrieve DDS from URI '" + uri + "'.");
+            return new DDS();
         } finally {
             if (dConnect2 != null) {
                 dConnect2.closeSession();

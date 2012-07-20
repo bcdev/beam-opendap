@@ -3,7 +3,6 @@ package org.esa.beam.opendap.utils;
 import com.bc.io.FileDownloader;
 import org.esa.beam.opendap.ui.LabelledProgressBarPM;
 import org.esa.beam.util.StringUtils;
-import org.esa.beam.visat.VisatApp;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
 import ucar.nc2.Attribute;
@@ -14,7 +13,6 @@ import ucar.nc2.NetcdfFileWriteable;
 import ucar.nc2.Variable;
 import ucar.nc2.dods.DODSNetcdfFile;
 
-import javax.swing.JOptionPane;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -44,40 +42,24 @@ public class DAPDownloader {
         downloadedFiles = new HashSet<File>();
     }
 
-    public void saveProducts(File targetDir) {
+    public void saveProducts(File targetDir) throws IOException {
         if (targetDir != null && targetDir.isDirectory()) {
             GregorianCalendar gc = new GregorianCalendar();
             startTime = gc.getTimeInMillis();
             downloadFilesWithDapAccess(targetDir);
             downloadFilesWithFileAccess(targetDir);
         } else {
-            JOptionPane.showMessageDialog(null, "Could not save to directory' " + targetDir + "'");
+            throw new IOException("Could not save to directory' " + targetDir + "'");
         }
     }
 
-    // todo - remove dependency to VisatApp
-    public void openProducts(VisatApp app) {
-        for (File file : downloadedFiles) {
-            app.openProduct(file);
-        }
-    }
-
-    private void downloadFilesWithDapAccess(File targetDir) {
+    private void downloadFilesWithDapAccess(File targetDir) throws IOException {
         for (String dapURI : dapUris) {
-            final String errorMessagePrefix = "Unable to download '" + dapURI + "' due to Exception\n" +
-                                              "Message: ";
-            try {
-                downloadDapFile(targetDir, dapURI);
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, errorMessagePrefix + e.getMessage());
-                e.printStackTrace();
-            } catch (InvalidRangeException e) {
-                e.printStackTrace();
-            }
+            downloadDapFile(targetDir, dapURI);
         }
     }
 
-    private void downloadDapFile(File targetDir, String dapURI) throws IOException, InvalidRangeException {
+    private void downloadDapFile(File targetDir, String dapURI) throws IOException {
         String[] uriComponents = dapURI.split("\\?");
         String constraintExpression = "";
         String fileName = dapURI.substring(uriComponents[0].lastIndexOf("/") + 1);
@@ -90,8 +72,7 @@ public class DAPDownloader {
         writeNetcdfFile(targetDir, fileName, constraintExpression, netcdfFile);
     }
 
-    void writeNetcdfFile(File targetDir, String fileName, String constraintExpression,
-                         DODSNetcdfFile sourceNetcdfFile) throws IOException {
+    void writeNetcdfFile(File targetDir, String fileName, String constraintExpression, DODSNetcdfFile sourceNetcdfFile) throws IOException {
         final File file = new File(targetDir, fileName);
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
             FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
@@ -150,8 +131,8 @@ public class DAPDownloader {
             try {
                 targetNetCDF.write(NetcdfFile.escapeName(filteredVariable), origin, values);
             } catch (InvalidRangeException e) {
-                //todo handle Exception
-                e.printStackTrace();
+                throw new IOException(MessageFormat.format("Unable to download variable ''{0}'' into file ''{1}''.",
+                                             filteredVariable, fileName), e);
             }
         }
         targetNetCDF.close();
@@ -287,17 +268,12 @@ public class DAPDownloader {
         return variableNames;
     }
 
-    private void downloadFilesWithFileAccess(File targetDir) {
+    private void downloadFilesWithFileAccess(File targetDir) throws IOException {
         for (String fileURI : fileURIs) {
             try {
                 downloadFile(targetDir, fileURI);
-            } catch (IOException e) {
-                //todo log warning
-                e.printStackTrace();
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            } finally {
-                System.out.println("DAPDownloader.downloadFilesWithFileAccess");
+            } catch (Exception e) {
+                throw new IOException("Unable to download file '" + fileURI + "'.", e);
             }
         }
     }
@@ -306,6 +282,10 @@ public class DAPDownloader {
         final URL fileUrl = new URI(fileURI).toURL();
         final File file = FileDownloader.downloadFile(fileUrl, targetDir, null);
         downloadedFiles.add(file);
+    }
+
+    public File[] getDownloadedFiles() {
+        return downloadedFiles.toArray(new File[downloadedFiles.size()]);
     }
 
     private class NetCDFFileWriterProgressListener implements FileWriter.FileWriterProgressListener {

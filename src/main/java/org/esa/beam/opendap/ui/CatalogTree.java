@@ -1,10 +1,11 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.opendap.CatalogNode;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.OpendapUtils;
-import org.esa.beam.util.Debug;
+import org.esa.beam.util.logging.BeamLogManager;
 import thredds.catalog.InvAccess;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvCatalogImpl;
@@ -26,13 +27,11 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.awt.Component;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -43,8 +42,10 @@ class CatalogTree {
     private final JTree jTree;
     private final HashMap<OpendapLeaf, MutableTreeNode> leafToParentNode = new HashMap<OpendapLeaf, MutableTreeNode>();
     private final Set<CatalogTreeListener> catalogTreeListeners = new HashSet<CatalogTreeListener>();
+    private final AppContext appContext;
 
-    public CatalogTree(final LeafSelectionListener leafSelectionListener) {
+    public CatalogTree(final LeafSelectionListener leafSelectionListener, AppContext appContext) {
+        this.appContext = appContext;
         jTree = new JTree();
         jTree.setRootVisible(false);
         ((DefaultTreeModel) jTree.getModel()).setRoot(createRootNode());
@@ -124,13 +125,10 @@ class CatalogTree {
             final URLConnection urlConnection = catalogUrl.openConnection();
             final InputStream inputStream = urlConnection.getInputStream();
             insertCatalogElements(inputStream, catalogUrl.toURI(), parent, expandPath);
-        } catch (MalformedURLException e) {
-            // todo handle with error collection and message dialog at the end.
-            Debug.trace(e);
-        } catch (URISyntaxException e) {
-            Debug.trace(e);
-        } catch (IOException e) {
-            Debug.trace(e);
+        } catch (Exception e) {
+            String msg = MessageFormat.format("Unable to completely resolve catalog. Reason: {0}", e.getMessage());
+            BeamLogManager.getSystemLogger().warning(msg);
+            appContext.handleError(msg, e);
         }
     }
 

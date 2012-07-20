@@ -18,6 +18,7 @@ package org.esa.beam.opendap.ui;
 
 import com.jidesoft.utils.Lm;
 import opendap.dap.DArrayDimension;
+import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.opendap.DAPVariable;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.Before;
@@ -40,7 +41,7 @@ public class VariableFilterTest {
     @Before
     public void setUp() {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
-        variableFilter = new VariableFilter(new JCheckBox(), new CatalogTree(null));
+        variableFilter = new VariableFilter(new JCheckBox(), new CatalogTree(null, new DefaultAppContext("")));
         variableFilter.getUI();
         leaf = new OpendapLeaf("leafName");
         DArrayDimension[] dArrayDimensions = {new DArrayDimension(10, "dimName")};

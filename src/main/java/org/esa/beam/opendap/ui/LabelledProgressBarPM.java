@@ -19,8 +19,9 @@ package org.esa.beam.opendap.ui;
 import com.bc.ceres.core.ProgressMonitor;
 
 /**
- * TODO fill out or delete
+ * Progress monitor that features and updates two labels and a progress bar.
  *
+ * @author Tonio Fincke
  * @author Thomas Storm
  */
 public interface LabelledProgressBarPM extends ProgressMonitor {

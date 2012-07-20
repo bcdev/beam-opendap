@@ -1,5 +1,6 @@
 package org.esa.beam.opendap.ui;
 
+import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.junit.*;
 import thredds.catalog.*;
 import ucar.nc2.constants.FeatureType;
@@ -32,7 +33,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createDataset(catalog, "first", "OPENDAP"));
 
         // execution
-        new CatalogTree(null).appendToNode(new JTree(), datasets, parentNode, true);
+        new CatalogTree(null, new DefaultAppContext("")).appendToNode(new JTree(), datasets, parentNode, true);
 
         // verification
         assertEquals(1, parentNode.getChildCount());
@@ -48,7 +49,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createDataset(catalog, "Name_3", "OPENDAP"));
 
         //execution
-        new CatalogTree(null).appendToNode(new JTree(), datasets, parentNode, true);
+        new CatalogTree(null, new DefaultAppContext("")).appendToNode(new JTree(), datasets, parentNode, true);
 
         //verification
         assertEquals(3, parentNode.getChildCount());
@@ -67,7 +68,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createDataset(catalog, "fileName", "file"));
 
         //execution
-        new CatalogTree(null).appendToNode(new JTree(), datasets, parentNode, true);
+        new CatalogTree(null, new DefaultAppContext("")).appendToNode(new JTree(), datasets, parentNode, true);
 
         //verification
         assertEquals(1, parentNode.getChildCount());
@@ -81,7 +82,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createCatalogRefDataset());
 
         //execution
-        new CatalogTree(null).appendToNode(new JTree(), datasets, parentNode, true);
+        new CatalogTree(null, new DefaultAppContext("")).appendToNode(new JTree(), datasets, parentNode, true);
 
         //verification
         assertEquals(1, parentNode.getChildCount());
@@ -101,7 +102,7 @@ public class CatalogTree_appendToNodeTest {
         datasets.add(createCatalogRefDataset());
 
         //execution
-        new CatalogTree(null).appendToNode(new JTree(), datasets, parentNode, true);
+        new CatalogTree(null, new DefaultAppContext("")).appendToNode(new JTree(), datasets, parentNode, true);
 
         //verification
         assertEquals(3, parentNode.getChildCount());
