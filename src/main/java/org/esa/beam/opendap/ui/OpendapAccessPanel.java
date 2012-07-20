@@ -12,6 +12,8 @@ import com.jidesoft.utils.Lm;
 import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.UIUtils;
+import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.DAPDownloader;
 import org.esa.beam.opendap.utils.OpendapUtils;
@@ -23,6 +25,7 @@ import thredds.catalog.InvCatalog;
 import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvDataset;
 
+import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -69,7 +72,7 @@ public class OpendapAccessPanel extends JPanel {
     private static final Integer GENERAL_AREA_INDEX = 2;
 
     private JComboBox urlField;
-    private JButton refreshButton;
+    private AbstractButton refreshButton;
     private CatalogTree catalogTree;
 
     private JTabbedPane metaInfoArea;
@@ -139,7 +142,9 @@ public class OpendapAccessPanel extends JPanel {
             }
         });
         updateUrlField();
-        refreshButton = new JButton("Refresh");
+        refreshButton = ToolButtonFactory.createButton(
+                UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/ViewRefresh22.png"),
+                false);
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -366,16 +371,15 @@ public class OpendapAccessPanel extends JPanel {
         urlPanel.add(refreshButton, gbc);
         gbc.gridx = 3;
         gbc.insets.right = 0;
-        JButton help = new JButton("Help");
-        HelpSys.enableHelpOnButton(help, helpId);
-        urlPanel.add(help, gbc);
-
-//        final JScrollPane dapResponse = new JScrollPane(metaInfoArea);
+        final AbstractButton helpButton = ToolButtonFactory.createButton(
+                UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/Help22.png"),
+                false);
+        HelpSys.enableHelpOnButton(helpButton, helpId);
+        urlPanel.add(helpButton, gbc);
 
         final JPanel variableInfo = new JPanel(new BorderLayout(5, 5));
         variableInfo.setBorder(new EmptyBorder(10, 0, 0, 0));
         variableInfo.add(metaInfoArea, BorderLayout.CENTER);
-//        variableInfo.add(dapResponse, BorderLayout.CENTER);
 
         final JScrollPane openDapTree = new JScrollPane(catalogTree.getComponent());
         openDapTree.setPreferredSize(new Dimension(400, 500));
