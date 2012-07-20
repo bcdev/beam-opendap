@@ -1,7 +1,7 @@
 package org.esa.beam.opendap.utils;
 
 import com.bc.io.FileDownloader;
-import org.esa.beam.opendap.ui.OpendapAccessPanel;
+import org.esa.beam.opendap.ui.LabelledProgressBarPM;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.visat.VisatApp;
 import ucar.ma2.Array;
@@ -33,13 +33,12 @@ public class DAPDownloader {
 
     final List<String> dapUris;
     final List<String> fileURIs;
-    private final OpendapAccessPanel.DownloadProgressBarProgressMonitor pm;
+    private final LabelledProgressBarPM pm;
     final Set<File> downloadedFiles;
     private NetCDFFileWriterProgressListener progressListener;
     private long startTime;
 
-    public DAPDownloader(List<String> dapUris, List<String> fileURIs,
-                         OpendapAccessPanel.DownloadProgressBarProgressMonitor pm) {
+    public DAPDownloader(List<String> dapUris, List<String> fileURIs, LabelledProgressBarPM pm) {
         this.dapUris = dapUris;
         this.fileURIs = fileURIs;
         this.pm = pm;
@@ -165,15 +164,16 @@ public class DAPDownloader {
         int workInMB = work  / (1024 * 1024);
         pm.worked(workInMB);
         StringBuilder preMessageBuilder = new StringBuilder(fileName.substring(0, 15)).append("...");
-        if (pm.getCurrentWork() != 0) {
+        int currentWork = pm.getCurrentWork();
+        if (currentWork != 0) {
             final long currentTime = new GregorianCalendar().getTimeInMillis();
             final long durationInMillis = currentTime - startTime;
             DecimalFormat format = new DecimalFormat("0.00");
-            final String speedString = format.format(getDownloadSpeed(durationInMillis, pm.getCurrentWork()*1024*1024));
+            final String speedString = format.format(getDownloadSpeed(durationInMillis, currentWork *1024*1024));
             preMessageBuilder.append(" @ ").append(speedString).append(" kB/s");
-            final double percentage = ((double) pm.getCurrentWork() / pm.getTotalWork()) * 100.0;
-            pm.setPostMessage(
-                    pm.getCurrentWork() + "MB/" + pm.getTotalWork() + "MB (" + format.format(percentage) + "%)");
+            int totalWork = pm.getTotalWork();
+            final double percentage = ((double) currentWork / totalWork) * 100.0;
+            pm.setPostMessage(currentWork + "MB/" + totalWork + "MB (" + format.format(percentage) + "%)");
         }
         pm.setPreMessage("Downloading " + preMessageBuilder.toString());
     }

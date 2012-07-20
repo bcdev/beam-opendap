@@ -1,7 +1,6 @@
 package org.esa.beam.opendap.ui;
 
 import com.bc.ceres.core.ProgressBarProgressMonitor;
-import com.bc.ceres.core.ProgressMonitor;
 import com.jidesoft.combobox.FolderChooserExComboBox;
 import com.jidesoft.combobox.PopupPanel;
 import com.jidesoft.status.LabelStatusBarItem;
@@ -311,7 +310,7 @@ public class OpendapAccessPanel extends JPanel {
 
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
-        final DownloadProgressBarProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel);
+        final LabelledProgressBarPM pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel);
         folderChooserComboBox = new FolderChooserExComboBox() {
             @Override
             public PopupPanel createPopupComponent() {
@@ -394,7 +393,8 @@ public class OpendapAccessPanel extends JPanel {
 
     }
 
-    public static class DownloadProgressBarProgressMonitor extends ProgressBarProgressMonitor {
+    public static class DownloadProgressBarProgressMonitor extends ProgressBarProgressMonitor implements
+                                                                                              LabelledProgressBarPM {
 
         private JLabel postMessageLabel;
         private int totalWork;
@@ -406,10 +406,12 @@ public class OpendapAccessPanel extends JPanel {
             this.postMessageLabel = postMessageLabel;
         }
 
+        @Override
         public void setPreMessage(String preMessageText) {
             setTaskName(preMessageText);
         }
 
+        @Override
         public void setPostMessage(String postMessageText) {
             postMessageLabel.setText(postMessageText);
         }
@@ -443,10 +445,12 @@ public class OpendapAccessPanel extends JPanel {
         protected void finish() {
         }
 
+        @Override
         public int getTotalWork() {
             return totalWork;
         }
 
+        @Override
         public int getCurrentWork() {
             return currentWork;
         }
@@ -454,9 +458,9 @@ public class OpendapAccessPanel extends JPanel {
 
     private class DownloadAction implements ActionListener {
 
-        private final DownloadProgressBarProgressMonitor pm;
+        private final LabelledProgressBarPM pm;
 
-        public DownloadAction(DownloadProgressBarProgressMonitor pm) {
+        public DownloadAction(LabelledProgressBarPM pm) {
             this.pm = pm;
             pm.worked(0);
         }
