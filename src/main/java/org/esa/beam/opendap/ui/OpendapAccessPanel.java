@@ -565,7 +565,7 @@ public class OpendapAccessPanel extends JPanel {
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(ActionEvent ignored) {
             final TreePath[] selectionPaths = ((JTree) catalogTree.getComponent()).getSelectionModel().getSelectionPaths();
             if (selectionPaths == null || selectionPaths.length <= 0) {
                 return;
@@ -590,21 +590,15 @@ public class OpendapAccessPanel extends JPanel {
             pm.beginTask("", (int) currentDataSize);
             pm.worked(0);
             final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, pm);
-            final File targetDirectory;
-            if (folderChooserComboBox.getSelectedItem() == null ||
-                folderChooserComboBox.getSelectedItem().toString().equals("")) {
-                targetDirectory = fetchTargetDirectory();
-            } else {
-                targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
-            }
-            SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
+            final File targetDirectory = getTargetDirectory();
+            new SwingWorker<Void, Void>() {
 
                 @Override
                 protected Void doInBackground() {
                     try {
                         downloader.saveProducts(targetDirectory);
-                    } catch (IOException e1) {
-                        appContext.handleError("Unable to perform download. Reason: " + e1.getMessage(), e);
+                    } catch (IOException e) {
+                        appContext.handleError("Unable to perform download. Reason: " + e.getMessage(), e);
                     }
                     if (openInVisat.isSelected()) {
                         File[] downloadedFiles = downloader.getDownloadedFiles();
@@ -621,8 +615,18 @@ public class OpendapAccessPanel extends JPanel {
                     pm.setPreMessage("All downloads completed");
                     pm.setPostMessage("");
                 }
-            };
-            swingWorker.execute();
+            }.execute();
+        }
+
+        private File getTargetDirectory() {
+            final File targetDirectory;
+            if (folderChooserComboBox.getSelectedItem() == null ||
+                folderChooserComboBox.getSelectedItem().toString().equals("")) {
+                targetDirectory = fetchTargetDirectory();
+            } else {
+                targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
+            }
+            return targetDirectory;
         }
     }
 
