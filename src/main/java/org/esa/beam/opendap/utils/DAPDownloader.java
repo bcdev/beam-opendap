@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -168,12 +167,12 @@ public class DAPDownloader {
         if (currentWork != 0) {
             final long currentTime = new GregorianCalendar().getTimeInMillis();
             final long durationInMillis = currentTime - startTime;
-            DecimalFormat format = new DecimalFormat("0.00");
-            final String speedString = format.format(getDownloadSpeed(durationInMillis, currentWork *1024*1024));
+            double downloadSpeed = getDownloadSpeed(durationInMillis, currentWork * 1024 * 1024);
+            String speedString = OpendapUtils.format(downloadSpeed);
             preMessageBuilder.append(" @ ").append(speedString).append(" kB/s");
             int totalWork = pm.getTotalWork();
             final double percentage = ((double) currentWork / totalWork) * 100.0;
-            pm.setPostMessage(currentWork + "MB/" + totalWork + "MB (" + format.format(percentage) + "%)");
+            pm.setPostMessage(currentWork + "MB/" + totalWork + "MB (" + OpendapUtils.format(percentage) + "%)");
         }
         pm.setPreMessage("Downloading " + preMessageBuilder.toString());
     }

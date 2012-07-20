@@ -33,8 +33,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -92,11 +90,8 @@ class CatalogTree {
             }
 
             private void setToolTip(DefaultMutableTreeNode value, JTree tree) {
-                DecimalFormatSymbols formatSymbols = DecimalFormatSymbols.getInstance();
-                formatSymbols.setDecimalSeparator('.');
-                DecimalFormat decimalFormat = new DecimalFormat("0.00", formatSymbols);
                 final double fileSize = ((OpendapLeaf)value.getUserObject()).getFileSize();
-                tree.setToolTipText(decimalFormat.format(fileSize) + " MB");
+                tree.setToolTipText(OpendapUtils.format(fileSize) + " MB");
             }
         });
     }

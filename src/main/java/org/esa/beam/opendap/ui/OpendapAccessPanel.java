@@ -46,8 +46,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -155,10 +153,7 @@ public class OpendapAccessPanel extends JPanel {
                 if (currentDataSize <= 0) {
                     updateStatusBar("Ready.");
                 } else {
-                    DecimalFormatSymbols formatSymbols = DecimalFormatSymbols.getInstance();
-                    formatSymbols.setDecimalSeparator('.');
-                    DecimalFormat decimalFormat = new DecimalFormat("0.00", formatSymbols);
-                    updateStatusBar("Total size of currently selected files: " + decimalFormat.format(currentDataSize) + " MB");
+                    updateStatusBar("Total size of currently selected files: " + OpendapUtils.format(currentDataSize) + " MB");
                 }
             }
 

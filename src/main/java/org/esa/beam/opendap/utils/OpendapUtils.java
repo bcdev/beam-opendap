@@ -28,6 +28,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 /**
  * Contains some methods useful when dealing with OPeNDAP servers.
@@ -47,6 +49,14 @@ public class OpendapUtils {
         httpMethod.execute();
         InputStream responseStream = httpMethod.getResponseAsStream();
         return convertStreamToString(responseStream);
+    }
+
+    public static String format(double value) {
+        DecimalFormat format = new DecimalFormat("0.00");
+        DecimalFormatSymbols instance = DecimalFormatSymbols.getInstance();
+        instance.setDecimalSeparator('.');
+        format.setDecimalFormatSymbols(instance);
+        return format.format(value);
     }
 
     private static String convertStreamToString(InputStream is) throws IOException {
