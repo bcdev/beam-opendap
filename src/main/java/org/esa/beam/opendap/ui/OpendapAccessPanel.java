@@ -237,6 +237,8 @@ public class OpendapAccessPanel extends JPanel {
 
         statusBar.add(progressBarItem, JideBoxLayout.FIX);
 
+        statusBar.add(postMessage, JideBoxLayout.FIX);
+
         useRegionFilter.setEnabled(false);
     }
 
