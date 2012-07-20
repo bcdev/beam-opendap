@@ -392,6 +392,7 @@ public class OpendapAccessPanel extends JPanel {
     public static class DownloadProgressBarProgressMonitor extends ProgressBarProgressMonitor implements
                                                                                               LabelledProgressBarPM {
 
+        private final JProgressBar progressBar;
         private JLabel postMessageLabel;
         private int totalWork;
         private int currentWork;
@@ -399,6 +400,7 @@ public class OpendapAccessPanel extends JPanel {
         public DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel,
                                                   JLabel postMessageLabel) {
             super(progressBar, preMessageLabel);
+            this.progressBar = progressBar;
             this.postMessageLabel = postMessageLabel;
         }
 
@@ -417,6 +419,7 @@ public class OpendapAccessPanel extends JPanel {
             super.beginTask(name, totalWork);
             this.totalWork = totalWork;
             this.currentWork = 0;
+            progressBar.setValue(0);
         }
 
         @Override
@@ -458,7 +461,6 @@ public class OpendapAccessPanel extends JPanel {
 
         public DownloadAction(LabelledProgressBarPM pm) {
             this.pm = pm;
-            pm.worked(0);
         }
 
         @Override
@@ -484,6 +486,7 @@ public class OpendapAccessPanel extends JPanel {
                 return;
             }
             pm.beginTask("", (int) currentDataSize);
+            pm.worked(0);
             final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, pm);
             final File targetDirectory;
             if (folderChooserComboBox.getSelectedItem() == null ||
