@@ -46,7 +46,7 @@ public class CatalogTree_insertCatalogElementsTest {
             //verification
             assertEquals(1, parentNode.getChildCount());
             final DefaultMutableTreeNode catalogNameNode = (DefaultMutableTreeNode) parentNode.getChildAt(0);
-            assertEquals("CatalogName/", catalogNameNode.getUserObject());
+            assertEquals("CatalogName", catalogNameNode.getUserObject());
             final TreeNode catalogReferenceNode = catalogNameNode.getChildAt(0);
             assertEquals(true, CatalogTree.isCatalogReferenceNode(catalogReferenceNode));
         } finally {

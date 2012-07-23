@@ -89,7 +89,7 @@ public class CatalogTree_appendNodeUnitTest {
 
         final DefaultMutableTreeNode child1 = (DefaultMutableTreeNode) parentNode.getChildAt(0);
         assertEquals(true, child1.getUserObject() instanceof String);
-        assertEquals("catalogRefName/", child1.getUserObject());
+        assertEquals("catalogRefName", child1.getUserObject());
 
         final DefaultMutableTreeNode child2 = (DefaultMutableTreeNode) parentNode.getChildAt(0).getChildAt(0);
         assertEquals(true, child2.getUserObject() instanceof CatalogNode);
