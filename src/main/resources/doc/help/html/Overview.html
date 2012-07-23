@@ -18,97 +18,90 @@
 <p>
     The BEAM OPeNDAP client allows to access an OPeNDAP server and download files using the data access protocol
     (DAP).
-    The client offers the possibility to filter the displayed catalog entries by various characteristics.
+    The client offers the possibility to filter the displayed catalog entries by various characteristics before
+    downloading.
 </p>
 
 <p align="center"><img src="images/opendapclient.png"></p>
 
-
 <h3>Access to servers</h3>
 
 <p>
-    You can enter the URL of an OPeNDAP server in the field at the top (please ensure the URL
-    ends with "catalog.xml").
-    The catalog content will be displayed as a tree structure.
-    VISAT will remember previously entered URLs.
+    Server access is established by entering the URL of a THREDDS catalog file of an arbitrary OPeNDAP server in the
+    "Root URL"-field and typing 'Return' or clicking on the 'Refresh'-Button. The catalog content will then be displayed
+    as a tree structure. The application will remember previously entered URLs.
 </p>
 
 <h3>Navigating through the catalog tree</h3>
 
 <p>
-    The tree structure on the right displays the contents of the chosen server.
+    The tree structure on the left displays the contents of the chosen server.
     Files which can be accessed via DAP are displayed as <img src="images/icons/DRsProduct16.png"> .
-    For files accessible via DAP, their DDS and DAS can be viewed (for more information about DDS and DAS please refer
-    to http://www.opendap.org/pdf/dap_2_data_model.pdf">http://www.opendap.org/pdf/dap_2_data_model.pdf ).<br>
+    For files accessible via DAP, their DDS and DAS are displayed in the information box below the tree. For more
+    information about DDS and DAS please refer to http://www.opendap.org/pdf/dap_2_data_model.pdf.<br>
+    Multiple files may be selected.
 </p>
 
 <h3>Using the filters</h3>
 
 <p>
-    With the filters, you can restrict the displayed files.
-    A filter can be set after selecting the respective check box at the upper left.
-    To apply the filter to the catalog, you must click the apply button.
-    The filter will become inactive after deselecting the check box.<br>
-    If you activate the check box, the previously defined filter will become active again.
-    You can combine multiple filters to restrict your search for files.<br>
-    The region filter and the variable filter both need information about the content of the catalog before they can be
-    applied.
+    The filters allow the user to narrow down the number of displayed files. A filter can be set after selecting the
+    respective check box. Note that the filters are not active before the apply button has been clicked.
+    The filters will become (in)active again after (de)selecting the check box. Multiple filters may be combined to refine the
+    search for files.<br>
 </p>
 
 <h4>Using the dataset name filter</h4>
 
 <p>
-    With this filter, you can search for whole file names or parts appearing in a file name.
-    You can use wildcards:
-<ul>
-    <li>* stands for any combination of signs</li>
-    <li>+ stands for the last entered sign, appearing at least one time</li>
-    <li>? stands for the last entered sign, appearing either once or not at all</li>
-</ul>
-
+    Using the dataset name filter a search for whole file names or parts appearing in a file name can be performed.
+    It supports the wildcards <b>*</b>, <b>+</b>, and <b>?</b>'.<br>
+    For example, if the entered filter is <b>*2007*</b>, only file names that contain <b>2007</b> are listed.<br>
+    If the entered filter is <b>*b+*</b>, only file names containing at least one <b>b</b> in their file name.<br>
+    If the entered filter is <b>*.dima?p?</b>, all file names with the extensions <b>dim</b> and <b>dimap</b> are listed.
 </p>
 
 <h4>Using the time range filter</h4>
 
 <p>
-    This filter enables you to make a temporal restriction about the given files.
-    The filtering is performed over the file name, so you need to know in which format the date is given in the names of
-    the files over which you want to perform a filtering.<br>
+    Using this filter a temporal restriction can be employed on the server files.<br>
+    If the chosen OPeNDAP-server provides time coverage information for its files, these information are used. If not,
+    the filtering is performed using the file name. In the latter case both the date pattern and the filename pattern
+    need to be provided by the user.<br>
+    For example, the filename <b>MER_RR__2PPBCM20080208_230550_000002002065_00451_31066_0001.N1</b> makes use of the
+    date pattern <b>yyyyMMdd_hhmmss</b> and features only a start time, so that the filename pattern <b>*${date}*</b>
+    needs to be used.<br><br>
 
-    You can set both start and end time for your filtering.<br>
+    Setting only a start time will filter out all files before the given time, setting only an end time will filter out
+    all files after the given time, and setting both start and end time will filter out all files not completely within
+    the resulting temporal range.<br>
 
-    Files of which no temporal information could be extracted will not be filtered out.
+    Files without temporal information will not be filtered out.
 </p>
 
 <h4>Using the region filter</h4>
 
 <p>
-    The region filter allows you to define a region of interest.
-    You can set this region by either changing the coordinate values in the text fields or dragging and resizing
-    the rectangle on the world map.
-    The filter will remove all files from the selection which are outside of the specified rectangle.<br>
-    The filter is only applicable to files providing information about their geospatial extent in their metadata.
-    When no such information is available, the file will not be affected by the filter.
+    The region filter filters out all products that do not intersect the chosen geographic region.
+    This filter relies on information about the files' geospatial extents.
+    If the OPeNDAP server does not provide this information, its files will not be affected by the filter.
 </p>
 
 <h4>Using the variable filter</h4>
 
 <p>
-    This filter allows to filter over the variables in the given files.
-    The filter will start scanning for variable information as you browse through the folder structure.
-    It will be available as soon as variable informations are available.<br>
-    In the filter, you can check and uncheck the variables you are interested in.
+    The variable filter filters out products that do not contain certain variables.
+    Initially, no information about variables are available, so the filter will start scanning for variable information
+    when browsing through the catalog. It is applicable as soon as variable information are available.<br>
     When applied, the filter will keep all files which contain at least one of the selected variables.
 </p>
 
 <h4>Downloading files</h4>
 
 <p>
-    You can download the files selected in the tree by clicking the button titled "Download" in the lower right.
-    When the client is run in VISAT, you can specify to open the products after download has completed.
-    After you have set the target directory, the status bar will inform you about the progress of the download.
+    The selected files are downloaded by clicking the "Download" button.
+    When the client is run in VISAT, the products can be opened immediately after their download is complete.
 </p>
-
 
 <br>
 <hr>
