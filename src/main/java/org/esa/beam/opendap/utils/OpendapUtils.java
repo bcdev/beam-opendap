@@ -48,7 +48,7 @@ public class OpendapUtils {
         final HTTPMethod httpMethod = session.newMethodGet(fileUri);
         httpMethod.execute();
         InputStream responseStream = httpMethod.getResponseAsStream();
-        return convertStreamToString(responseStream);
+        return convertStreamToString(responseStream, httpMethod.getCharSet());
     }
 
     public static String format(double value) {
@@ -59,12 +59,12 @@ public class OpendapUtils {
         return format.format(value);
     }
 
-    private static String convertStreamToString(InputStream is) throws IOException {
+    private static String convertStreamToString(InputStream is, String charSet) throws IOException {
         if (is != null) {
             Writer writer = new StringWriter();
             char[] buffer = new char[1024];
             try {
-                Reader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+                Reader reader = new BufferedReader(new InputStreamReader(is, charSet));
                 int n;
                 while ((n = reader.read(buffer)) != -1) {
                     writer.write(buffer, 0, n);
