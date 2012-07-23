@@ -11,45 +11,35 @@
         <td class="header">&nbsp;
             OPeNDAP client overview
         </td>
-        <td class="header" align="right"><img src="../images/MerisC2RHeader.gif" border=0></td>
+        <td class="header" align="right"><img src="images/BeamHeader.jpg" border=0></td>
     </tr>
 </table>
 
 <p>
-    The BEAM OPeNDAP client allows you to access an OPeNDAP server and download files using the data access protocol
+    The BEAM OPeNDAP client allows to access an OPeNDAP server and download files using the data access protocol
     (DAP).
     The client offers the possibility to filter the displayed catalog entries by various characteristics.
 </p>
 
+<p align="center"><img src="images/opendapclient.png"></p>
 
-<div class="image">
-    <img src="images/opendapclient.png" alt="opendap_client">
-</div>
 
 <h3>Access to servers</h3>
 
 <p>
-    You can enter the URL of an OPeNDAP server in the field at the top (please ensure the URL starts with "http://" and
-    ends
-    with "catalog.xml").
-    On either clicking "Return" or the refresh button at the left, the catalog content will be
-    made accessible in tree structure.
-    You can enter a new catalog URL at any time. VISAT will remember previously entered
-    URLs.
+    You can enter the URL of an OPeNDAP server in the field at the top (please ensure the URL
+    ends with "catalog.xml").
+    The catalog content will be displayed as a tree structure.
+    VISAT will remember previously entered URLs.
 </p>
 
 <h3>Navigating through the catalog tree</h3>
 
 <p>
     The tree structure on the right displays the contents of the chosen server.
-    You can open and close folders.
     Files which can be accessed via DAP are displayed as <img src="images/icons/DRsProduct16.png"> .
-    When you select a node, information about it is displayed in the info boxes below the tree.<br>
     For files accessible via DAP, their DDS and DAS can be viewed (for more information about DDS and DAS please refer
-    to
-    <a href="http://www.opendap.org/pdf/dap_2_data_model.pdf">http://www.opendap.org/pdf/dap_2_data_model.pdf</a> ).<br>
-    You can select one or more files in the catalog tree by clicking on them and pressing "Shift" or "Ctrl" at the same
-    time.
+    to http://www.opendap.org/pdf/dap_2_data_model.pdf">http://www.opendap.org/pdf/dap_2_data_model.pdf ).<br>
 </p>
 
 <h3>Using the filters</h3>
@@ -63,7 +53,6 @@
     You can combine multiple filters to restrict your search for files.<br>
     The region filter and the variable filter both need information about the content of the catalog before they can be
     applied.
-    You first need to browse through the folder structure to gather this information.
 </p>
 
 <h4>Using the dataset name filter</h4>
@@ -77,9 +66,6 @@
     <li>? stands for the last entered sign, appearing either once or not at all</li>
 </ul>
 
-For example, if you enter *2007* in the text field, the filter will filter out all files which do not have "2007" in
-their file name.
-If you enter *b+*, it will filter out all files which do not have a "b" in their file name.
 </p>
 
 <h4>Using the time range filter</h4>
@@ -88,15 +74,8 @@ If you enter *b+*, it will filter out all files which do not have a "b" in their
     This filter enables you to make a temporal restriction about the given files.
     The filtering is performed over the file name, so you need to know in which format the date is given in the names of
     the files over which you want to perform a filtering.<br>
-    You can alter the date pattern, which says of which contents the date consists and in which order they appear in the
-    file name.
-    With the format pattern, you can specify where in the file name the date pattern is to be expected and how often it
-    occurs.<br>
 
-    You can set a start and end time for your filtering.
-    Setting only a start time will filter out all files before the given time, setting only an end time will filter out
-    all files after the set time, and setting both start and end time will filter out all files outside of the set
-    temporal range.<br>
+    You can set both start and end time for your filtering.<br>
 
     Files of which no temporal information could be extracted will not be filtered out.
 </p>
@@ -109,18 +88,15 @@ If you enter *b+*, it will filter out all files which do not have a "b" in their
     the rectangle on the world map.
     The filter will remove all files from the selection which are outside of the specified rectangle.<br>
     The filter is only applicable to files providing information about their geospatial extent in their metadata.
-    Its checkbox can only be selected when such files are available in one of the folders of the catalog tree which has
-    already been viewed by the user.<br>
-    When a file's metadata has no information about its geospatial extent, it will not be affected by the filter.
+    When no such information is available, the file will not be affected by the filter.
 </p>
 
 <h4>Using the variable filter</h4>
 
 <p>
-    This filter allows you to filter over the variables in the given files.
-    Initially, this filter will have no information about these variables.
-    When you browse through the folder structure, the folder will start scanning the opened folders for variables.
-    After it has finished scanning, it will be available.<br>
+    This filter allows to filter over the variables in the given files.
+    The filter will start scanning for variable information as you browse through the folder structure.
+    It will be available as soon as variable informations are available.<br>
     In the filter, you can check and uncheck the variables you are interested in.
     When applied, the filter will keep all files which contain at least one of the selected variables.
 </p>
