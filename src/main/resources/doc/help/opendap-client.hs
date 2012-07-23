@@ -7,7 +7,7 @@
     <title>BEAM OPeNDAP-client Help</title>
     <maps>
         <homeID>top</homeID>
-        <mapref location="map.xml"/>
+        <mapref location="map.jhm"/>
     </maps>
     <view mergetype="javax.help.UniteAppendMerge">
         <name>TOC</name>
