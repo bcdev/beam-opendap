@@ -38,10 +38,6 @@ public class OpendapLeaf extends OpendapNode {
     private int fileSize;
     private Set<DAPVariable> variables;
 
-    public OpendapLeaf(String name) {
-        this(name, null);
-    }
-
     public OpendapLeaf(String name, InvDataset dataset) {
         super(name, dataset);
         this.variables = new HashSet<DAPVariable>();

@@ -3,6 +3,7 @@ package org.esa.beam.opendap.ui;
 import org.esa.beam.opendap.CatalogNode;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.*;
+import thredds.catalog.InvDataset;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -25,7 +26,8 @@ public class CatalogTree_isCatalogReferenceNodeTest {
 
     @Test
     public void testThatOpendapLeafWhichIsNoCatalogRefIsResolvedToFalse() {
-        final Object userObject = new OpendapLeaf("any");
+        final Object userObject = new OpendapLeaf("any", new InvDataset(null, "") {
+                });
         final DefaultMutableTreeNode noDapNode = new DefaultMutableTreeNode(userObject);
         assertEquals(false, CatalogTree.isCatalogReferenceNode(noDapNode));
     }

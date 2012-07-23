@@ -7,6 +7,7 @@ import opendap.dap.parser.ParseException;
 import org.esa.beam.opendap.DAPVariable;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.Test;
+import thredds.catalog.InvDataset;
 
 import java.io.ByteArrayInputStream;
 
@@ -16,7 +17,8 @@ public class VariableExtractorTest {
 
     @Test
     public void testThatNoVariableCanBeExtractedFromEmptyDDS() {
-        OpendapLeaf leaf = new OpendapLeaf("empty");
+        OpendapLeaf leaf = new OpendapLeaf("empty", new InvDataset(null, "") {
+                });
 
         final DAPVariable[] dapVariables = new VariableExtractor().extractVariables(leaf);
 

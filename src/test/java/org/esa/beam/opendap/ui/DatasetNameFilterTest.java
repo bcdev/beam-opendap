@@ -18,6 +18,7 @@ package org.esa.beam.opendap.ui;
 
 import org.esa.beam.opendap.OpendapLeaf;
 import org.junit.Test;
+import thredds.catalog.InvDataset;
 
 import javax.swing.JCheckBox;
 
@@ -32,22 +33,33 @@ public class DatasetNameFilterTest {
     @Test
     public void testAccept() throws Exception {
         DatasetNameFilter datasetNameFilter = new DatasetNameFilter(new JCheckBox());
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName")));
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName")));
+        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName", new InvDataset(null, "") {
+                })));
+        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName", new InvDataset(null, "") {
+                })));
         datasetNameFilter.expressionTextField.setText("x");
-        assertFalse(datasetNameFilter.accept(new OpendapLeaf("leafName")));
+        assertFalse(datasetNameFilter.accept(new OpendapLeaf("leafName", new InvDataset(null, "") {
+                })));
         datasetNameFilter.expressionTextField.setText("leafName");
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName")));
+        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName", new InvDataset(null, "") {
+                })));
         datasetNameFilter.expressionTextField.setText("*afNa*");
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName")));
+        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafName", new InvDataset(null, "") {
+                })));
         datasetNameFilter.expressionTextField.setText("*afNa+");
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafNaaaa")));
-        assertFalse(datasetNameFilter.accept(new OpendapLeaf("leafN")));
+        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafNaaaa", new InvDataset(null, "") {
+                })));
+        assertFalse(datasetNameFilter.accept(new OpendapLeaf("leafN", new InvDataset(null, "") {
+                })));
         datasetNameFilter.expressionTextField.setText("*afNa?");
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafN")));
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafNa")));
-        assertFalse(datasetNameFilter.accept(new OpendapLeaf("leafNam")));
+        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafN", new InvDataset(null, "") {
+                })));
+        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafNa", new InvDataset(null, "") {
+                })));
+        assertFalse(datasetNameFilter.accept(new OpendapLeaf("leafNam", new InvDataset(null, "") {
+                })));
         datasetNameFilter.expressionTextField.setText("*afna*");
-        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafNam")));
+        assertTrue(datasetNameFilter.accept(new OpendapLeaf("leafNam", new InvDataset(null, "") {
+                })));
     }
 }
