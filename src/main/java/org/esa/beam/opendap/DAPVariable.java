@@ -161,15 +161,21 @@ public class DAPVariable implements Comparable<DAPVariable> {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder(name + "(");
+        StringBuilder builder = new StringBuilder(name);
         for (int i = 0; i < dimensions.length; i++) {
+            if (i == 0) {
+                builder.append("(");
+            }
             final DArrayDimension dimension = dimensions[i];
             builder.append(dimension.getName());
             if (i < dimensions.length - 1) {
                 builder.append(",");
+            } else {
+                builder.append(")");
             }
         }
-        builder.append(") : ")
+
+        builder.append(": ")
                 .append(dataType);
         return builder.toString();
     }
