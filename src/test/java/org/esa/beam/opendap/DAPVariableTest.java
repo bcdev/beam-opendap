@@ -20,7 +20,7 @@ public class DAPVariableTest {
     public void setUp() throws Exception {
         vName = "validName";
         vType = "validType";
-        vDataType = "validDataType";
+        vDataType = "Float32";
         validXDim = new DArrayDimension(1121, "X");
         validYDim = new DArrayDimension(812, "Y");
         vDimensions = new DArrayDimension[]{validYDim, validXDim};
@@ -29,29 +29,11 @@ public class DAPVariableTest {
 
     @Test
     public void testGetInfoString() {
-        //preparation
-        StringBuilder builder = new StringBuilder();
+        assertEquals("Float32 validName (Y:812, X:1121)", dapVariable.getInfotext());
 
-        final DArrayDimension[] dimensions = dapVariable.getDimensions();
-        builder
-                .append("Name: " + dapVariable.getName() + "\n")
-                .append("Type: " + dapVariable.getType() + "\n")
-                .append("Dimensions: " + dimensions.length + "\n")
-                .append("Datatype: " + dapVariable.getDataType() + "\n");
-        for (int i = 0; i < dimensions.length; i++) {
-            final DArrayDimension dimension = dimensions[i];
-            builder.append("dim(" + dimension.getName() + ") size: " + dimension.getSize());
-            if (i < dimensions.length - 1) {
-                builder.append("\n");
-            }
-        }
+        DAPVariable metadataVariable = new DAPVariable("metadata", "someType", "byte", new DArrayDimension[0]);
 
-
-        //execution
-        final String infotext = dapVariable.getInfotext();
-
-        //verification
-        assertEquals(builder.toString(), infotext);
+        assertEquals("byte metadata", metadataVariable.getInfotext());
     }
 
     @Test

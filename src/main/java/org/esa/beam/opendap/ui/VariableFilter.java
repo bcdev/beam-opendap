@@ -3,6 +3,7 @@ package org.esa.beam.opendap.ui;
 import com.bc.ceres.core.ProgressBarProgressMonitor;
 import com.jidesoft.list.CheckBoxListSelectionModelWithWrapper;
 import com.jidesoft.list.FilterableCheckBoxList;
+import com.jidesoft.list.FilterableListModel;
 import com.jidesoft.list.QuickListFilterField;
 import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.opendap.DAPVariable;
@@ -28,6 +29,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -77,6 +79,9 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
     }
 
     private void configureComponents() {
+        checkBoxList.getCheckBoxListSelectionModel().getModel().getElementAt(0);
+
+
         selectAllButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -161,7 +166,7 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         selectNoneButton = new JButton("Select none");
         listModel = new FilterListModel();
         field = new QuickListFilterField(listModel);
-        checkBoxList = new FilterableCheckBoxList(field.getDisplayListModel());
+        checkBoxList = new ToolTippedCheckBoxList(field.getDisplayListModel());
         progressBar = new JProgressBar();
         statusLabel = new JLabel("");
         percentageLabel = new JLabel("");
@@ -394,4 +399,18 @@ public class VariableFilter implements FilterComponent, CatalogTree.CatalogTreeL
         }
     }
 
+    private class ToolTippedCheckBoxList extends FilterableCheckBoxList {
+
+        public ToolTippedCheckBoxList(FilterableListModel displayListModel) {
+            super(displayListModel);
+        }
+
+        @Override
+        public String getToolTipText(MouseEvent event) {
+            int index = locationToIndex(event.getPoint());
+            DAPVariable item = (DAPVariable) getModel().getElementAt(index);
+            return item.getInfotext();
+        }
+
+    }
 }

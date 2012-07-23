@@ -111,15 +111,23 @@ public class DAPVariable implements Comparable<DAPVariable> {
 
     public String getInfotext() {
         final StringBuilder builder = new StringBuilder();
-        builder.append("Name: " + getName() + "\n");
-        builder.append("Type: " + getType() + "\n");
-        builder.append("Dimensions: " + getNumDimensions() + "\n");
-        builder.append("Datatype: " + getDataType() + "\n");
+        builder
+                .append(dataType)
+                .append(" ")
+                .append(name);
         for (int i = 0; i < dimensions.length; i++) {
             final DArrayDimension dimension = dimensions[i];
-            builder.append("dim(" + dimension.getName() + ") size: " + dimension.getSize());
+            if (i == 0) {
+                builder.append(" (");
+            }
+            builder.append(dimension.getName())
+                    .append(":")
+                    .append(dimension.getSize());
+
             if (i < dimensions.length - 1) {
-                builder.append("\n");
+                builder.append(", ");
+            } else {
+                builder.append(")");
             }
         }
         return builder.toString();
