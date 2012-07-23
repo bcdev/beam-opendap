@@ -21,6 +21,8 @@ import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.TimeStampExtractor;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import thredds.catalog.InvDataset;
+import ucar.nc2.units.DateRange;
 
 import javax.swing.JCheckBox;
 import java.util.GregorianCalendar;
@@ -126,4 +128,48 @@ public class TimeRangeFilterTest {
         assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern")));
     }
 
+    @Test
+    public void testAccept_ServerSpecifiedTimeRange() throws Exception {
+        TimeRangeFilter filter = new TimeRangeFilter(new JCheckBox());
+        filter.startDate = new GregorianCalendar(2010, 0, 1).getTime();
+        filter.endDate = new GregorianCalendar(2010, 0, 2).getTime();
+
+        OpendapLeaf leaf = createLeaf();
+        assertFalse(filter.accept(leaf));
+
+        filter.startDate = new GregorianCalendar(2010, 0, 1).getTime();
+        filter.endDate = new GregorianCalendar(2011, 0, 2).getTime();
+
+        assertTrue(filter.accept(leaf));
+
+        filter.startDate = new GregorianCalendar(2010, 0, 2).getTime();
+        filter.endDate = null;
+
+        assertFalse(filter.accept(leaf));
+
+        filter.startDate = null;
+        filter.endDate = new GregorianCalendar(2010, 11, 31).getTime();
+
+        assertFalse(filter.accept(leaf));
+
+        filter.startDate = new GregorianCalendar(2009, 11, 31).getTime();
+        filter.endDate = null;
+
+        assertTrue(filter.accept(leaf));
+
+        filter.startDate = null;
+        filter.endDate = new GregorianCalendar(2011, 11, 31).getTime();
+
+        assertTrue(filter.accept(leaf));
+
+    }
+
+    private OpendapLeaf createLeaf() {
+        return new OpendapLeaf("", new InvDataset(null, "") {
+            @Override
+            public DateRange getTimeCoverage() {
+                return new DateRange(new GregorianCalendar(2010, 0, 1).getTime(), new GregorianCalendar(2011, 0, 1).getTime());
+            }
+        });
+    }
 }

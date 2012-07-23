@@ -7,6 +7,7 @@ import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.PatternProvider;
 import org.esa.beam.opendap.utils.TimeStampExtractor;
 import org.esa.beam.util.logging.BeamLogManager;
+import ucar.nc2.units.DateRange;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -80,7 +81,7 @@ public class TimeRangeFilter implements FilterComponent {
         startTimePicker.addActionListener(uiUpdater);
         startTimePicker.addActionListener(timePickerValidator);
         stopTimePicker.addActionListener(uiUpdater);
-        startTimePicker.addActionListener(timePickerValidator);
+        stopTimePicker.addActionListener(timePickerValidator);
         datePatternComboBox.addActionListener(uiUpdater);
         fileNamePatternComboBox.addActionListener(uiUpdater);
 
@@ -124,6 +125,8 @@ public class TimeRangeFilter implements FilterComponent {
     }
 
     private void initPatterns() {
+        datePatternComboBox.addItem("");
+        fileNamePatternComboBox.addItem("");
         for (String datePattern : PatternProvider.DATE_PATTERNS) {
             datePatternComboBox.addItem(datePattern);
         }
@@ -195,6 +198,33 @@ public class TimeRangeFilter implements FilterComponent {
 
     @Override
     public boolean accept(OpendapLeaf leaf) {
+        DateRange timeCoverage = leaf.getDataset().getTimeCoverage();
+        if (timeCoverage == null) {
+            return fitsToUserSpecifiedTimeRange(leaf);
+        }
+        return fitsToServerSpecifiedTimeRange(timeCoverage);
+    }
+
+    private boolean fitsToServerSpecifiedTimeRange(DateRange dateRange) {
+        if (startDate == null && endDate == null) {
+            return true;
+        } else if (startDate == null) {
+            return endsAtOrBeforeEndDate(dateRange);
+        } else if (endDate == null) {
+            return startsAtOrAfterStartDate(dateRange);
+        }
+        return startsAtOrAfterStartDate(dateRange) && endsAtOrBeforeEndDate(dateRange);
+    }
+
+    private boolean endsAtOrBeforeEndDate(DateRange dateRange) {
+        return dateRange.getEnd().getDate().equals(endDate) || dateRange.getEnd().before(endDate);
+    }
+
+    private boolean startsAtOrAfterStartDate(DateRange dateRange) {
+        return dateRange.getStart().getDate().equals(startDate) || dateRange.getStart().after(startDate);
+    }
+
+    private boolean fitsToUserSpecifiedTimeRange(OpendapLeaf leaf) {
         try {
             final ProductData.UTC[] timeStamps = timeStampExtractor.extractTimeStamps(leaf.getName());
 
