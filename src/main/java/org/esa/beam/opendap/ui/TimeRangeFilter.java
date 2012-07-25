@@ -5,7 +5,7 @@ import com.jidesoft.combobox.DateExComboBox;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.PatternProvider;
-import org.esa.beam.opendap.utils.TimeStampExtractor;
+import org.esa.beam.pixex.TimeStampExtractor;
 import org.esa.beam.util.logging.BeamLogManager;
 import ucar.nc2.units.DateRange;
 

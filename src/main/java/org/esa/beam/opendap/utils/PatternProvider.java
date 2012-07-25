@@ -17,6 +17,7 @@
 package org.esa.beam.opendap.utils;
 
 import com.bc.ceres.binding.ValidationException;
+import org.esa.beam.pixex.TimeStampExtractor;
 
 import java.util.ArrayList;
 import java.util.List;
