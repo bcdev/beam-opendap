@@ -25,6 +25,9 @@
     <dependency>
         <module>beam-visat-rcp</module>
     </dependency>
+    <dependency>
+        <module>beam-pixel-extraction</module>
+    </dependency>
 
     <extension point="beam-ui:actions">
         <action>
