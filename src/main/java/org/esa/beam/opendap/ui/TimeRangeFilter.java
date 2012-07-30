@@ -6,6 +6,7 @@ import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.opendap.OpendapLeaf;
 import org.esa.beam.opendap.utils.PatternProvider;
 import org.esa.beam.pixex.TimeStampExtractor;
+import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import ucar.nc2.units.DateRange;
 
@@ -92,8 +93,13 @@ public class TimeRangeFilter implements FilterComponent {
         applyButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                timeStampExtractor = new TimeStampExtractor(datePatternComboBox.getSelectedItem().toString(),
-                        fileNamePatternComboBox.getSelectedItem().toString());
+                if (StringUtils.isNotNullAndNotEmpty(datePatternComboBox.getEditor().getItem().toString())
+                    && StringUtils.isNotNullAndNotEmpty(fileNamePatternComboBox.getEditor().getItem().toString())) {
+                    timeStampExtractor = new TimeStampExtractor(datePatternComboBox.getSelectedItem().toString(),
+                                                                fileNamePatternComboBox.getSelectedItem().toString());
+                } else {
+                    timeStampExtractor = null;
+                }
                 startDate = startTimePicker.getDate();
                 endDate = stopTimePicker.getDate();
                 updateUIState();
@@ -117,10 +123,10 @@ public class TimeRangeFilter implements FilterComponent {
         final boolean hasStartDate = startTimePicker.getDate() != null;
         final boolean hasEndDate = stopTimePicker.getDate() != null;
         final boolean patternProvided = !("".equals(datePattern) || "".equals(fileNamePattern));
-        if (!isSelected || (!patternProvided && (hasStartDate || hasEndDate))) {
-            applyButton.setEnabled(false);
-        } else {
+        if (isSelected && (patternProvided || (!hasStartDate && !hasEndDate))) {
             applyButton.setEnabled(true);
+        } else {
+            applyButton.setEnabled(false);
         }
     }
 
@@ -199,10 +205,13 @@ public class TimeRangeFilter implements FilterComponent {
     @Override
     public boolean accept(OpendapLeaf leaf) {
         DateRange timeCoverage = leaf.getDataset().getTimeCoverage();
-        if (timeCoverage == null) {
+        if (timeCoverage != null) {
+            return fitsToServerSpecifiedTimeRange(timeCoverage);
+        }
+        if (timeStampExtractor != null) {
             return fitsToUserSpecifiedTimeRange(leaf);
         }
-        return fitsToServerSpecifiedTimeRange(timeCoverage);
+        return true;
     }
 
     private boolean fitsToServerSpecifiedTimeRange(DateRange dateRange) {

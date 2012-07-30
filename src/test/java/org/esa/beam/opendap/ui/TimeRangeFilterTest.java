@@ -49,12 +49,9 @@ public class TimeRangeFilterTest {
         filter.endDate = null;
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
 
-        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345.nc", new InvDataset(null, "") {
-                })));
-        assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern", new InvDataset(null, "") {
-                })));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345.nc", createNullDataset())));
+        assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern", createNullDataset())));
     }
 
     @Test
@@ -66,12 +63,9 @@ public class TimeRangeFilterTest {
         filter.endDate = null;
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
 
-        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20091231:233012__.nc", new InvDataset(null, "") {
-                })));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20091231:233012__.nc", createNullDataset())));
     }
 
     @Test
@@ -84,10 +78,8 @@ public class TimeRangeFilterTest {
 
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
 
-        assertTrue(filter.accept(new OpendapLeaf("sth__20080101:192345.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20111231:192345.nc", new InvDataset(null, "") {
-                })));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20080101:192345.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20111231:192345.nc", createNullDataset())));
     }
 
     @Test
@@ -98,12 +90,9 @@ public class TimeRangeFilterTest {
 
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
 
-        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100103:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20100103:192345___20100103:233012__.nc", new InvDataset(null, "") {
-                })));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100103:012345__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20100103:192345___20100103:233012__.nc", createNullDataset())));
     }
 
     @Test
@@ -114,14 +103,15 @@ public class TimeRangeFilterTest {
 
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
 
-        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20111231:192345.nc", new InvDataset(null, "") {
-                })));
-        assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern", new InvDataset(null, "") {
-                })));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20111231:192345.nc", createNullDataset())));
+        assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern", createNullDataset())));
+    }
+
+    private static InvDataset createNullDataset() {
+        return new InvDataset(null, "") {
+                };
     }
 
 
@@ -132,24 +122,15 @@ public class TimeRangeFilterTest {
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
         filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
 
-        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20100101:192345___20100103:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100103:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20091231:233012__.nc", new InvDataset(null, "") {
-                })));
-        assertFalse(filter.accept(new OpendapLeaf("sth__20100103:004523___20100103:012345__.nc", new InvDataset(null, "") {
-                })));
-        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345_does_not_match_naming_pattern.nc", new InvDataset(null, "") {
-                })));
-        assertTrue(filter.accept(new OpendapLeaf("sth__20100104:192345_does_not_match_naming_pattern.nc", new InvDataset(null, "") {
-                })));
-        assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern", new InvDataset(null, "") {
-                })));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20100101:192345___20100103:012345__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100103:012345__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20091231:233012__.nc", createNullDataset())));
+        assertFalse(filter.accept(new OpendapLeaf("sth__20100103:004523___20100103:012345__.nc", createNullDataset())));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345_does_not_match_naming_pattern.nc", createNullDataset())));
+        assertTrue(filter.accept(new OpendapLeaf("sth__20100104:192345_does_not_match_naming_pattern.nc", createNullDataset())));
+        assertTrue(filter.accept(new OpendapLeaf("does_not_match_naming_pattern", createNullDataset())));
     }
 
     @Test
