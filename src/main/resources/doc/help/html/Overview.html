@@ -47,7 +47,8 @@
 <p>
     The filters allow the user to narrow down the number of displayed files. A filter can be set after selecting the
     respective check box. Note that the filters are not active before the apply button has been clicked.
-    The filters will become (in)active again after (de)selecting the check box. Multiple filters may be combined to refine the
+    The filters will become (in)active again after (de)selecting the check box. Multiple filters may be combined to
+    refine the
     search for files.<br>
 </p>
 
@@ -55,28 +56,49 @@
 
 <p>
     Using the dataset name filter a search for whole file names or parts appearing in a file name can be performed.
-    It supports the wildcards <b>*</b>, <b>+</b>, and <b>?</b>'.<br>
-    For example, if the entered filter is <b>*2007*</b>, only file names that contain <b>2007</b> are listed.<br>
-    If the entered filter is <b>*b+*</b>, only file names containing at least one <b>b</b> in their file name.<br>
-    If the entered filter is <b>*.dima?p?</b>, all file names with the extensions <b>dim</b> and <b>dimap</b> are listed.
+    It supports the wildcards *, +, and ?'.<br>
+    For example, if the entered filter is *2007*, only file names that contain 2007 are listed.<br>
+    If the entered filter is *b+*, only file names containing at least one b in their file name.<br>
+    If the entered filter is *.dima?p?, all file names with the extensions dim and dimap are listed.
 </p>
 
 <h4>Using the time range filter</h4>
 
 <p>
-    Using this filter a temporal restriction can be employed on the server files.<br>
+    The time range filter can perform a temporal restriction on the files files of the selected server.<br>
     If the chosen OPeNDAP-server provides time coverage information for its files, these information are used. If not,
     the filtering is performed using the file name. In the latter case both the date pattern and the filename pattern
     need to be provided by the user.<br>
-    For example, the filename <b>MER_RR__2PPBCM20080208_230550_000002002065_00451_31066_0001.N1</b> makes use of the
-    date pattern <b>yyyyMMdd_hhmmss</b> and features only a start time, so that the filename pattern <b>*${date}*</b>
-    needs to be used.<br><br>
+    For example, the filename '<i>MER_RR__2PPBCM20080208_230550_000002002065_00451_31066_0001.N1</i>' employs the
+    date pattern <i>yyyyMMdd_hhmmss</i> and features a start time, so that the filename pattern <i>*CM${date}_*</i>
+    should be used. The filename '<i>sst_northsea_20010101_20010201.nc</i>' employs the date pattern <i>yyyyMMdd</i>
+    and features both start and stop time, so the filename pattern <i>*_${date}_${date}*</i> should be used.
+</p>
 
+<p>
+    Common pitfalls when using the time range filter:
+<ul>
+    <li>
+        If the date pattern matches multiple parts of the filename, the last match is considered the date. Thus, to
+        safely use the filter for the file '<i>sst_northsea_20090102_61504254.nc</i>',
+        the filename pattern '<i>*${date}*</i>' is
+        not sufficient; in this case, the more specific filename pattern '<i>*_${date}_*</i>' should be used.
+    </li>
+    <li>
+        For the same reason it is advisable to provide the patterns as precisely as possible. If for example a file
+        '<i>sst_northsea_20090102_100410_000000992075.nc</i>' shall be filtered, both the date patterns
+        <i>yyyyMMdd</i> and <i>yyyyMMdd_hhmmss</i> are potentially correct, but while the former matches two parts
+        of the filename and therefore yields wrong results, the latter is unique.
+    </li>
+</ul>
+</p>
+
+<p>
     Setting only a start time will filter out all files before the given time, setting only an end time will filter out
     all files after the given time, and setting both start and end time will filter out all files not completely within
     the resulting temporal range.<br>
 
-    Files without temporal information will not be filtered out.
+    Files that carry no temporal information will not be filtered out.
 </p>
 
 <h4>Using the region filter</h4>
