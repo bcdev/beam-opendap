@@ -227,7 +227,7 @@ public class DAPDownloaderTest {
     private static class NullLabelledProgressBarPM extends OpendapAccessPanel.DownloadProgressBarProgressMonitor {
 
         public NullLabelledProgressBarPM() {
-            super(null, null, null);
+            super(null, null, null, null);
         }
 
         @Override

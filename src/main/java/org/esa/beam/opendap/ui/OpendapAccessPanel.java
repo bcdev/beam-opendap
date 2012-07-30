@@ -101,6 +101,7 @@ public class OpendapAccessPanel extends JPanel {
     private Map<Integer,JTextArea> textAreas;
     private JButton downloadButton;
     private AppContext appContext;
+    private JButton cancelButton;
 
     public static void main(String[] args) {
         Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
@@ -400,7 +401,8 @@ public class OpendapAccessPanel extends JPanel {
 
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
-        final DownloadProgressBarProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel);
+        cancelButton = new JButton("Cancel");
+        final DownloadProgressBarProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel, cancelButton);
         progressBar.setVisible(false);
         folderChooserComboBox = new FolderChooserExComboBox() {
             @Override
@@ -416,13 +418,31 @@ public class OpendapAccessPanel extends JPanel {
         };
         downloadButton = new JButton("Download");
         downloadButton.setEnabled(false);
-        downloadButton.addActionListener(createDownloadAction(pm));
+        final DownloadAction downloadAction = createDownloadAction(pm);
+        downloadButton.addActionListener(downloadAction);
         folderChooserComboBox.setEditable(true);
         if (VisatApp.getApp() != null) {
             downloadButtonPanel.add(openInVisat, BorderLayout.NORTH);
         }
         downloadButtonPanel.add(folderChooserComboBox);
-        downloadButtonPanel.add(downloadButton, BorderLayout.EAST);
+        JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.add(downloadButton, BorderLayout.WEST);
+        cancelButton.setEnabled(false);
+        downloadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cancelButton.setEnabled(true);
+            }
+        });
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                downloadAction.cancel();
+                cancelButton.setEnabled(false);
+            }
+        });
+        buttonPanel.add(cancelButton, BorderLayout.EAST);
+        downloadButtonPanel.add(buttonPanel, BorderLayout.EAST);
 
         final JPanel centerRightPane = new JPanel(new BorderLayout());
         centerRightPane.add(filterPanel, BorderLayout.NORTH);
@@ -514,12 +534,14 @@ public class OpendapAccessPanel extends JPanel {
         private int totalWork;
         private int currentWork;
         private long startTime;
+        private JButton cancelButton;
 
-        public DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel, JLabel postMessageLabel) {
+        public DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel, JLabel postMessageLabel, JButton cancelButton) {
             super(progressBar, preMessageLabel);
             this.progressBar = progressBar;
             this.preMessageLabel = preMessageLabel;
             this.postMessageLabel = postMessageLabel;
+            this.cancelButton = cancelButton;
         }
 
         @Override
@@ -569,6 +591,7 @@ public class OpendapAccessPanel extends JPanel {
 
         @Override
         protected void finish() {
+            cancelButton.setEnabled(false);
         }
 
         @Override

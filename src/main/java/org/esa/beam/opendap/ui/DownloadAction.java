@@ -88,6 +88,17 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
         downloadedFilesCount++;
     }
 
+    public void cancel() {
+        for (DownloadWorker activeDownloader : new HashSet<DownloadWorker>(activeDownloaders)) {
+            activeDownloader.cancel(true);
+        }
+        activeDownloaders.clear();
+        pm.done();
+        pm.setPreMessage("Download cancelled");
+        pm.setPostMessage("");
+        downloadedFilesCount = 0;
+    }
+
     private class DownloadWorker extends SwingWorker<Void, Void> {
 
         private final DAPDownloader downloader;

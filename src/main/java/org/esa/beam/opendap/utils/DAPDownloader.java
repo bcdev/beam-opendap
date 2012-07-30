@@ -315,6 +315,5 @@ public class DAPDownloader {
         int getAllDownloadedFilesCount();
 
         void notifyFileDownloaded();
-
     }
 }
