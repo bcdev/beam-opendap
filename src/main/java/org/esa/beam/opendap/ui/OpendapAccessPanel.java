@@ -143,7 +143,7 @@ public class OpendapAccessPanel extends JPanel {
         });
         updateUrlField();
         refreshButton = ToolButtonFactory.createButton(
-                UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/ViewRefresh22.png"),
+                UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/ViewRefresh22.png", OpendapAccessPanel.class),
                 false);
         refreshButton.addActionListener(new ActionListener() {
             @Override
@@ -372,7 +372,7 @@ public class OpendapAccessPanel extends JPanel {
         gbc.gridx = 3;
         gbc.insets.right = 0;
         final AbstractButton helpButton = ToolButtonFactory.createButton(
-                UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/Help22.png"),
+                UIUtils.loadImageIcon("/org/esa/beam/opendap/images/icons/Help22.png", OpendapAccessPanel.class),
                 false);
         HelpSys.enableHelpOnButton(helpButton, helpId);
         urlPanel.add(helpButton, gbc);
