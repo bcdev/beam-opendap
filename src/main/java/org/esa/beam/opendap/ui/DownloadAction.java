@@ -23,26 +23,30 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Tonio Fincke
  * @author Thomas Storm
-*/
-class DownloadAction implements ActionListener {
+ */
+class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider {
+
+    private final Set<DownloadWorker> activeDownloaders = new HashSet<DownloadWorker>();
 
     private final OpendapAccessPanel.DownloadProgressBarProgressMonitor pm;
     private final ParameterProvider parameterProvider;
     private final DownloadHandler downloadHandler;
-    private List<DownloadWorker> activeDownloaders;
+
+    private int downloadedFilesCount;
+    private int filesToDownloadCount;
 
     public DownloadAction(OpendapAccessPanel.DownloadProgressBarProgressMonitor pm, ParameterProvider parameterProvider,
                           DownloadHandler downloadHandler) {
         this.pm = pm;
         this.parameterProvider = parameterProvider;
         this.downloadHandler = downloadHandler;
-        activeDownloaders = new ArrayList<DownloadWorker>();
     }
 
     @Override
@@ -53,15 +57,35 @@ class DownloadAction implements ActionListener {
         if (dapURIs.size() == 0 && fileURIs.size() == 0) {
             return;
         }
-        final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, pm);
+        final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, this, pm);
         final File targetDirectory = parameterProvider.getTargetDirectory();
-        pm.setProgressBarVisible(true);
-        pm.beginTask("", parameterProvider.getDatasize());
-        pm.worked(0);
         DownloadWorker downloadWorker = new DownloadWorker(downloader, targetDirectory);
         downloadWorker.execute();
+        if (activeDownloaders.isEmpty()) {
+            pm.beginTask("", parameterProvider.getDatasize());
+            pm.worked(0);
+            pm.resetStartTime();
+            filesToDownloadCount = dapURIs.size() + fileURIs.size();
+        } else {
+            pm.updateTask(parameterProvider.getDatasize());
+            filesToDownloadCount += dapURIs.size() + fileURIs.size();
+        }
         activeDownloaders.add(downloadWorker);
+    }
 
+    @Override
+    public int getAllFilesCount() {
+        return filesToDownloadCount;
+    }
+
+    @Override
+    public int getAllDownloadedFilesCount() {
+        return downloadedFilesCount;
+    }
+
+    @Override
+    public void notifyFileDownloaded() {
+        downloadedFilesCount++;
     }
 
     private class DownloadWorker extends SwingWorker<Void, Void> {
@@ -86,10 +110,15 @@ class DownloadAction implements ActionListener {
 
         @Override
         protected void done() {
-            pm.done();
-            pm.setPreMessage("All downloads completed");
-            pm.setPostMessage("");
-            downloadHandler.handleDownloadFinished(downloader.getDownloadedFiles());
+            activeDownloaders.remove(this);
+            if (activeDownloaders.isEmpty()) {
+                pm.done();
+                pm.setPreMessage("All downloads completed");
+                pm.setPostMessage("");
+                downloadedFilesCount = 0;
+            }
+            File[] downloadedFiles = downloader.getDownloadedFiles();
+            downloadHandler.handleDownloadFinished(downloadedFiles);
         }
     }
 

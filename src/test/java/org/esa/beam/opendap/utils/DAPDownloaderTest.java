@@ -1,6 +1,6 @@
 package org.esa.beam.opendap.utils;
 
-import org.esa.beam.opendap.ui.LabelledProgressBarPM;
+import org.esa.beam.opendap.ui.OpendapAccessPanel;
 import org.esa.beam.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +41,7 @@ public class DAPDownloaderTest {
     @Test
     public void testDownloadFile() throws Exception {
         DAPDownloader dapDownloader = new DAPDownloader(new ArrayList<String>(), new ArrayList<String>(),
-                                                        new NullLabelledProgressBarPM());
+                                                        new NullFileCountProvider(), new NullLabelledProgressBarPM());
         String fileName = "fileToTextDownload.txt";
         assertFalse(getTestFile(fileName).exists());
         assertEquals(0, dapDownloader.downloadedFiles.size());
@@ -192,7 +192,7 @@ public class DAPDownloaderTest {
     @Ignore
     @Test
     public void testActualWriting() throws Exception {
-        final DAPDownloader dapDownloader = new DAPDownloader(null, null,new NullLabelledProgressBarPM());
+        final DAPDownloader dapDownloader = new DAPDownloader(null, null, new NullFileCountProvider(), new NullLabelledProgressBarPM());
         final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile(
                 "http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
         dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "", sourceNetcdfFile);
@@ -207,7 +207,7 @@ public class DAPDownloaderTest {
     @Ignore
     @Test
     public void testActualWriting_WithConstraint() throws Exception {
-        final DAPDownloader dapDownloader = new DAPDownloader(null, null, new NullLabelledProgressBarPM());
+        final DAPDownloader dapDownloader = new DAPDownloader(null, null, new NullFileCountProvider(), new NullLabelledProgressBarPM());
         final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile(
                 "http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
         dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "COADSX[0:1:4]", sourceNetcdfFile);
@@ -224,7 +224,11 @@ public class DAPDownloaderTest {
         return new File(TESTDATA_DIR, fileName);
     }
 
-    private static class NullLabelledProgressBarPM implements LabelledProgressBarPM {
+    private static class NullLabelledProgressBarPM extends OpendapAccessPanel.DownloadProgressBarProgressMonitor {
+
+        public NullLabelledProgressBarPM() {
+            super(null, null, null);
+        }
 
         @Override
         public void setPreMessage(String preMessageText) {
@@ -279,6 +283,23 @@ public class DAPDownloaderTest {
 
         @Override
         public void worked(int work) {
+        }
+    }
+
+    private static class NullFileCountProvider implements DAPDownloader.FileCountProvider {
+
+        @Override
+        public int getAllFilesCount() {
+            return 0;
+        }
+
+        @Override
+        public int getAllDownloadedFilesCount() {
+            return 0;
+        }
+
+        @Override
+        public void notifyFileDownloaded() {
         }
     }
 }

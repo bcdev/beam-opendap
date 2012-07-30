@@ -1,7 +1,7 @@
 package org.esa.beam.opendap.utils;
 
 import com.bc.io.FileDownloader;
-import org.esa.beam.opendap.ui.LabelledProgressBarPM;
+import org.esa.beam.opendap.ui.OpendapAccessPanel;
 import org.esa.beam.util.StringUtils;
 import ucar.ma2.Array;
 import ucar.ma2.InvalidRangeException;
@@ -30,22 +30,22 @@ public class DAPDownloader {
 
     final List<String> dapUris;
     final List<String> fileURIs;
-    private final LabelledProgressBarPM pm;
+    private final FileCountProvider fileCountProvider;
+    private final OpendapAccessPanel.DownloadProgressBarProgressMonitor pm;
     final Set<File> downloadedFiles;
     private NetCDFFileWriterProgressListener progressListener;
-    private long startTime;
 
-    public DAPDownloader(List<String> dapUris, List<String> fileURIs, LabelledProgressBarPM pm) {
+    public DAPDownloader(List<String> dapUris, List<String> fileURIs, FileCountProvider fileCountProvider,
+                         OpendapAccessPanel.DownloadProgressBarProgressMonitor pm) {
         this.dapUris = dapUris;
         this.fileURIs = fileURIs;
+        this.fileCountProvider = fileCountProvider;
         this.pm = pm;
         downloadedFiles = new HashSet<File>();
     }
 
     public void saveProducts(File targetDir) throws IOException {
         if (targetDir != null && targetDir.isDirectory()) {
-            GregorianCalendar gc = new GregorianCalendar();
-            startTime = gc.getTimeInMillis();
             downloadFilesWithDapAccess(targetDir);
             downloadFilesWithFileAccess(targetDir);
         } else {
@@ -78,6 +78,7 @@ public class DAPDownloader {
             FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
             final int work = (int) file.length() - progressListener.amount;
             updateProgressBar(fileName, work);
+            fileCountProvider.notifyFileDownloaded();
             downloadedFiles.add(file);
             return;
         }
@@ -136,6 +137,7 @@ public class DAPDownloader {
             }
         }
         targetNetCDF.close();
+        fileCountProvider.notifyFileDownloaded();
         downloadedFiles.add(file);
     }
 
@@ -143,15 +145,14 @@ public class DAPDownloader {
         pm.worked(work);
         StringBuilder preMessageBuilder = new StringBuilder(fileName);
         int currentWork = pm.getCurrentWork();
-        int fileCount = fileURIs.size() + dapUris.size();
         preMessageBuilder.append(" (")
-                .append(downloadedFiles.size() + 1)
+                .append(fileCountProvider.getAllDownloadedFilesCount() + 1)
                 .append("/")
-                .append(fileCount)
+                .append(fileCountProvider.getAllFilesCount())
                 .append(")");
         if (currentWork != 0) {
             final long currentTime = new GregorianCalendar().getTimeInMillis();
-            final long durationInMillis = currentTime - startTime;
+            final long durationInMillis = currentTime - pm.getStartTime();
             double downloadSpeed = getDownloadSpeed(durationInMillis, currentWork);
             String speedString = OpendapUtils.format(downloadSpeed);
             preMessageBuilder.append(" @ ").append(speedString).append(" kB/s");
@@ -282,6 +283,7 @@ public class DAPDownloader {
         final URL fileUrl = new URI(fileURI).toURL();
         final File file = FileDownloader.downloadFile(fileUrl, targetDir, null);
         downloadedFiles.add(file);
+        fileCountProvider.notifyFileDownloaded();
     }
 
     public File[] getDownloadedFiles() {
@@ -304,5 +306,15 @@ public class DAPDownloader {
         @Override
         public void writeStatus(FileWriter.FileWriterProgressEvent event) {
         }
+    }
+
+    public interface FileCountProvider {
+
+        int getAllFilesCount();
+
+        int getAllDownloadedFilesCount();
+
+        void notifyFileDownloaded();
+
     }
 }

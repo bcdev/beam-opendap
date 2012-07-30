@@ -58,6 +58,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -512,6 +513,7 @@ public class OpendapAccessPanel extends JPanel {
         private JLabel postMessageLabel;
         private int totalWork;
         private int currentWork;
+        private long startTime;
 
         public DownloadProgressBarProgressMonitor(JProgressBar progressBar, JLabel preMessageLabel, JLabel postMessageLabel) {
             super(progressBar, preMessageLabel);
@@ -557,6 +559,8 @@ public class OpendapAccessPanel extends JPanel {
 
         @Override
         protected void setVisibility(boolean visible) {
+            // once the progress bar has been made visible, it shall always be visible
+            progressBar.setVisible(true);
         }
 
         @Override
@@ -577,8 +581,19 @@ public class OpendapAccessPanel extends JPanel {
             return currentWork;
         }
 
-        void setProgressBarVisible(boolean visible) {
-            progressBar.setVisible(visible);
+        public void updateTask(int additionalWork) {
+            totalWork += additionalWork;
+            progressBar.setMaximum(totalWork);
+            progressBar.updateUI();
+        }
+
+        public void resetStartTime() {
+            GregorianCalendar gc = new GregorianCalendar();
+            startTime = gc.getTimeInMillis();
+        }
+
+        public long getStartTime() {
+            return startTime;
         }
     }
 
