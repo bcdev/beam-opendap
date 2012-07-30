@@ -472,19 +472,24 @@ public class OpendapAccessPanel extends JPanel {
     }
 
     private boolean refresh() {
-        final String text = urlField.getSelectedItem().toString();
-        final String catalogUrl;
-        if (!text.toLowerCase().endsWith("/catalog.xml")) {
-            catalogUrl = text + "/catalog.xml";
+        String url;
+        if (urlField.getSelectedItem() == null) {
+            url = urlField.getEditor().getItem().toString();
         } else {
-            catalogUrl = text;
+            url = urlField.getSelectedItem().toString();
+        }
+        final String catalogUrl;
+        if (!url.toLowerCase().endsWith("/catalog.xml")) {
+            catalogUrl = url + "/catalog.xml";
+        } else {
+            catalogUrl = url;
         }
         final InvCatalogFactory factory = InvCatalogFactory.getDefaultFactory(true);
         final InvCatalog catalog = factory.readXML(catalogUrl);
         final List<InvDataset> datasets = catalog.getDatasets();
 
         if (datasets.size() == 0) {
-            JOptionPane.showMessageDialog(this, "'" + text + "' is not a valid OPeNDAP URL.");
+            JOptionPane.showMessageDialog(this, "'" + url + "' is not a valid OPeNDAP URL.");
             return false;
         }
 
