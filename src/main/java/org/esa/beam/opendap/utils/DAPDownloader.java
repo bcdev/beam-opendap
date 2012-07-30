@@ -154,8 +154,9 @@ public class DAPDownloader {
             final long currentTime = new GregorianCalendar().getTimeInMillis();
             final long durationInMillis = currentTime - pm.getStartTime();
             double downloadSpeed = getDownloadSpeed(durationInMillis, currentWork);
+            char sizeIdentifier = downloadSpeed < 1000 ? 'k' : 'M';
             String speedString = OpendapUtils.format(downloadSpeed);
-            preMessageBuilder.append(" @ ").append(speedString).append(" kB/s");
+            preMessageBuilder.append(" @ ").append(speedString).append(" ").append(sizeIdentifier).append("B/s");
         }
         int totalWork = pm.getTotalWork();
         final double percentage = ((double) currentWork / totalWork) * 100.0;
