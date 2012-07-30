@@ -478,18 +478,13 @@ public class OpendapAccessPanel extends JPanel {
         } else {
             url = urlField.getSelectedItem().toString();
         }
-        final String catalogUrl;
-        if (!url.toLowerCase().endsWith("/catalog.xml")) {
-            catalogUrl = url + "/catalog.xml";
-        } else {
-            catalogUrl = url;
-        }
         final InvCatalogFactory factory = InvCatalogFactory.getDefaultFactory(true);
-        final InvCatalog catalog = factory.readXML(catalogUrl);
+        final InvCatalog catalog = factory.readXML(url);
         final List<InvDataset> datasets = catalog.getDatasets();
 
         if (datasets.size() == 0) {
-            JOptionPane.showMessageDialog(this, "'" + url + "' is not a valid OPeNDAP URL.");
+            JOptionPane.showMessageDialog(this, "'" + url + "' is not a valid OPeNDAP URL. Note that the URL must point " +
+                                                "to a THREDDS catalog service XML.");
             return false;
         }
 
