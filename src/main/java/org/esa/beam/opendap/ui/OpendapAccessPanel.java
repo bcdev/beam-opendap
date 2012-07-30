@@ -15,7 +15,6 @@ import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.opendap.OpendapLeaf;
-import org.esa.beam.opendap.utils.DAPDownloader;
 import org.esa.beam.opendap.utils.OpendapUtils;
 import org.esa.beam.util.PropertyMap;
 import org.esa.beam.util.StringUtils;
@@ -42,7 +41,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
-import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -401,7 +399,7 @@ public class OpendapAccessPanel extends JPanel {
 
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
-        final LabelledProgressBarPM pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel);
+        final DownloadProgressBarProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel);
         progressBar.setVisible(false);
         folderChooserComboBox = new FolderChooserExComboBox() {
             @Override
@@ -417,7 +415,7 @@ public class OpendapAccessPanel extends JPanel {
         };
         downloadButton = new JButton("Download");
         downloadButton.setEnabled(false);
-        downloadButton.addActionListener(new DownloadAction(pm));
+        downloadButton.addActionListener(createDownloadAction(pm));
         folderChooserComboBox.setEditable(true);
         if (VisatApp.getApp() != null) {
             downloadButtonPanel.add(openInVisat, BorderLayout.NORTH);
@@ -439,6 +437,25 @@ public class OpendapAccessPanel extends JPanel {
         this.add(urlPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
         this.add(statusBar, BorderLayout.SOUTH);
+    }
+
+    private DownloadAction createDownloadAction(DownloadProgressBarProgressMonitor pm) {
+        return new DownloadAction(pm, new ParameterProviderImpl(), new DownloadAction.DownloadHandler() {
+
+            @Override
+            public void handleException(Exception e) {
+                appContext.handleError("Unable to perform download. Reason: " + e.getMessage(), e);
+            }
+
+            @Override
+            public void handleDownloadFinished(File[] downloadedFiles) {
+                if (openInVisat.isSelected()) {
+                    for (File file : downloadedFiles) {
+                        VisatApp.getApp().openProduct(file);
+                    }
+                }
+            }
+        });
     }
 
     private File fetchTargetDirectory() {
@@ -559,24 +576,39 @@ public class OpendapAccessPanel extends JPanel {
         public int getCurrentWork() {
             return currentWork;
         }
+
+        void setProgressBarVisible(boolean visible) {
+            progressBar.setVisible(visible);
+        }
     }
 
-    private class DownloadAction implements ActionListener {
+    private class ParameterProviderImpl implements DownloadAction.ParameterProvider {
 
-        private final LabelledProgressBarPM pm;
+        List<String> dapURIs = new ArrayList<String>();
+        List<String> fileURIs = new ArrayList<String>();
 
-        public DownloadAction(LabelledProgressBarPM pm) {
-            this.pm = pm;
+        @Override
+        public List<String> getDapURIs() {
+            if (dapURIs.isEmpty() && fileURIs.isEmpty()) {
+                collectURIs();
+            }
+            return new ArrayList<String>(dapURIs);
         }
 
         @Override
-        public void actionPerformed(ActionEvent ignored) {
+        public List<String> getFileURIs() {
+            if (dapURIs.isEmpty() && fileURIs.isEmpty()) {
+                collectURIs();
+            }
+            return new ArrayList<String>(fileURIs);
+        }
+
+        private void collectURIs() {
             final TreePath[] selectionPaths = ((JTree) catalogTree.getComponent()).getSelectionModel().getSelectionPaths();
             if (selectionPaths == null || selectionPaths.length <= 0) {
                 return;
             }
-            List<String> dapURIs = new ArrayList<String>();
-            List<String> fileURIs = new ArrayList<String>();
+
             for (TreePath selectionPath : selectionPaths) {
                 final DefaultMutableTreeNode treeNode = (DefaultMutableTreeNode) selectionPath.getLastPathComponent();
                 if (CatalogTree.isDapNode(treeNode) || CatalogTree.isFileNode(treeNode)) {
@@ -588,42 +620,21 @@ public class OpendapAccessPanel extends JPanel {
                     }
                 }
             }
-            if (dapURIs.size() == 0 && fileURIs.size() == 0) {
-                return;
-            }
-            progressBar.setVisible(true);
-            pm.beginTask("", (int) currentDataSize);
-            pm.worked(0);
-            final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, pm);
-            final File targetDirectory = getTargetDirectory();
-            new SwingWorker<Void, Void>() {
-
-                @Override
-                protected Void doInBackground() {
-                    try {
-                        downloader.saveProducts(targetDirectory);
-                    } catch (IOException e) {
-                        appContext.handleError("Unable to perform download. Reason: " + e.getMessage(), e);
-                    }
-                    if (openInVisat.isSelected()) {
-                        File[] downloadedFiles = downloader.getDownloadedFiles();
-                        for (File file : downloadedFiles) {
-                            VisatApp.getApp().openProduct(file);
-                        }
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void done() {
-                    pm.done();
-                    pm.setPreMessage("All downloads completed");
-                    pm.setPostMessage("");
-                }
-            }.execute();
         }
 
-        private File getTargetDirectory() {
+        @Override
+        public void reset() {
+            dapURIs.clear();
+            fileURIs.clear();
+        }
+
+        @Override
+        public int getDatasize() {
+            return (int) currentDataSize;
+        }
+
+        @Override
+        public File getTargetDirectory() {
             final File targetDirectory;
             if (folderChooserComboBox.getSelectedItem() == null ||
                 folderChooserComboBox.getSelectedItem().toString().equals("")) {
