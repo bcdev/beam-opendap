@@ -209,6 +209,9 @@ class CatalogTree {
             final MutableTreeNode deeperParent;
             if (!goDeeper || !isHyraxId(dataset.getID())) {
                 appendToNode(jTree, dataset, parentNode);
+                if (parentNode.getChildCount() == 0) {
+                    continue;
+                }
                 deeperParent = (MutableTreeNode) parentNode.getChildAt(parentNode.getChildCount() - 1);
             } else {
                 deeperParent = parentNode;
@@ -262,8 +265,8 @@ class CatalogTree {
             }
         }
         final boolean hasNestedDatasets = dataset.hasNestedDatasets();
-        fireLeafAdded(leaf, hasNestedDatasets);
         appendDataNodeToParent(parentNode, treeModel, leaf);
+        fireLeafAdded(leaf, hasNestedDatasets);
     }
 
     private void appendDataNodeToParent(MutableTreeNode parentNode, DefaultTreeModel treeModel, OpendapLeaf leaf) {
