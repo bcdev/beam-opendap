@@ -51,6 +51,9 @@ public class DAPDownloader {
 
     private void downloadFilesWithDapAccess(File targetDir) throws IOException {
         for (String dapURI : dapUris) {
+            if (pm.isCanceled()) {
+                break;
+            }
             downloadDapFile(targetDir, dapURI);
         }
     }
@@ -62,7 +65,6 @@ public class DAPDownloader {
         if (uriComponents.length > 1) {
             constraintExpression = uriComponents[1];
         }
-
         updateProgressBar(fileName, 0);
         DODSNetcdfFile netcdfFile = new DODSNetcdfFile(dapURI);
         writeNetcdfFile(targetDir, fileName, constraintExpression, netcdfFile);
@@ -72,9 +74,11 @@ public class DAPDownloader {
         final File file = new File(targetDir, fileName);
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
             FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
-            final int work = (int) file.length() - progressListener.amount;
-            updateProgressBar(fileName, work);
-            fileCountProvider.notifyFileDownloaded(file);
+            if (!pm.isCanceled()) {
+                fileCountProvider.notifyFileDownloaded(file);
+                final int work = (int) file.length() - progressListener.amount;
+                updateProgressBar(fileName, work);
+            }
             return;
         }
         /**
@@ -266,6 +270,9 @@ public class DAPDownloader {
 
     private void downloadFilesWithFileAccess(File targetDir) throws IOException {
         for (String fileURI : fileURIs) {
+            if (pm.isCanceled()) {
+                break;
+            }
             try {
                 downloadFile(targetDir, fileURI);
             } catch (Exception e) {
@@ -276,6 +283,7 @@ public class DAPDownloader {
 
     void downloadFile(File targetDir, String fileURI) throws URISyntaxException, IOException {
         final URL fileUrl = new URI(fileURI).toURL();
+        updateProgressBar(fileUrl.getFile(), 0);
         final File file = FileDownloader.downloadFile(fileUrl, targetDir, null);
         fileCountProvider.notifyFileDownloaded(file);
     }

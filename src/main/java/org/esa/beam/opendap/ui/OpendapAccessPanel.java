@@ -469,11 +469,9 @@ public class OpendapAccessPanel extends JPanel {
             }
 
             @Override
-            public void handleDownloadFinished(File[] downloadedFiles) {
+            public void handleDownloadFinished(File downloadedFiles) {
                 if (openInVisat.isSelected()) {
-                    for (File file : downloadedFiles) {
-                        VisatApp.getApp().openProduct(file);
-                    }
+                    VisatApp.getApp().openProduct(downloadedFiles);
                 }
             }
         });

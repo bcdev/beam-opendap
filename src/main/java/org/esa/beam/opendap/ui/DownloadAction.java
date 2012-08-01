@@ -59,8 +59,6 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
         }
         final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, this, pm);
         final File targetDirectory = parameterProvider.getTargetDirectory();
-        DownloadWorker downloadWorker = new DownloadWorker(downloader, targetDirectory);
-        downloadWorker.execute();
         if (activeDownloaders.isEmpty()) {
             pm.beginTask("", parameterProvider.getDatasize());
             pm.worked(0);
@@ -70,6 +68,8 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
             pm.updateTask(parameterProvider.getDatasize());
             filesToDownloadCount += dapURIs.size() + fileURIs.size();
         }
+        DownloadWorker downloadWorker = new DownloadWorker(downloader, targetDirectory);
+        downloadWorker.execute();
         activeDownloaders.add(downloadWorker);
     }
 
@@ -86,7 +86,7 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
     @Override
     public void notifyFileDownloaded(File downloadedFile) {
         downloadedFilesCount++;
-        downloadHandler.handleDownloadFinished(new File[] {downloadedFile});
+        downloadHandler.handleDownloadFinished(downloadedFile);
     }
 
     public void cancel() {
@@ -94,7 +94,7 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
             activeDownloader.cancel(true);
         }
         activeDownloaders.clear();
-        pm.done();
+        pm.setCanceled(true);
         pm.setPreMessage("Download cancelled");
         pm.setPostMessage("");
         downloadedFilesCount = 0;
@@ -151,7 +151,7 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
 
         void handleException(Exception e);
 
-        void handleDownloadFinished(File[] downloadedFiles);
+        void handleDownloadFinished(File downloadedFiles);
 
     }
 }
