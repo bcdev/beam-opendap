@@ -60,12 +60,12 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
         final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, this, pm);
         final File targetDirectory = parameterProvider.getTargetDirectory();
         if (activeDownloaders.isEmpty()) {
-            pm.beginTask("", parameterProvider.getDatasize());
+            pm.beginTask("", parameterProvider.getDatasize() / 1024);
             pm.worked(0);
             pm.resetStartTime();
             filesToDownloadCount = dapURIs.size() + fileURIs.size();
         } else {
-            pm.updateTask(parameterProvider.getDatasize());
+            pm.updateTask(parameterProvider.getDatasize() / 1024);
             filesToDownloadCount += dapURIs.size() + fileURIs.size();
         }
         DownloadWorker downloadWorker = new DownloadWorker(downloader, targetDirectory);

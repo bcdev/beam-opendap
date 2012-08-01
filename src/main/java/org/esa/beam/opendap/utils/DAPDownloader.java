@@ -45,7 +45,7 @@ public class DAPDownloader {
             downloadFilesWithDapAccess(targetDir);
             downloadFilesWithFileAccess(targetDir);
         } else {
-            throw new IOException("Could not save to directory' " + targetDir + "'");
+            throw new IOException("No target directory specified.");
         }
     }
 
@@ -77,7 +77,7 @@ public class DAPDownloader {
             if (!pm.isCanceled()) {
                 fileCountProvider.notifyFileDownloaded(file);
                 final int work = (int) file.length() - progressListener.amount;
-                updateProgressBar(fileName, work);
+                updateProgressBar(fileName, work / 1024);
             }
             return;
         }
@@ -158,16 +158,16 @@ public class DAPDownloader {
         }
         int totalWork = pm.getTotalWork();
         final double percentage = ((double) currentWork / totalWork) * 100.0;
-        String workDone = OpendapUtils.format(currentWork / (1024.0 * 1024.0));
-        String totalWorkString = OpendapUtils.format(totalWork / (1024.0 * 1024.0));
+        String workDone = OpendapUtils.format(currentWork / 1024.0);
+        String totalWorkString = OpendapUtils.format(totalWork / 1024.0);
         pm.setPostMessage(workDone + " MB/" + totalWorkString + " MB (" + OpendapUtils.format(percentage) + "%)");
         String preMessageString = preMessageBuilder.toString();
         pm.setTooltip("Downloading " + preMessageBuilder.toString());
         pm.setPreMessage("Downloading " + preMessageString.replace(fileName, fileName.substring(0, 15) + "..."));
     }
 
-    static double getDownloadSpeed(long durationInMillis, int byteCount) {
-        return (byteCount / 1024.0) / (durationInMillis / 1000.0);
+    static double getDownloadSpeed(long durationInMillis, int kilobyteCount) {
+        return kilobyteCount / (durationInMillis / 1000.0);
     }
 
     private List<FileWriter.FileWriterProgressListener> createProgressListeners() {
@@ -297,7 +297,7 @@ public class DAPDownloader {
             if (event.getBytesWritten() != 0) {
                 int workedAmount = (int) event.getBytesWritten();
                 amount += workedAmount;
-                updateProgressBar("", workedAmount);
+                updateProgressBar("", workedAmount / 1024);
             }
         }
 
