@@ -17,7 +17,6 @@ public class ShowOpendapClientAction extends AbstractVisatAction {
         jDialog.setContentPane(opendapAccessPanel);
         jDialog.pack();
         final Dimension size = jDialog.getSize();
-        jDialog.setMinimumSize(size);
         jDialog.setPreferredSize(size);
         jDialog.setVisible(true);
     }

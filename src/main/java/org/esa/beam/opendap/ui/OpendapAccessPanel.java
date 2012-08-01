@@ -9,6 +9,8 @@ import com.jidesoft.status.ProgressStatusBarItem;
 import com.jidesoft.status.StatusBar;
 import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.swing.JideBoxLayout;
+import com.jidesoft.swing.JideScrollPane;
+import com.jidesoft.swing.SimpleScrollPane;
 import com.jidesoft.utils.Lm;
 import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.framework.help.HelpSys;
@@ -117,8 +119,6 @@ public class OpendapAccessPanel extends JPanel {
         mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainFrame.setContentPane(opendapAccessPanel);
         mainFrame.pack();
-        final Dimension size = mainFrame.getSize();
-        mainFrame.setMinimumSize(size);
         mainFrame.setVisible(true);
     }
 
@@ -449,7 +449,11 @@ public class OpendapAccessPanel extends JPanel {
         centerRightPane.add(optionalPanel, BorderLayout.CENTER);
         centerRightPane.add(downloadButtonPanel, BorderLayout.SOUTH);
 
-        final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerLeftPane, centerRightPane);
+        SimpleScrollPane centerRightScrollPane = new SimpleScrollPane(centerRightPane,
+                                                                      JideScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                                                      JideScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerLeftPane, centerRightScrollPane);
         centerPanel.setResizeWeight(1);
         centerPanel.setContinuousLayout(true);
 
