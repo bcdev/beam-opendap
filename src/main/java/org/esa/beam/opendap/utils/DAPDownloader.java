@@ -22,9 +22,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class DAPDownloader {
 
@@ -32,7 +30,6 @@ public class DAPDownloader {
     final List<String> fileURIs;
     private final FileCountProvider fileCountProvider;
     private final OpendapAccessPanel.DownloadProgressBarProgressMonitor pm;
-    final Set<File> downloadedFiles;
     private NetCDFFileWriterProgressListener progressListener;
 
     public DAPDownloader(List<String> dapUris, List<String> fileURIs, FileCountProvider fileCountProvider,
@@ -41,7 +38,6 @@ public class DAPDownloader {
         this.fileURIs = fileURIs;
         this.fileCountProvider = fileCountProvider;
         this.pm = pm;
-        downloadedFiles = new HashSet<File>();
     }
 
     public void saveProducts(File targetDir) throws IOException {
@@ -78,8 +74,7 @@ public class DAPDownloader {
             FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
             final int work = (int) file.length() - progressListener.amount;
             updateProgressBar(fileName, work);
-            fileCountProvider.notifyFileDownloaded();
-            downloadedFiles.add(file);
+            fileCountProvider.notifyFileDownloaded(file);
             return;
         }
         /**
@@ -137,8 +132,7 @@ public class DAPDownloader {
             }
         }
         targetNetCDF.close();
-        fileCountProvider.notifyFileDownloaded();
-        downloadedFiles.add(file);
+        fileCountProvider.notifyFileDownloaded(file);
     }
 
     private void updateProgressBar(String fileName, int work) {
@@ -283,12 +277,7 @@ public class DAPDownloader {
     void downloadFile(File targetDir, String fileURI) throws URISyntaxException, IOException {
         final URL fileUrl = new URI(fileURI).toURL();
         final File file = FileDownloader.downloadFile(fileUrl, targetDir, null);
-        downloadedFiles.add(file);
-        fileCountProvider.notifyFileDownloaded();
-    }
-
-    public File[] getDownloadedFiles() {
-        return downloadedFiles.toArray(new File[downloadedFiles.size()]);
+        fileCountProvider.notifyFileDownloaded(file);
     }
 
     private class NetCDFFileWriterProgressListener implements FileWriter.FileWriterProgressListener {
@@ -315,6 +304,6 @@ public class DAPDownloader {
 
         int getAllDownloadedFilesCount();
 
-        void notifyFileDownloaded();
+        void notifyFileDownloaded(File downloadedFile);
     }
 }

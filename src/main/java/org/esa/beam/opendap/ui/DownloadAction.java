@@ -84,8 +84,9 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
     }
 
     @Override
-    public void notifyFileDownloaded() {
+    public void notifyFileDownloaded(File downloadedFile) {
         downloadedFilesCount++;
+        downloadHandler.handleDownloadFinished(new File[] {downloadedFile});
     }
 
     public void cancel() {
@@ -128,8 +129,6 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
                 pm.setPostMessage("");
                 downloadedFilesCount = 0;
             }
-            File[] downloadedFiles = downloader.getDownloadedFiles();
-            downloadHandler.handleDownloadFinished(downloadedFiles);
         }
     }
 

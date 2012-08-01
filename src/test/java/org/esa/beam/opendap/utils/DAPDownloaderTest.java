@@ -15,7 +15,9 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -40,17 +42,24 @@ public class DAPDownloaderTest {
 
     @Test
     public void testDownloadFile() throws Exception {
+        final Set<File> downloadedFiles = new HashSet<File>();
+        NullFileCountProvider fileCountProvider = new NullFileCountProvider() {
+            @Override
+            public void notifyFileDownloaded(File downloadedFile) {
+                downloadedFiles.add(downloadedFile);
+            }
+        };
         DAPDownloader dapDownloader = new DAPDownloader(new ArrayList<String>(), new ArrayList<String>(),
-                                                        new NullFileCountProvider(), new NullLabelledProgressBarPM());
+                                                        fileCountProvider, new NullLabelledProgressBarPM());
         String fileName = "fileToTextDownload.txt";
         assertFalse(getTestFile(fileName).exists());
-        assertEquals(0, dapDownloader.downloadedFiles.size());
+        assertEquals(0, downloadedFiles.size());
 
         URL resource = getClass().getResource(fileName);
         dapDownloader.downloadFile(TESTDATA_DIR, resource.toString());
 
-        assertEquals(1, dapDownloader.downloadedFiles.size());
-        assertEquals(fileName, ((File) dapDownloader.downloadedFiles.toArray()[0]).getName());
+        assertEquals(1, downloadedFiles.size());
+        assertEquals(fileName, ((File) downloadedFiles.toArray()[0]).getName());
         assertTrue(getTestFile(fileName).exists());
     }
 
@@ -299,7 +308,7 @@ public class DAPDownloaderTest {
         }
 
         @Override
-        public void notifyFileDownloaded() {
+        public void notifyFileDownloaded(File downloadedFile) {
         }
     }
 }
