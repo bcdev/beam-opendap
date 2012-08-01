@@ -679,7 +679,9 @@ public class OpendapAccessPanel extends JPanel {
             AbstractComboBox.DefaultTextFieldEditorComponent textField = (AbstractComboBox.DefaultTextFieldEditorComponent) folderChooserComboBox.getEditor();
             if (textField.getText() == null || textField.getText().equals("")) {
                 targetDirectory = fetchTargetDirectory();
-                textField.setText(targetDirectory.toString());
+                if (targetDirectory != null) {
+                    textField.setText(targetDirectory.toString());
+                }
             } else {
                 targetDirectory = new File(textField.getText());
             }
