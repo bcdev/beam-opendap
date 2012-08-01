@@ -209,8 +209,7 @@ public class OpendapAccessPanel extends JPanel {
                 } else {
                     downloadButton.setEnabled(true);
                     double dataSizeInMB = currentDataSize / (1024.0 * 1024.0);
-                    updateStatusBar(
-                            "Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
+                    updateStatusBar("Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
                 }
             }
         }, appContext);
@@ -666,8 +665,8 @@ public class OpendapAccessPanel extends JPanel {
         }
 
         @Override
-        public int getDatasize() {
-            return (int) currentDataSize;
+        public double getDatasize() {
+            return currentDataSize;
         }
 
         @Override

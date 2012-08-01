@@ -153,6 +153,7 @@ public class DAPDownloader {
             final long durationInMillis = currentTime - pm.getStartTime();
             double downloadSpeed = getDownloadSpeed(durationInMillis, currentWork);
             char sizeIdentifier = downloadSpeed < 1000 ? 'k' : 'M';
+            downloadSpeed = downloadSpeed < 1000 ? downloadSpeed : downloadSpeed / 1024;
             String speedString = OpendapUtils.format(downloadSpeed);
             preMessageBuilder.append(" @ ").append(speedString).append(" ").append(sizeIdentifier).append("B/s");
         }

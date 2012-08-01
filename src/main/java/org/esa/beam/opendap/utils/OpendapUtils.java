@@ -52,9 +52,6 @@ public class OpendapUtils {
     }
 
     public static String format(double value) {
-        if (value > 1024) {
-            value /= 1024;
-        }
         DecimalFormat format = new DecimalFormat("0.00");
         DecimalFormatSymbols instance = DecimalFormatSymbols.getInstance();
         instance.setDecimalSeparator('.');
