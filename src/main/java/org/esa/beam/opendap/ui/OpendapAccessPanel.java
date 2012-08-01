@@ -1,7 +1,8 @@
 package org.esa.beam.opendap.ui;
 
 import com.bc.ceres.core.ProgressBarProgressMonitor;
-import com.jidesoft.combobox.FolderChooserExComboBox;
+import com.jidesoft.combobox.AbstractComboBox;
+import com.jidesoft.combobox.FolderChooserComboBox;
 import com.jidesoft.combobox.PopupPanel;
 import com.jidesoft.status.LabelStatusBarItem;
 import com.jidesoft.status.ProgressStatusBarItem;
@@ -94,7 +95,7 @@ public class OpendapAccessPanel extends JPanel {
     private double currentDataSize = 0.0;
     private final PropertyMap propertyMap;
     private final String helpId;
-    private FolderChooserExComboBox folderChooserComboBox;
+    private FolderChooserComboBox folderChooserComboBox;
     private JProgressBar progressBar;
     private JLabel preMessageLabel;
     private JLabel postMessageLabel;
@@ -404,7 +405,7 @@ public class OpendapAccessPanel extends JPanel {
         cancelButton = new JButton("Cancel");
         final DownloadProgressBarProgressMonitor pm = new DownloadProgressBarProgressMonitor(progressBar, preMessageLabel, postMessageLabel, cancelButton);
         progressBar.setVisible(false);
-        folderChooserComboBox = new FolderChooserExComboBox() {
+        folderChooserComboBox = new FolderChooserComboBox() {
             @Override
             public PopupPanel createPopupComponent() {
                 final PopupPanel popupComponent = super.createPopupComponent();
@@ -672,11 +673,12 @@ public class OpendapAccessPanel extends JPanel {
         @Override
         public File getTargetDirectory() {
             final File targetDirectory;
-            if (folderChooserComboBox.getSelectedItem() == null ||
-                folderChooserComboBox.getSelectedItem().toString().equals("")) {
+            AbstractComboBox.DefaultTextFieldEditorComponent textField = (AbstractComboBox.DefaultTextFieldEditorComponent) folderChooserComboBox.getEditor();
+            if (textField.getText() == null || textField.getText().equals("")) {
                 targetDirectory = fetchTargetDirectory();
+                textField.setText(targetDirectory.toString());
             } else {
-                targetDirectory = new File(folderChooserComboBox.getSelectedItem().toString());
+                targetDirectory = new File(textField.getText());
             }
             return targetDirectory;
         }
