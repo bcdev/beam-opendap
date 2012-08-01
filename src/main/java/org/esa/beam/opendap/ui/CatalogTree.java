@@ -93,7 +93,7 @@ class CatalogTree {
 
             private void setToolTip(DefaultMutableTreeNode value, JTree tree) {
                 final int fileSize = ((OpendapLeaf)value.getUserObject()).getFileSize();
-                tree.setToolTipText(OpendapUtils.format(fileSize / (1024.0 * 1024.0)) + " MB");
+                tree.setToolTipText(OpendapUtils.format(fileSize / 1024.0) + " MB");
             }
         });
     }
@@ -246,7 +246,7 @@ class CatalogTree {
 
     void appendLeafNode(MutableTreeNode parentNode, DefaultTreeModel treeModel, InvDataset dataset) {
         final OpendapLeaf leaf = new OpendapLeaf(dataset.getName(), dataset);
-        final int fileSize = OpendapUtils.getDataSizeInBytes(leaf);
+        final int fileSize = (int) (OpendapUtils.getDataSizeInBytes(leaf) / 1024);
         leaf.setFileSize(fileSize);
         final InvAccess dapAccess = dataset.getAccess(ServiceType.OPENDAP);
         if (dapAccess != null) {

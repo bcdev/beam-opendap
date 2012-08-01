@@ -39,8 +39,8 @@ import java.text.DecimalFormatSymbols;
 public class OpendapUtils {
 
 
-    public static int getDataSizeInBytes(OpendapLeaf leaf) {
-        return (int) ((InvDatasetImpl) leaf.getDataset()).getLocalMetadata().getDataSize();
+    public static long getDataSizeInBytes(OpendapLeaf leaf) {
+        return (long) ((InvDatasetImpl) leaf.getDataset()).getLocalMetadata().getDataSize();
     }
 
     public static String getResponse(String fileUri) throws IOException {

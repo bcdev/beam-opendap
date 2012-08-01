@@ -208,7 +208,7 @@ public class OpendapAccessPanel extends JPanel {
                     downloadButton.setEnabled(false);
                 } else {
                     downloadButton.setEnabled(true);
-                    double dataSizeInMB = currentDataSize / (1024.0 * 1024.0);
+                    double dataSizeInMB = currentDataSize / 1024.0;
                     updateStatusBar("Total size of currently selected files: " + OpendapUtils.format(dataSizeInMB) + " MB");
                 }
             }
@@ -624,15 +624,15 @@ public class OpendapAccessPanel extends JPanel {
 
     private class ParameterProviderImpl implements DownloadAction.ParameterProvider {
 
-        List<String> dapURIs = new ArrayList<String>();
+        Map<String, Boolean> dapURIs = new HashMap<String, Boolean>();
         List<String> fileURIs = new ArrayList<String>();
 
         @Override
-        public List<String> getDapURIs() {
+        public Map<String, Boolean> getDapURIs() {
             if (dapURIs.isEmpty() && fileURIs.isEmpty()) {
                 collectURIs();
             }
-            return new ArrayList<String>(dapURIs);
+            return new HashMap<String, Boolean>(dapURIs);
         }
 
         @Override
@@ -654,7 +654,7 @@ public class OpendapAccessPanel extends JPanel {
                 if (CatalogTree.isDapNode(treeNode) || CatalogTree.isFileNode(treeNode)) {
                     final OpendapLeaf leaf = (OpendapLeaf) treeNode.getUserObject();
                     if (leaf.isDapAccess()) {
-                        dapURIs.add(leaf.getDapUri());
+                        dapURIs.put(leaf.getDapUri(), leaf.getFileSize() >= 2 * 1024 * 1024);
                     } else if (leaf.isFileAccess()) {
                         fileURIs.add(leaf.getFileUri());
                     }
@@ -669,7 +669,7 @@ public class OpendapAccessPanel extends JPanel {
         }
 
         @Override
-        public double getDatasize() {
+        public double getDatasizeInKb() {
             return currentDataSize;
         }
 

@@ -23,16 +23,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Map;
 
 public class DAPDownloader {
 
-    final List<String> dapUris;
+    final Map<String, Boolean> dapUris;
     final List<String> fileURIs;
     private final FileCountProvider fileCountProvider;
     private final OpendapAccessPanel.DownloadProgressBarProgressMonitor pm;
-    private NetCDFFileWriterProgressListener progressListener;
 
-    public DAPDownloader(List<String> dapUris, List<String> fileURIs, FileCountProvider fileCountProvider,
+    public DAPDownloader(Map<String, Boolean> dapUris, List<String> fileURIs, FileCountProvider fileCountProvider,
                          OpendapAccessPanel.DownloadProgressBarProgressMonitor pm) {
         this.dapUris = dapUris;
         this.fileURIs = fileURIs;
@@ -50,15 +50,15 @@ public class DAPDownloader {
     }
 
     private void downloadFilesWithDapAccess(File targetDir) throws IOException {
-        for (String dapURI : dapUris) {
+        for (Map.Entry<String, Boolean> entry : dapUris.entrySet()) {
             if (pm.isCanceled()) {
                 break;
             }
-            downloadDapFile(targetDir, dapURI);
+            downloadDapFile(targetDir, entry.getKey(), entry.getValue());
         }
     }
 
-    private void downloadDapFile(File targetDir, String dapURI) throws IOException {
+    private void downloadDapFile(File targetDir, String dapURI, boolean isLargeFile) throws IOException {
         String[] uriComponents = dapURI.split("\\?");
         String constraintExpression = "";
         String fileName = dapURI.substring(uriComponents[0].lastIndexOf("/") + 1);
@@ -67,17 +67,17 @@ public class DAPDownloader {
         }
         updateProgressBar(fileName, 0);
         DODSNetcdfFile netcdfFile = new DODSNetcdfFile(dapURI);
-        writeNetcdfFile(targetDir, fileName, constraintExpression, netcdfFile);
+        writeNetcdfFile(targetDir, fileName, constraintExpression, netcdfFile, isLargeFile);
     }
 
-    void writeNetcdfFile(File targetDir, String fileName, String constraintExpression, DODSNetcdfFile sourceNetcdfFile) throws IOException {
+    void writeNetcdfFile(File targetDir, String fileName, String constraintExpression, DODSNetcdfFile sourceNetcdfFile, boolean isLargeFile) throws IOException {
         final File file = new File(targetDir, fileName);
         if (StringUtils.isNullOrEmpty(constraintExpression)) {
-            FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, false, createProgressListeners());
+            FileWriter.writeToFile(sourceNetcdfFile, file.getAbsolutePath(), true, isLargeFile);
             if (!pm.isCanceled()) {
                 fileCountProvider.notifyFileDownloaded(file);
-                final int work = (int) file.length() - progressListener.amount;
-                updateProgressBar(fileName, work / 1024);
+                final int work = (int) (file.length() / 1024);
+                updateProgressBar(fileName, work);
             }
             return;
         }
@@ -169,13 +169,6 @@ public class DAPDownloader {
 
     static double getDownloadSpeed(long durationInMillis, int kilobyteCount) {
         return kilobyteCount / (durationInMillis / 1000.0);
-    }
-
-    private List<FileWriter.FileWriterProgressListener> createProgressListeners() {
-        List<FileWriter.FileWriterProgressListener> progressListeners = new ArrayList<FileWriter.FileWriterProgressListener>();
-        progressListener = new NetCDFFileWriterProgressListener();
-        progressListeners.add(progressListener);
-        return progressListeners;
     }
 
     static String getConstraintExpression(String sourceVariable, String constraintExpression) {
@@ -287,24 +280,6 @@ public class DAPDownloader {
         updateProgressBar(fileUrl.getFile(), 0);
         final File file = FileDownloader.downloadFile(fileUrl, targetDir, null);
         fileCountProvider.notifyFileDownloaded(file);
-    }
-
-    private class NetCDFFileWriterProgressListener implements FileWriter.FileWriterProgressListener {
-
-        int amount = 0;
-
-        @Override
-        public void writeProgress(FileWriter.FileWriterProgressEvent event) {
-            if (event.getBytesWritten() != 0) {
-                int workedAmount = (int) event.getBytesWritten();
-                amount += workedAmount;
-                updateProgressBar("", workedAmount / 1024);
-            }
-        }
-
-        @Override
-        public void writeStatus(FileWriter.FileWriterProgressEvent event) {
-        }
     }
 
     public interface FileCountProvider {

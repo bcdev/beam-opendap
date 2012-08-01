@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -51,7 +52,7 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
 
     @Override
     public void actionPerformed(ActionEvent ignored) {
-        List<String> dapURIs = parameterProvider.getDapURIs();
+        Map<String, Boolean> dapURIs = parameterProvider.getDapURIs();
         List<String> fileURIs = parameterProvider.getFileURIs();
         parameterProvider.reset();
         if (dapURIs.size() == 0 && fileURIs.size() == 0) {
@@ -60,12 +61,12 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
         final DAPDownloader downloader = new DAPDownloader(dapURIs, fileURIs, this, pm);
         final File targetDirectory = parameterProvider.getTargetDirectory();
         if (activeDownloaders.isEmpty()) {
-            pm.beginTask("", (int) (parameterProvider.getDatasize() / 1024.0));
+            pm.beginTask("", (int) (parameterProvider.getDatasizeInKb()));
             pm.worked(0);
             pm.resetStartTime();
             filesToDownloadCount = dapURIs.size() + fileURIs.size();
         } else {
-            pm.updateTask((int) (parameterProvider.getDatasize() / 1024.0));
+            pm.updateTask((int) (parameterProvider.getDatasizeInKb()));
             filesToDownloadCount += dapURIs.size() + fileURIs.size();
         }
         DownloadWorker downloadWorker = new DownloadWorker(downloader, targetDirectory);
@@ -135,13 +136,13 @@ class DownloadAction implements ActionListener, DAPDownloader.FileCountProvider 
 
     interface ParameterProvider {
 
-        List<String> getDapURIs();
+        Map<String, Boolean> getDapURIs();
 
         List<String> getFileURIs();
 
         void reset();
 
-        double getDatasize();
+        double getDatasizeInKb();
 
         File getTargetDirectory();
 

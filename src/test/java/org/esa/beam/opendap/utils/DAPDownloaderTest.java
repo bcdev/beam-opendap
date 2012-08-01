@@ -15,6 +15,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,7 +50,7 @@ public class DAPDownloaderTest {
                 downloadedFiles.add(downloadedFile);
             }
         };
-        DAPDownloader dapDownloader = new DAPDownloader(new ArrayList<String>(), new ArrayList<String>(),
+        DAPDownloader dapDownloader = new DAPDownloader(new HashMap<String, Boolean>(), new ArrayList<String>(),
                                                         fileCountProvider, new NullLabelledProgressBarPM());
         String fileName = "fileToTextDownload.txt";
         assertFalse(getTestFile(fileName).exists());
@@ -204,7 +205,7 @@ public class DAPDownloaderTest {
         final DAPDownloader dapDownloader = new DAPDownloader(null, null, new NullFileCountProvider(), new NullLabelledProgressBarPM());
         final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile(
                 "http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
-        dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "", sourceNetcdfFile);
+        dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "", sourceNetcdfFile, false);
 
         final File testFile = getTestFile("deleteme.nc");
         assertTrue(testFile.exists());
@@ -219,7 +220,7 @@ public class DAPDownloaderTest {
         final DAPDownloader dapDownloader = new DAPDownloader(null, null, new NullFileCountProvider(), new NullLabelledProgressBarPM());
         final DODSNetcdfFile sourceNetcdfFile = new DODSNetcdfFile(
                 "http://test.opendap.org:80/opendap/data/nc/coads_climatology.nc");
-        dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "COADSX[0:1:4]", sourceNetcdfFile);
+        dapDownloader.writeNetcdfFile(TESTDATA_DIR, "deleteme.nc", "COADSX[0:1:4]", sourceNetcdfFile, false);
 
         final File testFile = getTestFile("deleteme.nc");
         assertTrue(testFile.exists());
