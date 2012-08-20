@@ -22,34 +22,34 @@ public class PatternProviderTest {
         List<String[]> patternCombinations = PatternProvider.recommendPatterns("sth__20100101:200101.nc");
         assertTrue(patternCombinations.size() >= 3);
 
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd:hhmmss", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${date}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd:hhmmss", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${startDate}*"});
     }
 
     @Test
     public void testRecommendPatterns_secondPattern_twoDates() throws Exception {
         List<String[]> patternCombinations = PatternProvider.recommendPatterns("sth__20100101_192345_20110101_192345.nc");
         assertTrue(patternCombinations.size() >= 6);
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd_hhmmss", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd_hhmmss", "*${date}*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${date}*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${date}*${date}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd_hhmmss", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd_hhmmss", "*${startDate}*${endDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${startDate}*${endDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${startDate}*${endDate}*"});
     }
 
     @Test
     public void testRecommendPatterns_variousPossiblePatterns() throws Exception {
         List<String[]> patternCombinations = PatternProvider.recommendPatterns("sth__20100101192345_99999999.nc");
         assertTrue(patternCombinations.size() >= 7);
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd_hhmmss", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMddhhmmss", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMddhh", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${date}*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${date}*"});
-        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${date}*${date}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd_hhmmss", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMddhhmmss", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMddhh", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMMdd", "*${startDate}*${endDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${startDate}*"});
+        containAssertEquals(patternCombinations, new String[]{"yyyyMM", "*${startDate}*${endDate}*"});
     }
 
     private static void containAssertEquals(List<String[]> containingList, String[] expectedStrings) {

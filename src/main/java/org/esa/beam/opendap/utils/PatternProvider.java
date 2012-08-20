@@ -17,7 +17,7 @@
 package org.esa.beam.opendap.utils;
 
 import com.bc.ceres.binding.ValidationException;
-import org.esa.beam.pixex.TimeStampExtractor;
+import org.esa.beam.util.TimeStampExtractor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +45,8 @@ public class PatternProvider {
     };
 
     public static final String[] FILENAME_PATTERNS = {
-            "*${date}*",
-            "*${date}*${date}*"
+            "*${startDate}*",
+            "*${startDate}*${endDate}*"
     };
 
     public static List<String[]> recommendPatterns(String fileName) {
@@ -91,8 +91,7 @@ public class PatternProvider {
 
         final String dateMatcher = getDateMatcher(datePattern);
 
-        Pattern pattern = Pattern.compile(starSignPattern+dateMatcher+starSignPattern);
-        return pattern;
+        return Pattern.compile(starSignPattern + dateMatcher + starSignPattern);
     }
 
     private static String getDateMatcher(String datePattern) {

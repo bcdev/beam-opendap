@@ -18,7 +18,7 @@ package org.esa.beam.opendap.ui;
 
 import com.jidesoft.utils.Lm;
 import org.esa.beam.opendap.OpendapLeaf;
-import org.esa.beam.pixex.TimeStampExtractor;
+import org.esa.beam.util.TimeStampExtractor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import thredds.catalog.InvDataset;
@@ -47,7 +47,7 @@ public class TimeRangeFilterTest {
         TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
         filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
         filter.endDate = null;
-        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${startDate}*");
 
         assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc", createNullDataset())));
         assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345.nc", createNullDataset())));
@@ -61,7 +61,7 @@ public class TimeRangeFilterTest {
         TimeRangeFilter filter = new TimeRangeFilter(filterCheckBox);
         filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
         filter.endDate = null;
-        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${startDate}*${endDate}*");
 
         assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", createNullDataset())));
         assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc", createNullDataset())));
@@ -76,7 +76,7 @@ public class TimeRangeFilterTest {
         filter.startDate = null;
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
 
-        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${startDate}*");
 
         assertTrue(filter.accept(new OpendapLeaf("sth__20080101:192345.nc", createNullDataset())));
         assertFalse(filter.accept(new OpendapLeaf("sth__20111231:192345.nc", createNullDataset())));
@@ -88,7 +88,7 @@ public class TimeRangeFilterTest {
         filter.startDate = null;
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
 
-        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${startDate}*${endDate}*");
 
         assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", createNullDataset())));
         assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100103:012345__.nc", createNullDataset())));
@@ -101,7 +101,7 @@ public class TimeRangeFilterTest {
         filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
 
-        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*");
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${startDate}*");
 
         assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345.nc", createNullDataset())));
         assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345.nc", createNullDataset())));
@@ -120,7 +120,7 @@ public class TimeRangeFilterTest {
         TimeRangeFilter filter = new TimeRangeFilter(new JCheckBox());
         filter.startDate = new GregorianCalendar(2010, 0, 1, 12, 37, 15).getTime();
         filter.endDate = new GregorianCalendar(2010, 0, 2, 12, 37, 15).getTime();
-        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${date}*${date}*");
+        filter.timeStampExtractor = new TimeStampExtractor("yyyyMMdd:hhmmss", "*${startDate}*${endDate}*");
 
         assertTrue(filter.accept(new OpendapLeaf("sth__20100101:192345___20100102:012345__.nc", createNullDataset())));
         assertFalse(filter.accept(new OpendapLeaf("sth__20091231:192345___20100102:012345__.nc", createNullDataset())));
