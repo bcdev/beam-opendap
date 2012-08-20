@@ -70,9 +70,9 @@
     the filtering is performed using the file name. In the latter case both the date pattern and the filename pattern
     need to be provided by the user.<br>
     For example, the filename '<i>MER_RR__2PPBCM20080208_230550_000002002065_00451_31066_0001.N1</i>' employs the
-    date pattern <i>yyyyMMdd_hhmmss</i> and features a start time, so that the filename pattern <i>*CM${date}_*</i>
+    date pattern <i>yyyyMMdd_hhmmss</i> and features a start time, so that the filename pattern <i>*CM${startDate}_*</i>
     should be used. The filename '<i>sst_northsea_20010101_20010201.nc</i>' employs the date pattern <i>yyyyMMdd</i>
-    and features both start and stop time, so the filename pattern <i>*_${date}_${date}*</i> should be used.
+    and features both start and stop time, so the filename pattern <i>*_${startDate}_${endDate}*</i> should be used.
 </p>
 
 <p>
@@ -81,8 +81,8 @@
     <li>
         If the date pattern matches multiple parts of the filename, the last match is considered the date. Thus, to
         safely use the filter for the file '<i>sst_northsea_20090102_61504254.nc</i>',
-        the filename pattern '<i>*${date}*</i>' is
-        not sufficient; in this case, the more specific filename pattern '<i>*_${date}_*</i>' should be used.
+        the filename pattern '<i>*${startDate}*</i>' is
+        not sufficient; in this case, the more specific filename pattern '<i>*_${startDate}_*</i>' should be used.
     </li>
     <li>
         For the same reason it is advisable to provide the patterns as precisely as possible. If for example a file
