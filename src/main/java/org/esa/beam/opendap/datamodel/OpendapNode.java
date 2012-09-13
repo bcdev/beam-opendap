@@ -14,29 +14,34 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.opendap;
+package org.esa.beam.opendap.datamodel;
 
 import thredds.catalog.InvDataset;
 
 /**
- * {@link OpendapLeaf} that serves as catalog leaf. The URI points to a catalog that contains datasets.
- *
  * @author Tonio Fincke
  * @author Thomas Storm
  */
-public class CatalogNode extends OpendapNode {
+public abstract class OpendapNode {
 
-    private String catalogUri;
+    private final String name;
+    private final InvDataset dataset;
 
-    public CatalogNode(String name, InvDataset dataset) {
-        super(name, dataset);
+    public OpendapNode(String name, InvDataset dataset) {
+        this.name = name;
+        this.dataset = dataset;
     }
 
-    public String getCatalogUri() {
-        return catalogUri;
+    public String getName() {
+        return name;
     }
 
-    public void setCatalogUri(String catalogUri) {
-        this.catalogUri = catalogUri;
+    public InvDataset getDataset() {
+        return dataset;
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

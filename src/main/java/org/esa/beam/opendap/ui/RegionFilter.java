@@ -3,7 +3,7 @@ package org.esa.beam.opendap.ui;
 import com.bc.ceres.binding.Property;
 import com.bc.ceres.binding.PropertySet;
 import org.esa.beam.framework.ui.RegionBoundsInputUI;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 import thredds.catalog.ThreddsMetadata;
 import ucar.unidata.geoloc.LatLonPointImpl;
 import ucar.unidata.geoloc.LatLonRect;

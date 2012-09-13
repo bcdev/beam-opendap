@@ -1,6 +1,6 @@
 package org.esa.beam.opendap.ui;
 
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 import org.junit.*;
 import thredds.catalog.InvDataset;
 

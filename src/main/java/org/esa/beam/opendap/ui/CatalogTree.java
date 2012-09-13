@@ -2,8 +2,8 @@ package org.esa.beam.opendap.ui;
 
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.UIUtils;
-import org.esa.beam.opendap.CatalogNode;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.CatalogNode;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 import org.esa.beam.opendap.utils.OpendapUtils;
 import org.esa.beam.util.logging.BeamLogManager;
 import thredds.catalog.InvAccess;

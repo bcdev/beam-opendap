@@ -6,8 +6,8 @@ import opendap.dap.DArrayDimension;
 import opendap.dap.DConnect2;
 import opendap.dap.DDS;
 import opendap.dap.DGrid;
-import org.esa.beam.opendap.DAPVariable;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.DAPVariable;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 
 import java.io.IOException;
 import java.io.InputStream;

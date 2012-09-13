@@ -6,8 +6,8 @@ import com.jidesoft.list.FilterableCheckBoxList;
 import com.jidesoft.list.FilterableListModel;
 import com.jidesoft.list.QuickListFilterField;
 import org.esa.beam.framework.ui.GridBagUtils;
-import org.esa.beam.opendap.DAPVariable;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.DAPVariable;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 import org.esa.beam.opendap.utils.VariableCollector;
 import org.esa.beam.util.logging.BeamLogManager;
 

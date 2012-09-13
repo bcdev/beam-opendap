@@ -18,7 +18,7 @@ package org.esa.beam.opendap.utils;
 
 import opendap.dap.http.HTTPMethod;
 import opendap.dap.http.HTTPSession;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 import thredds.catalog.InvDatasetImpl;
 
 import java.io.BufferedReader;

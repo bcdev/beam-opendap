@@ -1,8 +1,8 @@
 package org.esa.beam.opendap.utils;
 
 import opendap.dap.DDS;
-import org.esa.beam.opendap.DAPVariable;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.DAPVariable;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 
 import java.util.HashSet;
 import java.util.Set;

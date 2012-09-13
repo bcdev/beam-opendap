@@ -3,7 +3,7 @@ package org.esa.beam.opendap.ui;
 import com.bc.ceres.binding.ValidationException;
 import com.jidesoft.combobox.DateExComboBox;
 import org.esa.beam.framework.datamodel.ProductData;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 import org.esa.beam.opendap.utils.PatternProvider;
 import org.esa.beam.util.StringUtils;
 import org.esa.beam.util.TimeStampExtractor;

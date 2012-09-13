@@ -3,7 +3,7 @@ package org.esa.beam.opendap.utils;
 import opendap.dap.DAP2Exception;
 import opendap.dap.DDS;
 import opendap.dap.parser.ParseException;
-import org.esa.beam.opendap.DAPVariable;
+import org.esa.beam.opendap.datamodel.DAPVariable;
 import org.junit.*;
 
 import java.io.ByteArrayInputStream;

@@ -17,7 +17,7 @@
 package org.esa.beam.opendap.ui;
 
 import com.jidesoft.utils.Lm;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 import org.esa.beam.util.TimeStampExtractor;
 import org.junit.BeforeClass;
 import org.junit.Test;

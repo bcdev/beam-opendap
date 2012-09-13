@@ -1,6 +1,7 @@
 package org.esa.beam.opendap;
 
 import opendap.dap.DArrayDimension;
+import org.esa.beam.opendap.datamodel.DAPVariable;
 import org.junit.Before;
 import org.junit.Test;
 

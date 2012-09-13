@@ -1,4 +1,4 @@
-package org.esa.beam.opendap;
+package org.esa.beam.opendap.datamodel;
 
 import com.bc.ceres.core.Assert;
 import opendap.dap.DArrayDimension;

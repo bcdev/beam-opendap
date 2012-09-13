@@ -4,8 +4,8 @@ import opendap.dap.DAP2Exception;
 import opendap.dap.DArrayDimension;
 import opendap.dap.DDS;
 import opendap.dap.parser.ParseException;
-import org.esa.beam.opendap.DAPVariable;
-import org.esa.beam.opendap.OpendapLeaf;
+import org.esa.beam.opendap.datamodel.DAPVariable;
+import org.esa.beam.opendap.datamodel.OpendapLeaf;
 import org.junit.Test;
 import thredds.catalog.InvDataset;
 
