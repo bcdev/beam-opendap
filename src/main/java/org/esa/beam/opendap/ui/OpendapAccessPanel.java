@@ -106,22 +106,6 @@ public class OpendapAccessPanel extends JPanel {
     private AppContext appContext;
     private JButton cancelButton;
 
-    public static void main(String[] args) {
-        Lm.verifyLicense("Brockmann Consult", "BEAM", "lCzfhklpZ9ryjomwWxfdupxIcuIoCxg2");
-
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        final OpendapAccessPanel opendapAccessPanel = new OpendapAccessPanel(new DefaultAppContext(""), "");
-        final JFrame mainFrame = new JFrame("OPeNDAP Access");
-        mainFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        mainFrame.setContentPane(opendapAccessPanel);
-        mainFrame.pack();
-        mainFrame.setVisible(true);
-    }
-
     public OpendapAccessPanel(AppContext appContext, String helpId) {
         super();
         this.propertyMap = appContext.getPreferences();
