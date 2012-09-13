@@ -18,8 +18,6 @@ import java.util.List;
 
 public class VariableExtractor {
 
-    private DDS dds = new DDS();
-
     public DAPVariable[] extractVariables(OpendapLeaf leaf) {
         DDS dds = getDDS(leaf.getDdsUri());
         return extractVariables(dds);
@@ -39,13 +37,13 @@ public class VariableExtractor {
     private DDS getDDS(String uri) {
         InputStream stream = null;
         DConnect2 dConnect2 = null;
+        DDS dds = new DDS();
         try {
             stream = new URI(uri).toURL().openStream();
             dConnect2 = new DConnect2(stream);
             dds = dConnect2.getDDS();
         } catch (Exception e) {
             // ok, no opendap leaf
-            return new DDS();
         } finally {
             if (dConnect2 != null) {
                 dConnect2.closeSession();
