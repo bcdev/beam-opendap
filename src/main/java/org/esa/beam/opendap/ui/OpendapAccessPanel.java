@@ -11,8 +11,6 @@ import com.jidesoft.swing.FolderChooser;
 import com.jidesoft.swing.JideBoxLayout;
 import com.jidesoft.swing.JideScrollPane;
 import com.jidesoft.swing.SimpleScrollPane;
-import com.jidesoft.utils.Lm;
-import org.esa.beam.framework.gpf.ui.DefaultAppContext;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.AppContext;
 import org.esa.beam.framework.ui.UIUtils;
@@ -34,7 +32,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -44,7 +41,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -101,7 +97,7 @@ public class OpendapAccessPanel extends JPanel {
     private JProgressBar progressBar;
     private JLabel preMessageLabel;
     private JLabel postMessageLabel;
-    private Map<Integer,JTextArea> textAreas;
+    private Map<Integer, JTextArea> textAreas;
     private JButton downloadButton;
     private AppContext appContext;
     private JButton cancelButton;
@@ -158,9 +154,14 @@ public class OpendapAccessPanel extends JPanel {
         textAreas.put(DDS_AREA_INDEX, ddsArea);
         textAreas.put(GENERAL_AREA_INDEX, generalArea);
 
-        metaInfoArea.addTab("DDS", new JScrollPane(ddsArea));
+        final JScrollPane ddsPane = new JScrollPane(ddsArea);
+        metaInfoArea.addTab("DDS", ddsPane);
         metaInfoArea.addTab("DAS", new JScrollPane(dasArea));
         metaInfoArea.addTab("General Info", new JScrollPane(generalArea));
+        metaInfoArea.setToolTipTextAt(DDS_AREA_INDEX, "Dataset Descriptor Structure: A description of the variables and their names" +
+                " and types that compose the dataset");
+        metaInfoArea.setToolTipTextAt(DAS_AREA_INDEX, "Dataset Attribute Structure: A representation of the data source's attributes");
+        metaInfoArea.setToolTipTextAt(GENERAL_AREA_INDEX, "Either the DDS (for DAP files) or the file URI");
 
         metaInfoArea.addChangeListener(new ChangeListener() {
             @Override
@@ -311,9 +312,9 @@ public class OpendapAccessPanel extends JPanel {
     private void filterLeaf(OpendapLeaf leaf) {
         if (
                 (!useDatasetNameFilter.isSelected() || datasetNameFilter.accept(leaf)) &&
-                (!useTimeRangeFilter.isSelected() || timeRangeFilter.accept(leaf)) &&
-                (!useRegionFilter.isSelected() || regionFilter.accept(leaf)) &&
-                (!useVariableFilter.isSelected() || variableFilter.accept(leaf))) {
+                        (!useTimeRangeFilter.isSelected() || timeRangeFilter.accept(leaf)) &&
+                        (!useRegionFilter.isSelected() || regionFilter.accept(leaf)) &&
+                        (!useVariableFilter.isSelected() || variableFilter.accept(leaf))) {
             catalogTree.setLeafVisible(leaf, true);
         } else {
             catalogTree.setLeafVisible(leaf, false);
@@ -490,7 +491,7 @@ public class OpendapAccessPanel extends JPanel {
         final List<InvDataset> datasets = catalog.getDatasets();
 
         if (datasets.size() == 0) {
-            JOptionPane.showMessageDialog(this, "Cannnot find THREDDS catalog service xml at '" + url+ "'");
+            JOptionPane.showMessageDialog(this, "Cannnot find THREDDS catalog service xml at '" + url + "'");
             return false;
         }
         urlField.setSelectedItem(url);
@@ -500,11 +501,11 @@ public class OpendapAccessPanel extends JPanel {
     }
 
     private String checkCatalogURLString(String url) {
-        if(url.endsWith("catalog.xml")) {
+        if (url.endsWith("catalog.xml")) {
             return url;
-        } else if(url.endsWith("catalog.html")) {
-            return  url.substring(0, url.lastIndexOf("h")).concat("xml");
-        } else if(url.endsWith("/")) {
+        } else if (url.endsWith("catalog.html")) {
+            return url.substring(0, url.lastIndexOf("h")).concat("xml");
+        } else if (url.endsWith("/")) {
             return url.concat("catalog.xml");
         } else {
             return url.concat("/catalog.xml");
@@ -524,7 +525,7 @@ public class OpendapAccessPanel extends JPanel {
     }
 
     public static class DownloadProgressBarProgressMonitor extends ProgressBarProgressMonitor implements
-                                                                                              LabelledProgressBarPM {
+            LabelledProgressBarPM {
 
         private final JProgressBar progressBar;
         private final JLabel preMessageLabel;
