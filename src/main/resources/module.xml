@@ -34,7 +34,7 @@
             <id>showOpendapClientAction</id>
             <parent>file</parent>
             <class>org.esa.beam.opendap.ShowOpendapClientAction</class>
-            <text>Show OPeNDAP client ...</text>
+            <text>OPeNDAP Access</text>
             <smallIcon>icons/RsProduct16.gif</smallIcon>
             <largeIcon>icons/RsProduct24.gif</largeIcon>
             <shortDescr>Download products from OPeNDAP servers</shortDescr>
