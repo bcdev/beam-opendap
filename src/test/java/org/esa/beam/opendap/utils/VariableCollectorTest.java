@@ -20,10 +20,6 @@ public class VariableCollectorTest {
         variableCollector = new VariableCollector();
     }
 
-    @After
-    public void tearDown() throws Exception {
-    }
-
     @Test
     public void testCollectFromDDS_TwoVariables() throws DAP2Exception, ParseException {
         // preparation
@@ -34,7 +30,7 @@ public class VariableCollectorTest {
         variableCollector.collectDAPVariables(dds);
 
         // verification
-        assertExpectedVariableNamesInList(variableNames, variableCollector.getVariableNames());
+        assertExpectedVariableNamesInList(variableNames, variableCollector.getVariables());
         final Set<DAPVariable> dapVariables = variableCollector.getVariables();
         assertEquals(2, dapVariables.size());
         assertTrue(containsDAPVariableAsExpected(variableNames[0], "Grid", "Float32", dapVariables));
@@ -51,7 +47,7 @@ public class VariableCollectorTest {
         variableCollector.collectDAPVariables(dds);
 
         //verification
-        assertExpectedVariableNamesInList(variableNames, variableCollector.getVariableNames());
+        assertExpectedVariableNamesInList(variableNames, variableCollector.getVariables());
     }
 
     @Test
@@ -66,7 +62,7 @@ public class VariableCollectorTest {
         variableCollector.collectDAPVariables(dds2);
 
         //verification
-        assertExpectedVariableNamesInList(variableNames, variableCollector.getVariableNames());
+        assertExpectedVariableNamesInList(variableNames, variableCollector.getVariables());
         final Set<DAPVariable> dapVariables = variableCollector.getVariables();
         assertEquals(6, dapVariables.size());
         assertTrue(containsDAPVariableAsExpected(variableNames[0], "Grid", "Float32", dapVariables));
@@ -104,11 +100,17 @@ public class VariableCollectorTest {
                "    } " + variableName + ";\n";
     }
 
-    private void assertExpectedVariableNamesInList(String[] variableNames, Set<String> namesSet) {
+    private void assertExpectedVariableNamesInList(String[] namesSet, Set<DAPVariable> variables) {
         assertNotNull(namesSet);
-        assertEquals(variableNames.length, namesSet.size());
-        for (String variableName : variableNames) {
-            assertEquals(variableName, true, namesSet.contains(variableName));
+        assertEquals(variables.size(), namesSet.length);
+        for (DAPVariable variable : variables) {
+            boolean contained = false;
+            for(String name : namesSet) {
+                if(variable.getName().equals(name)) {
+                    contained = true;
+                }
+            }
+            assertEquals("Variable name " + variable.getName() + " is contained", true, contained);
         }
     }
 

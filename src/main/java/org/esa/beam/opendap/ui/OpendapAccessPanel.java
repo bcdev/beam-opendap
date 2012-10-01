@@ -154,8 +154,7 @@ public class OpendapAccessPanel extends JPanel {
         textAreas.put(DDS_AREA_INDEX, ddsArea);
         textAreas.put(GENERAL_AREA_INDEX, generalArea);
 
-        final JScrollPane ddsPane = new JScrollPane(ddsArea);
-        metaInfoArea.addTab("DDS", ddsPane);
+        metaInfoArea.addTab("DDS", new JScrollPane(ddsArea));
         metaInfoArea.addTab("DAS", new JScrollPane(dasArea));
         metaInfoArea.addTab("General Info", new JScrollPane(generalArea));
         metaInfoArea.setToolTipTextAt(DDS_AREA_INDEX, "Dataset Descriptor Structure: A description of the variables and their names" +

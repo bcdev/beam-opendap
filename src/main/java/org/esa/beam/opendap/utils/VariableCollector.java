@@ -4,6 +4,7 @@ import opendap.dap.DDS;
 import org.esa.beam.opendap.datamodel.DAPVariable;
 import org.esa.beam.opendap.datamodel.OpendapLeaf;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
@@ -11,13 +12,11 @@ import java.util.TreeSet;
 public class VariableCollector {
 
 
-    private final Set<String> variableNames;
-    private final Set<DAPVariable> variables;
+    private final ArrayList<DAPVariable> variableList;
     private VariableExtractor variableExtractor;
 
     public VariableCollector() {
-        variableNames = new TreeSet<String>();
-        variables = new HashSet<DAPVariable>();
+        variableList = new ArrayList<DAPVariable>();
         variableExtractor = new VariableExtractor();
     }
 
@@ -34,17 +33,23 @@ public class VariableCollector {
     }
 
     private void storeDAPVariables(DAPVariable[] dapVariables) {
-        for (DAPVariable dapVariable : dapVariables) {
-            variables.add(dapVariable);
-            variableNames.add(dapVariable.getName());
+        for (int i = 0; i < dapVariables.length; i++) {
+            boolean contained = false;
+            for (int j = 0; j < variableList.size(); j++) {
+                if (dapVariables[i].equals(variableList.get(j))) {
+                    dapVariables[i] = variableList.get(j);
+                    contained = true;
+                    break;
+                }
+            }
+            if (!contained) {
+                variableList.add(dapVariables[i]);
+            }
         }
     }
 
-    public Set<String> getVariableNames() {
-        return variableNames;
-    }
-
-    public Set<DAPVariable> getVariables(){
+    public Set<DAPVariable> getVariables() {
+        Set<DAPVariable> variables = new HashSet<DAPVariable>(variableList);
         return variables;
     }
 
