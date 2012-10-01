@@ -484,19 +484,31 @@ public class OpendapAccessPanel extends JPanel {
         } else {
             url = urlField.getSelectedItem().toString();
         }
+        url = checkCatalogURLString(url);
         final InvCatalogFactory factory = InvCatalogFactory.getDefaultFactory(true);
         final InvCatalog catalog = factory.readXML(url);
         final List<InvDataset> datasets = catalog.getDatasets();
 
         if (datasets.size() == 0) {
-            JOptionPane.showMessageDialog(this, "'" + url + "' is not a valid OPeNDAP URL. Note that the URL must point " +
-                                                "to a THREDDS catalog service XML.");
+            JOptionPane.showMessageDialog(this, "Cannnot find THREDDS catalog service xml at '" + url+ "'");
             return false;
         }
-
+        urlField.setSelectedItem(url);
         catalogTree.setNewRootDatasets(datasets);
         variableFilter.stopFiltering();
         return true;
+    }
+
+    private String checkCatalogURLString(String url) {
+        if(url.endsWith("catalog.xml")) {
+            return url;
+        } else if(url.endsWith("catalog.html")) {
+            return  url.substring(0, url.lastIndexOf("h")).concat("xml");
+        } else if(url.endsWith("/")) {
+            return url.concat("catalog.xml");
+        } else {
+            return url.concat("/catalog.xml");
+        }
     }
 
     private class DefaultFilterChangeListener implements FilterChangeListener {
