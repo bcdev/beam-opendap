@@ -69,7 +69,6 @@ public class OpendapAccessPanel extends JPanel {
     private static final String PROPERTY_KEY_SERVER_URLS = "opendap.server.urls";
     private final static int DDS_AREA_INDEX = 0;
     private final static int DAS_AREA_INDEX = 1;
-    private static final Integer GENERAL_AREA_INDEX = 2;
 
     private JComboBox urlField;
     private AbstractButton refreshButton;
@@ -145,24 +144,18 @@ public class OpendapAccessPanel extends JPanel {
         metaInfoArea = new JTabbedPane(JTabbedPane.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         JTextArea ddsArea = new JTextArea(10, 40);
         JTextArea dasArea = new JTextArea(10, 40);
-        JTextArea generalArea = new JTextArea(10, 40);
 
         ddsArea.setEditable(false);
         dasArea.setEditable(false);
-        generalArea.setEditable(false);
 
         textAreas = new HashMap<Integer, JTextArea>();
         textAreas.put(DAS_AREA_INDEX, dasArea);
         textAreas.put(DDS_AREA_INDEX, ddsArea);
-        textAreas.put(GENERAL_AREA_INDEX, generalArea);
 
         metaInfoArea.addTab("DDS", new JScrollPane(ddsArea));
         metaInfoArea.addTab("DAS", new JScrollPane(dasArea));
-        metaInfoArea.addTab("General Info", new JScrollPane(generalArea));
-        metaInfoArea.setToolTipTextAt(DDS_AREA_INDEX, "Dataset Descriptor Structure: A description of the variables and their names" +
-                " and types that compose the dataset");
-        metaInfoArea.setToolTipTextAt(DAS_AREA_INDEX, "Dataset Attribute Structure: A representation of the data source's attributes");
-        metaInfoArea.setToolTipTextAt(GENERAL_AREA_INDEX, "Either the DDS (for DAP files) or the file URI");
+        metaInfoArea.setToolTipTextAt(DDS_AREA_INDEX, "Dataset Descriptor Structure: description of dataset variables");
+        metaInfoArea.setToolTipTextAt(DAS_AREA_INDEX, "Dataset Attribute Structure: description of dataset attributes");
 
         metaInfoArea.addChangeListener(new ChangeListener() {
             @Override
@@ -275,16 +268,12 @@ public class OpendapAccessPanel extends JPanel {
                     text = OpendapUtils.getResponse(leaf.getDdsUri());
                 } else if (metaInfoArea.getSelectedIndex() == DAS_AREA_INDEX) {
                     text = OpendapUtils.getResponse(leaf.getDasUri());
-                } else {
-                    text = OpendapUtils.getResponse(leaf.getDdsUri());
                 }
             } else if (leaf.isFileAccess()) {
                 if (metaInfoArea.getSelectedIndex() == DDS_AREA_INDEX) {
                     text = "No DDS information for file '" + leaf.getName() + "'.";
                 } else if (metaInfoArea.getSelectedIndex() == DAS_AREA_INDEX) {
                     text = "No DAS information for file '" + leaf.getName() + "'.";
-                } else {
-                    text = OpendapUtils.getResponse(leaf.getFileUri());
                 }
             }
         } catch (IOException e) {
