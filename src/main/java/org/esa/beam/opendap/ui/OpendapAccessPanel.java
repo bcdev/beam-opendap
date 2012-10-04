@@ -4,7 +4,6 @@ import com.bc.ceres.core.ProgressBarProgressMonitor;
 import com.jidesoft.combobox.AbstractComboBox;
 import com.jidesoft.combobox.FolderChooserComboBox;
 import com.jidesoft.combobox.PopupPanel;
-import com.jidesoft.pane.CollapsiblePane;
 import com.jidesoft.status.LabelStatusBarItem;
 import com.jidesoft.status.ProgressStatusBarItem;
 import com.jidesoft.status.StatusBar;
@@ -14,6 +13,7 @@ import com.jidesoft.swing.JideScrollPane;
 import com.jidesoft.swing.SimpleScrollPane;
 import org.esa.beam.framework.help.HelpSys;
 import org.esa.beam.framework.ui.AppContext;
+import org.esa.beam.framework.ui.GridBagUtils;
 import org.esa.beam.framework.ui.UIUtils;
 import org.esa.beam.framework.ui.tool.ToolButtonFactory;
 import org.esa.beam.opendap.datamodel.OpendapLeaf;
@@ -27,7 +27,7 @@ import thredds.catalog.InvCatalogFactory;
 import thredds.catalog.InvDataset;
 
 import javax.swing.AbstractButton;
-import javax.swing.BoxLayout;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -55,7 +55,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.beans.PropertyVetoException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -357,26 +356,23 @@ public class OpendapAccessPanel extends JPanel {
         variableInfo.add(metaInfoArea, BorderLayout.CENTER);
 
         final JScrollPane openDapTree = new JScrollPane(catalogTree.getComponent());
-        openDapTree.setPreferredSize(new Dimension(400, 500));
-
         final JSplitPane centerLeftPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, openDapTree, variableInfo);
         centerLeftPane.setResizeWeight(1);
         centerLeftPane.setContinuousLayout(true);
 
-        final JPanel filterPanel = new JPanel();
-        filterPanel.setLayout(new BoxLayout(filterPanel, BoxLayout.Y_AXIS));
-        filterPanel.add(new TitledPanel(useDatasetNameFilter,
-                                        createCollapsiblePane(datasetNameFilter.getUI(), useDatasetNameFilter)));
-        filterPanel.add(new TitledPanel(useTimeRangeFilter,
-                                        createCollapsiblePane(timeRangeFilter.getUI(), useTimeRangeFilter)));
-        filterPanel.add(new TitledPanel(useRegionFilter,
-                                        createCollapsiblePane(regionFilter.getUI(), useRegionFilter)));
-        filterPanel.add(new TitledPanel(useVariableFilter,
-                                        createCollapsiblePane(variableFilter.getUI(), useVariableFilter)));
-        final Dimension size = filterPanel.getSize();
-        filterPanel.setMinimumSize(new Dimension(460, size.height));
-
-        final JPanel optionalPanel = new TitledPanel(null, null);
+        final JPanel filterPanel = new JPanel(new GridBagLayout());
+        final JComponent datasetNameFilterUI = datasetNameFilter.getUI();
+        final JComponent timeRangeFilterUI = timeRangeFilter.getUI();
+        final JComponent regionFilterUI = regionFilter.getUI();
+        final JComponent variableFilterUI = variableFilter.getUI();
+        GridBagUtils.addToPanel(filterPanel, new TitledPanel(useDatasetNameFilter, datasetNameFilterUI, true, true), gbc, "gridx=0,gridy=0,anchor=NORTHWEST,weightx=1,weighty=0,,fill=BOTH");
+        GridBagUtils.addToPanel(filterPanel, new TitledPanel(useTimeRangeFilter, timeRangeFilterUI, true, true), gbc, "gridy=1");
+        GridBagUtils.addToPanel(filterPanel, new TitledPanel(useRegionFilter, regionFilterUI, true, true), gbc, "gridy=2");
+        GridBagUtils.addToPanel(filterPanel, new TitledPanel(useVariableFilter, variableFilterUI, true, true), gbc, "gridy=3");
+        GridBagUtils.addToPanel(filterPanel, new JLabel(), gbc, "gridy=4,weighty=1");
+        filterPanel.setPreferredSize(new Dimension(460, 800));
+        filterPanel.setMinimumSize(new Dimension(460, 120));
+        filterPanel.setMaximumSize(new Dimension(460, 800));
 
         final JPanel downloadButtonPanel = new JPanel(new BorderLayout(8, 5));
         downloadButtonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
@@ -423,16 +419,14 @@ public class OpendapAccessPanel extends JPanel {
         buttonPanel.add(cancelButton, BorderLayout.EAST);
         downloadButtonPanel.add(buttonPanel, BorderLayout.EAST);
 
-        final JPanel centerRightPane = new JPanel(new BorderLayout());
-        centerRightPane.add(filterPanel, BorderLayout.NORTH);
-        centerRightPane.add(optionalPanel, BorderLayout.CENTER);
+        JPanel centerRightPane = new JPanel(new BorderLayout());
+        final SimpleScrollPane simpleScrollPane = new SimpleScrollPane(filterPanel, JideScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                                           JideScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        simpleScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        centerRightPane.add(simpleScrollPane, BorderLayout.CENTER);
         centerRightPane.add(downloadButtonPanel, BorderLayout.SOUTH);
 
-        SimpleScrollPane centerRightScrollPane = new SimpleScrollPane(centerRightPane,
-                                                                      JideScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                                                      JideScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-
-        final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerLeftPane, centerRightScrollPane);
+        final JSplitPane centerPanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, centerLeftPane, centerRightPane);
         centerPanel.setResizeWeight(1);
         centerPanel.setContinuousLayout(true);
 
@@ -441,31 +435,6 @@ public class OpendapAccessPanel extends JPanel {
         this.add(urlPanel, BorderLayout.NORTH);
         this.add(centerPanel, BorderLayout.CENTER);
         this.add(statusBar, BorderLayout.SOUTH);
-    }
-
-    private CollapsiblePane createCollapsiblePane(JComponent component, final JCheckBox checkBox) {
-        final CollapsiblePane collapsiblePane = new CollapsiblePane();
-        collapsiblePane.setLayout(new BorderLayout());
-        collapsiblePane.add(component, BorderLayout.CENTER);
-        collapsiblePane.setShowTitleBar(false);
-        collapsiblePane.setContentAreaFilled(false);
-        checkBox.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                updateCollapsiblePane(checkBox, collapsiblePane);
-            }
-        });
-        updateCollapsiblePane(checkBox, collapsiblePane);
-        return collapsiblePane;
-    }
-
-    private void updateCollapsiblePane(JCheckBox checkBox, CollapsiblePane collapsiblePane) {
-        try {
-            collapsiblePane.setCollapsed(!checkBox.isEnabled());
-            collapsiblePane.updateUI();
-        } catch (PropertyVetoException e) {
-            e.printStackTrace();
-        }
     }
 
     private DownloadAction createDownloadAction(DownloadProgressBarProgressMonitor pm) {
